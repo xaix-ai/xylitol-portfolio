@@ -1,29 +1,4 @@
-/* ==========================================================================
-   XY NEX KY YM — OCEAN PIXEL BEACH PORTFOLIO
-   style.css  (complete replacement — the old override block is merged in)
-
-    1. Colour registration (smooth theme transitions)
-    2. Reset & base
-    3. Beach scene + time themes
-    4. Sky, sun / moon, stars
-    5. Clouds
-    6. Navbar + Philippine clock
-    7. Greeting
-    8. Ocean
-    9. Sand + wet sand
-   10. Shoreline swash
-   11. Shells, starfish, sparkles
-   12. Testudo + speech bubble
-   13. Left bookmarks
-   14. Popup overlay + panel
-   15. Glass cards (per section)
-   16. Responsive
-   17. Reduced motion
-   18. Generated pixel art (sprites, speckles, edges)
-   ========================================================================== */
-
-
-/* 1. COLOUR REGISTRATION ---------------------------------------------------
+/* 1. COLOUR REGISTRATION 
    Registering the theme colours lets the browser fade between Dawn, Day,
    Sunset and Night instead of snapping. */
 
@@ -51,7 +26,7 @@
 @property --greet-shadow { syntax: "<color>"; inherits: true; initial-value: #d2668f; }
 
 
-/* 2. RESET & BASE --------------------------------------------------------- */
+/* 2. RESET & BASE  */
 
 * {
     margin: 0;
@@ -133,7 +108,7 @@ a:focus-visible,
 }
 
 
-/* 3. BEACH SCENE + TIME THEMES -------------------------------------------- */
+/* 3. BEACH SCENE + TIME THEMES  */
 
 .hero {
     position: relative;
@@ -293,7 +268,7 @@ a:focus-visible,
 }
 
 
-/* 4. SKY, SUN / MOON, STARS ----------------------------------------------- */
+/* 4. SKY, SUN / MOON, STARS  */
 
 .sky {
     position: absolute;
@@ -382,7 +357,7 @@ a:focus-visible,
 }
 
 
-/* 5. CLOUDS ---------------------------------------------------------------- */
+/* 5. CLOUDS  */
 
 .px-sprite {
     position: absolute;
@@ -430,7 +405,7 @@ a:focus-visible,
 }
 
 
-/* 6. NAVBAR + PHILIPPINE CLOCK -------------------------------------------- */
+/* 6. NAVBAR + PHILIPPINE CLOCK  */
 
 .navbar {
     position: absolute;
@@ -554,7 +529,57 @@ a:focus-visible,
 }
 
 
-/* 7. GREETING -------------------------------------------------------------- */
+/* SOUND TOGGLE (button is added by script.js) */
+.nav-sound {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: background 0.2s ease, transform 0.2s steps(3);
+}
+
+.nav-sound:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.sound-icon {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.nav-sound .sound-waves { display: none; }
+.nav-sound[aria-pressed="true"] .sound-waves { display: inline; }
+.nav-sound[aria-pressed="true"] .sound-mute { display: none; }
+
+.nav-sound[aria-pressed="true"] {
+    background: rgba(255, 255, 255, 0.85);
+    color: #f08db4;
+}
+
+/* remembered "on" from a previous visit: little pulse until the first tap */
+.nav-sound.is-waiting {
+    animation: sound-wait 1.2s steps(2) infinite;
+}
+
+@keyframes sound-wait {
+    50% { background: rgba(255, 255, 255, 0.55); }
+}
+
+
+/* 7. GREETING  */
 
 .hero-content {
     position: absolute;
@@ -604,7 +629,7 @@ a:focus-visible,
 }
 
 
-/* 8. OCEAN ------------------------------------------------------------------ */
+/* 8. OCEAN  */
 
 .ocean {
     --oh: calc(var(--hero-h) * 0.34);
@@ -736,7 +761,7 @@ a:focus-visible,
 }
 
 
-/* 9. SAND + WET SAND ------------------------------------------------------- */
+/* 9. SAND + WET SAND  */
 
 .sand {
     --sh: calc(var(--hero-h) * 0.30);
@@ -792,7 +817,7 @@ a:focus-visible,
 }
 
 
-/* 10. SHORELINE SWASH ------------------------------------------------------
+/* 10. SHORELINE SWASH 
    Two sheets of shallow water with a pixel-foam lip slide up the sand and
    back on different rhythms, so the water reaches different spots. */
 
@@ -853,7 +878,7 @@ a:focus-visible,
 }
 
 
-/* 11. SHELLS, STARFISH, SPARKLES ------------------------------------------ */
+/* 11. SHELLS, STARFISH, SPARKLES  */
 
 .sand-decor {
     position: absolute;
@@ -909,7 +934,7 @@ a:focus-visible,
 }
 
 
-/* 12. TESTUDO + SPEECH BUBBLE --------------------------------------------- */
+/* 12. TESTUDO + SPEECH BUBBLE  */
 
 .turtle-companion {
     position: absolute;
@@ -1079,7 +1104,7 @@ a:focus-visible,
 }
 
 
-/* 13. LEFT BOOKMARKS ------------------------------------------------------- */
+/* 13. LEFT BOOKMARKS */
 
 .bookmark-navigation {
     position: absolute;
@@ -1169,7 +1194,7 @@ a:focus-visible,
 }
 
 
-/* 14. POPUP OVERLAY + PANEL ----------------------------------------------- */
+/* 14. POPUP OVERLAY + PANEL  */
 
 .panel-overlay {
     position: absolute;
@@ -1324,7 +1349,7 @@ a:focus-visible,
 }
 
 
-/* 15. GLASS CARDS (each section gets its own containers) ------------------ */
+/* 15. GLASS CARDS (each section gets its own containers) */
 
 .glass-card {
     position: relative;
@@ -1882,7 +1907,7 @@ a.contact-card:hover .contact-value {
 }
 
 
-/* 16. RESPONSIVE ----------------------------------------------------------- */
+/* 16. RESPONSIVE */
 
 /* TABLET */
 @media (max-width: 1024px) {
@@ -1924,8 +1949,14 @@ a.contact-card:hover .contact-value {
         font-size: 1.05rem;
     }
 
-    .nav-clock {
+    .nav-sound {
         margin-left: auto;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+    }
+
+    .nav-clock {
         padding: 5px 10px;
         gap: 6px;
     }
@@ -2140,6 +2171,12 @@ a.contact-card:hover .contact-value {
         font-size: 0.74rem;
     }
 
+    .nav-sound {
+        margin-left: 0;
+        width: 30px;
+        height: 30px;
+    }
+
     .nav-clock {
         margin-left: 0;
         padding: 4px 8px;
@@ -2216,7 +2253,7 @@ a.contact-card:hover .contact-value {
 }
 
 
-/* 17. REDUCED MOTION ------------------------------------------------------- */
+/* 17. REDUCED MOTION  */
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -2246,7 +2283,7 @@ a.contact-card:hover .contact-value {
 }
 
 
-/* 18. GENERATED PIXEL ART ---------------------------------------------------
+/* 18. GENERATED PIXEL ART 
    Produced from small pixel grids: Testudo's two walking frames, shells,
    starfish, clouds, sand speckles, ocean glimmers and the irregular
    shoreline edges. Edit the grids, not these numbers. */

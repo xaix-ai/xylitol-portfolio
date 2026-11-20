@@ -1,15 +1,3 @@
-/* ==========================================================================
-   XY NEX KY YM — OCEAN PIXEL BEACH PORTFOLIO
-   script.js
-
-   1. Greeting interaction (29 languages)
-   2. Beach time themes
-   3. Philippine clock (Asia/Manila)
-   4. Testudo's dialogue
-   5. Portfolio panel (navbar + bookmarks)
-   6. Testudo walking
-   ========================================================================== */
-
 (function () {
     "use strict";
 
@@ -17,7 +5,7 @@
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 
-    /* 1. GREETING INTERACTION ---------------------------------------------- */
+    /* 1. GREETING INTERACTION  */
 
     const greetings = [
         "Hello, I'm Xynex Kim.",
@@ -83,7 +71,7 @@
     }
 
 
-    /* 2. BEACH TIME THEMES ------------------------------------------------- */
+    /* 2. BEACH TIME THEMES  */
     // Dawn 5–7 AM · Day 8 AM–3 PM · Sunset 4–6 PM · Night 7 PM–4 AM
 
     function updateBeachTheme() {
@@ -114,7 +102,7 @@
     setInterval(updateBeachTheme, 60000);
 
 
-    /* 3. PHILIPPINE CLOCK -------------------------------------------------- */
+    /* 3. PHILIPPINE CLOCK  */
 
     const clockTime = document.getElementById("ph-clock-time");
 
@@ -151,7 +139,7 @@
     tickClock();
 
 
-    /* 4. TESTUDO'S DIALOGUE ------------------------------------------------ */
+    /* 4. TESTUDO'S DIALOGUE  */
 
     const TESTUDO_LINES = {
         home: "Psst! Click the greeting to hear it in different languages!",
@@ -202,7 +190,7 @@
     }
 
 
-    /* 5. PORTFOLIO PANEL --------------------------------------------------- */
+    /* 5. PORTFOLIO PANEL  */
 
     const PANELS = {
         about:        { title: "About Me",     icon: "icon-user" },
@@ -373,7 +361,7 @@
     }
 
 
-    /* 6. TESTUDO WALKING ------------------------------------------------------
+    /* 6. TESTUDO WALKING 
        One lightweight requestAnimationFrame loop that only moves a transform.
        It pauses by itself when the tab is hidden. */
 
@@ -464,5 +452,240 @@
             lastTime = 0;
         });
     }
+
+
+    /* 7. BEACH SOUNDS 
+       Ambient soundscapes made live with the Web Audio API (no audio files):
+         dawn   – soft breeze + waves + a few early birds
+         day    – waves + light breeze
+         sunset – slower, warmer waves + breeze
+         night  – calm waves + crickets
+       Browsers only allow sound after a click, so it starts from the 🔈 button.
+       The soundscape follows the beach theme automatically. */
+
+    const SOUND_KEY = "beach-sound";
+
+    const SOUNDSCAPES = {
+        //        waves  wave tone  breeze  breeze tone  birds  crickets
+        dawn:   { waves: .30, waveHz: 520, breeze: .16, breezeHz: 1100, birds: true,  crickets: false },
+        day:    { waves: .42, waveHz: 680, breeze: .08, breezeHz: 1400, birds: false, crickets: false },
+        sunset: { waves: .36, waveHz: 480, breeze: .12, breezeHz: 900,  birds: false, crickets: false },
+        night:  { waves: .26, waveHz: 380, breeze: .04, breezeHz: 700,  birds: false, crickets: true }
+    };
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const navbar = document.querySelector(".navbar");
+    const clock = document.querySelector(".nav-clock");
+
+    let audio = null;          // built on first use
+    let soundOn = false;
+    let chirpTimer = null;
+
+    function readPreference() {
+        try { return localStorage.getItem(SOUND_KEY) === "on"; } catch (e) { return false; }
+    }
+
+    function savePreference(on) {
+        try { localStorage.setItem(SOUND_KEY, on ? "on" : "off"); } catch (e) { /* private mode */ }
+    }
+
+    function makeNoise(ctx) {
+        // 4 seconds of soft "brown" noise, looped: the raw material for wind and surf
+        const length = ctx.sampleRate * 4;
+        const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        let last = 0;
+        for (let i = 0; i < length; i++) {
+            last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+            data[i] = last * 3.5;
+        }
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        // start each copy at a random point so wind and surf don't sound in sync
+        source.start(0, Math.random() * 4);
+        return source;
+    }
+
+    function lfo(ctx, rate, depth, target) {
+        // slow wobble connected to an AudioParam (gain or frequency)
+        const osc = ctx.createOscillator();
+        const amount = ctx.createGain();
+        osc.frequency.value = rate;
+        amount.gain.value = depth;
+        osc.connect(amount).connect(target);
+        osc.start();
+    }
+
+    function buildAudio() {
+        const ctx = new AudioCtx();
+        const master = ctx.createGain();
+        master.gain.value = 0;
+        master.connect(ctx.destination);
+
+        // WAVES: low rumble that swells every ~8 s, in time with the CSS swash
+        const waveFilter = ctx.createBiquadFilter();
+        waveFilter.type = "lowpass";
+        waveFilter.frequency.value = 600;
+        const waveSwell = ctx.createGain();
+        waveSwell.gain.value = 0.6;
+        lfo(ctx, 1 / 8, 0.4, waveSwell.gain);
+        const waves = ctx.createGain();
+        waves.gain.value = 0;
+        makeNoise(ctx).connect(waveFilter).connect(waveSwell).connect(waves).connect(master);
+
+        // BREEZE: airy band of noise that drifts in pitch and strength
+        const breezeFilter = ctx.createBiquadFilter();
+        breezeFilter.type = "bandpass";
+        breezeFilter.frequency.value = 1100;
+        breezeFilter.Q.value = 0.6;
+        lfo(ctx, 0.05, 350, breezeFilter.frequency);
+        const breezeGust = ctx.createGain();
+        breezeGust.gain.value = 0.7;
+        lfo(ctx, 0.07, 0.3, breezeGust.gain);
+        const breeze = ctx.createGain();
+        breeze.gain.value = 0;
+        makeNoise(ctx).connect(breezeFilter).connect(breezeGust).connect(breeze).connect(master);
+
+        // CHIRPS (birds at dawn, crickets at night) are short notes played on a timer
+        const chirps = ctx.createGain();
+        chirps.gain.value = 0.5;
+        chirps.connect(master);
+
+        return { ctx, master, waves, waveFilter, breeze, breezeFilter, chirps };
+    }
+
+    function chirp(freqStart, freqEnd, duration, volume, when) {
+        const { ctx, chirps } = audio;
+        const osc = ctx.createOscillator();
+        const env = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freqStart, when);
+        osc.frequency.exponentialRampToValueAtTime(freqEnd, when + duration);
+        env.gain.setValueAtTime(0, when);
+        env.gain.linearRampToValueAtTime(volume, when + 0.01);
+        env.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+        osc.connect(env).connect(chirps);
+        osc.start(when);
+        osc.stop(when + duration + 0.05);
+    }
+
+    function scheduleChirps() {
+        clearTimeout(chirpTimer);
+        if (!soundOn || !audio) return;
+
+        const scape = SOUNDSCAPES[beach.dataset.theme] || SOUNDSCAPES.day;
+        const now = audio.ctx.currentTime + 0.05;
+
+        if (scape.birds) {
+            // a little two- or three-note bird call
+            const base = 2400 + Math.random() * 1200;
+            const notes = 2 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < notes; i++) {
+                chirp(base, base * 1.35, 0.09, 0.05, now + i * 0.14);
+            }
+        }
+
+        if (scape.crickets) {
+            // cricket trill: a quick burst of tiny pulses
+            for (let i = 0; i < 4; i++) {
+                chirp(4600, 4500, 0.035, 0.018, now + i * 0.06);
+            }
+        }
+
+        const wait = scape.birds ? 2500 + Math.random() * 5000 : 700 + Math.random() * 1400;
+        chirpTimer = setTimeout(scheduleChirps, wait);
+    }
+
+    function applySoundscape() {
+        if (!audio) return;
+        const scape = SOUNDSCAPES[beach.dataset.theme] || SOUNDSCAPES.day;
+        const t = audio.ctx.currentTime;
+        // setTargetAtTime gives a smooth ~3 s crossfade between times of day
+        audio.waves.gain.setTargetAtTime(scape.waves, t, 1);
+        audio.waveFilter.frequency.setTargetAtTime(scape.waveHz, t, 1);
+        audio.breeze.gain.setTargetAtTime(scape.breeze, t, 1);
+        audio.breezeFilter.frequency.setTargetAtTime(scape.breezeHz, t, 1);
+        scheduleChirps();
+    }
+
+    function setSound(on) {
+        if (!AudioCtx) return;
+
+        if (on && !audio) {
+            audio = buildAudio();
+        }
+
+        soundOn = on;
+        savePreference(on);
+        soundButton.setAttribute("aria-pressed", on ? "true" : "false");
+        soundButton.setAttribute("aria-label", on ? "Turn beach sounds off" : "Turn beach sounds on");
+        soundButton.title = on ? "Sound on" : "Sound off";
+
+        if (!audio) return;
+
+        const t = audio.ctx.currentTime;
+        if (on) {
+            audio.ctx.resume();
+            audio.master.gain.cancelScheduledValues(t);
+            audio.master.gain.setTargetAtTime(0.9, t, 0.6);   // fade in
+            applySoundscape();
+        } else {
+            audio.master.gain.cancelScheduledValues(t);
+            audio.master.gain.setTargetAtTime(0, t, 0.3);     // fade out
+            clearTimeout(chirpTimer);
+            setTimeout(() => { if (!soundOn) audio.ctx.suspend(); }, 1500);
+        }
+    }
+
+    // the toggle button lives in the navbar, just before the clock
+    const soundButton = document.createElement("button");
+    soundButton.type = "button";
+    soundButton.className = "nav-sound";
+    soundButton.setAttribute("aria-pressed", "false");
+    soundButton.setAttribute("aria-label", "Turn beach sounds on");
+    soundButton.title = "Sound off";
+    soundButton.innerHTML =
+        '<svg class="sound-icon" viewBox="0 0 24 24" aria-hidden="true">' +
+            '<path d="M4 9h4l5-4v14l-5-4H4z"/>' +
+            '<path class="sound-waves" d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>' +
+            '<path class="sound-mute" d="m16 9 6 6m0-6-6 6"/>' +
+        '</svg>';
+
+    if (AudioCtx && navbar) {
+        navbar.insertBefore(soundButton, clock || null);
+
+        soundButton.addEventListener("click", () => setSound(!soundOn));
+
+        // follow the time-of-day theme
+        new MutationObserver(applySoundscape).observe(beach, {
+            attributes: true,
+            attributeFilter: ["data-theme"]
+        });
+
+        // stay quiet while the tab is in the background
+        document.addEventListener("visibilitychange", () => {
+            if (!audio || !soundOn) return;
+            if (document.hidden) {
+                audio.ctx.suspend();
+                clearTimeout(chirpTimer);
+            } else {
+                audio.ctx.resume();
+                scheduleChirps();
+            }
+        });
+
+        // if they turned sound on during an earlier visit, start it on their first tap
+        if (readPreference()) {
+            soundButton.classList.add("is-waiting");
+            const resumeOnce = (event) => {
+                if (event.target.closest(".nav-sound")) return; // the button handles itself
+                soundButton.classList.remove("is-waiting");
+                setSound(true);
+            };
+            document.addEventListener("pointerdown", resumeOnce, { once: true, capture: true });
+        }
+    }
+
 
 })();
