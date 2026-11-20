@@ -1,0 +1,1004 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xylitol</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'portfolio/css/style.css' %}">
+</head>
+
+<body>
+
+     <!-- SVG ICON LIBRARY -->
+
+<svg xmlns="http://www.w3.org/2000/svg" class="icon-library" aria-hidden="true">
+
+    <symbol id="icon-home" viewBox="0 0 24 24">
+        <path d="M3 10.5 12 3l9 7.5"/>
+        <path d="M5 9v12h14V9"/>
+        <path d="M9 21v-7h6v7"/>
+    </symbol>
+
+    <symbol id="icon-user" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 21a8 8 0 0 1 16 0"/>
+    </symbol>
+
+    <symbol id="icon-folder" viewBox="0 0 24 24">
+        <path d="M3 6a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v10H3z"/>
+        <path d="M3 9h18"/>
+    </symbol>
+
+    <symbol id="icon-code" viewBox="0 0 24 24">
+        <path d="m8 8-4 4 4 4"/>
+        <path d="m16 8 4 4-4 4"/>
+        <path d="m14 5-4 14"/>
+    </symbol>
+
+    <symbol id="icon-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2"/>
+        <path d="m3 7 9 6 9-6"/>
+    </symbol>
+
+    <symbol id="icon-graduation" viewBox="0 0 24 24">
+        <path d="m2 10 10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 2.5 9 2.5 12 0v-5"/>
+        <path d="M22 10v6"/>
+    </symbol>
+
+    <symbol id="icon-briefcase" viewBox="0 0 24 24">
+        <rect x="3" y="7" width="18" height="14" rx="2"/>
+        <path d="M8 7V4h8v3"/>
+        <path d="M3 12h18"/>
+        <path d="M10 12v2h4v-2"/>
+    </symbol>
+
+    <symbol id="icon-certificate" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="6"/>
+        <path d="m8 13-2 8 6-3 6 3-2-8"/>
+        <path d="m10 8 1.5 1.5L14 7"/>
+    </symbol>
+
+    <symbol id="icon-trophy" viewBox="0 0 24 24">
+        <path d="M8 4h8v5a4 4 0 0 1-8 0z"/>
+        <path d="M8 6H4v3a4 4 0 0 0 4 4"/>
+        <path d="M16 6h4v3a4 4 0 0 1-4 4"/>
+        <path d="M12 13v4"/>
+        <path d="M8 21h8"/>
+        <path d="M10 17h4"/>
+    </symbol>
+
+    <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M18 6 6 18"/>
+    </symbol>
+
+    <symbol id="icon-external" viewBox="0 0 24 24">
+        <path d="M14 4h6v6"/>
+        <path d="M20 4 10 14"/>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+    </symbol>
+
+</svg>
+
+
+      <!-- MAIN BEACH PORTFOLIO -->
+
+<main id="home" class="hero" data-theme="day">
+
+    <!-- SKY -->
+    <div class="sky" aria-hidden="true"></div>
+
+
+         <!-- CLOUDS -->
+
+    <div class="cloud cloud-one" aria-hidden="true"></div>
+    <div class="cloud cloud-two" aria-hidden="true"></div>
+    <div class="cloud cloud-three" aria-hidden="true"></div>
+    <div class="cloud cloud-four" aria-hidden="true"></div>
+    <div class="cloud cloud-five" aria-hidden="true"></div>
+    <div class="cloud cloud-six" aria-hidden="true"></div>
+    <div class="cloud cloud-seven" aria-hidden="true"></div>
+    <div class="cloud cloud-eight" aria-hidden="true"></div>
+
+
+          <!-- GLASS NAVBAR - SKY -->
+
+    <nav class="navbar glass-navbar" aria-label="Main navigation">
+
+        <a href="#home" class="logo" data-home>
+            xynexkyym
+        </a>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="#home" data-home class="nav-link active">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="#about" data-open-panel="about" class="nav-link">
+                    About
+                </a>
+            </li>
+
+            <li>
+                <a href="#projects" data-open-panel="projects" class="nav-link">
+                    Projects
+                </a>
+            </li>
+
+            <li>
+                <a href="#skills" data-open-panel="skills" class="nav-link">
+                    Skills
+                </a>
+            </li>
+
+            <li>
+                <a href="#contact" data-open-panel="contact" class="nav-link">
+                    Contact
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+          <!-- HERO GREETING -->
+
+    <div class="hero-content">
+
+        <div class="hero-text">
+
+            <h1 id="greeting" class="greeting">
+                Hello, I'm Xynex Kim.
+            </h1>
+
+            <p class="hero-subtitle">
+                An aspiring Data Analyst.
+            </p>
+
+            {% comment %} <p class="greeting-instruction">
+                Click my greeting to say hello in another language.
+            </p> {% endcomment %}
+
+        </div>
+
+    </div>
+
+
+          <!-- OCEAN -->
+
+    <div class="ocean" aria-hidden="true">
+
+        <div class="ocean-layer ocean-back"></div>
+
+        <div class="ocean-layer ocean-middle"></div>
+
+        <div class="ocean-layer ocean-front"></div>
+
+        <div class="ocean-glimmer"></div>
+
+    </div>
+
+
+          <!-- SHORELINE -->
+
+    <div class="shoreline" aria-hidden="true">
+
+        <div class="foam foam-back"></div>
+
+        <div class="foam foam-front"></div>
+
+    </div>
+
+
+          <!-- SAND -->
+
+    <div class="sand" aria-hidden="true">
+
+        <div class="sand-texture"></div>
+
+        <!-- Pixel shells -->
+        <div class="shell shell-one"></div>
+        <div class="shell shell-two"></div>
+        <div class="shell shell-three"></div>
+        <div class="shell shell-four"></div>
+        <div class="shell shell-five"></div>
+
+        <!-- Sand details -->
+        <div class="sand-detail detail-one"></div>
+        <div class="sand-detail detail-two"></div>
+        <div class="sand-detail detail-three"></div>
+        <div class="sand-detail detail-four"></div>
+        <div class="sand-detail detail-five"></div>
+
+    </div>
+
+
+          <!-- TURTLE COMPANION | TESTUDO -->
+
+    <div class="turtle-companion">
+
+        <div class="turtle-art" aria-hidden="true">
+
+            <div class="turtle-tail"></div>
+
+            <div class="turtle-leg turtle-leg-one"></div>
+            <div class="turtle-leg turtle-leg-two"></div>
+            <div class="turtle-leg turtle-leg-three"></div>
+            <div class="turtle-leg turtle-leg-four"></div>
+
+            <div class="turtle-shell">
+
+                <div class="shell-pattern shell-pattern-one"></div>
+                <div class="shell-pattern shell-pattern-two"></div>
+                <div class="shell-pattern shell-pattern-three"></div>
+
+            </div>
+
+            <div class="turtle-head">
+
+                <div class="turtle-eye"></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="turtle-dialogue">
+
+            <p>
+                Hiii! Want to hear a global hello? Click the greeting above! 𓆉𓏸𓇼𓈒𓏸
+            </p>
+
+        </div>
+
+    </div>
+
+          <!-- LEFT BOOKMARK NAVIGATION -->
+
+    <aside class="bookmark-navigation" aria-label="Additional portfolio sections">
+
+        <button
+            type="button"
+            class="bookmark"
+            data-open-panel="education"
+            aria-label="Open Education"
+            title="Education">
+
+            <svg class="bookmark-icon">
+                <use href="#icon-graduation"></use>
+            </svg>
+
+            <span class="bookmark-label">
+                Education
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="bookmark"
+            data-open-panel="experience"
+            aria-label="Open Experience"
+            title="Experience">
+
+            <svg class="bookmark-icon">
+                <use href="#icon-briefcase"></use>
+            </svg>
+
+            <span class="bookmark-label">
+                Experience
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="bookmark"
+            data-open-panel="certificates"
+            aria-label="Open Certificates"
+            title="Certificates">
+
+            <svg class="bookmark-icon">
+                <use href="#icon-certificate"></use>
+            </svg>
+
+            <span class="bookmark-label">
+                Certificates
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="bookmark"
+            data-open-panel="achievements"
+            aria-label="Open Achievements"
+            title="Achievements">
+
+            <svg class="bookmark-icon">
+                <use href="#icon-trophy"></use>
+            </svg>
+
+            <span class="bookmark-label">
+                Achievements
+            </span>
+
+        </button>
+
+    </aside>
+
+          <!-- POPUP OVERLAY -->
+
+    <div class="panel-overlay" id="panel-overlay" hidden>
+
+        <div
+            class="glass-panel"
+            id="glass-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="panel-title"
+            tabindex="-1">
+
+            <!-- Panel Header -->
+
+            <div class="panel-header">
+
+                <div class="panel-heading">
+
+                    <svg class="panel-icon" id="panel-icon">
+                        <use href="#icon-user"></use>
+                    </svg>
+
+                    <h2 id="panel-title">
+                        About Me
+                    </h2>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="panel-close"
+                    id="panel-close"
+                    aria-label="Close panel">
+
+                    <svg class="close-icon">
+                        <use href="#icon-close"></use>
+                    </svg>
+
+                </button>
+
+            </div>
+
+
+            <!-- Panel Content -->
+
+            <div class="panel-content">
+
+
+                      <!-- ABOUT -->
+
+                <section class="panel-section" id="panel-about" data-panel="about" hidden>
+
+                    <div class="about-content">
+
+                        {% if profile and profile.profile_image %}
+
+                            <div class="profile-image-container">
+
+                                <img
+                                    src="{{ profile.profile_image.url }}"
+                                    alt="Profile photo of Xynex Kim"
+                                    class="profile-image">
+
+                            </div>
+
+                        {% endif %}
+
+
+                        {% if profile and profile.bio %}
+
+                            <p class="about-description">
+                                {{ profile.bio }}
+                            </p>
+
+                        {% else %}
+
+                            <p class="about-description">
+                                I enjoy working with data, solving puzzles,
+                                and constantly learning new things.
+                                Still growing into my craft, so I keep things
+                                simple: stay curious, keep practicing,
+                                and stay open to everything.
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if contact.location %}
+
+                            <div class="info-item">
+
+                                <span class="info-label">
+                                    Location
+                                </span>
+
+                                <p>
+                                    {{ contact.location }}
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </section>
+
+
+                      <!-- EDUCATION -->
+
+                <section class="panel-section" id="panel-education" data-panel="education" hidden>
+
+                    {% for item in education %}
+
+                        <article class="content-card education-card">
+
+                            <h3>
+                                {{ item.degree }}
+                            </h3>
+
+                            {% if item.field_of_study %}
+
+                                <p class="card-subtitle">
+                                    {{ item.field_of_study }}
+                                </p>
+
+                            {% endif %}
+
+                            <p class="card-organization">
+                                {{ item.institution }}
+                            </p>
+
+
+                            <div class="card-date">
+
+                                {% if item.start_date %}
+                                    {{ item.start_date|date:"Y" }}
+                                {% endif %}
+
+                                {% if item.end_date %}
+                                    – {{ item.end_date|date:"Y" }}
+                                {% endif %}
+
+                            </div>
+
+
+                            {% if item.description %}
+
+                                <p class="card-description">
+                                    {{ item.description }}
+                                </p>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% empty %}
+
+                        <p class="empty-message">
+                            No educational background added yet.
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+
+                      <!-- EXPERIENCE -->
+
+                <section class="panel-section" id="panel-experience" data-panel="experience" hidden>
+
+                    {% for item in experiences %}
+
+                        <article class="content-card experience-card">
+
+                            <h3>
+                                {{ item.position }}
+                            </h3>
+
+                            <p class="card-organization">
+                                {{ item.company }}
+                            </p>
+
+
+                            {% if item.employment_type %}
+
+                                <span class="card-tag">
+                                    {{ item.employment_type }}
+                                </span>
+
+                            {% endif %}
+
+
+                            <div class="card-date">
+
+                                {% if item.start_date %}
+                                    {{ item.start_date|date:"M Y" }}
+                                {% endif %}
+
+                                {% if item.end_date %}
+                                    – {{ item.end_date|date:"M Y" }}
+                                {% else %}
+                                    – Present
+                                {% endif %}
+
+                            </div>
+
+
+                            {% if item.description %}
+
+                                <p class="card-description">
+                                    {{ item.description }}
+                                </p>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% empty %}
+
+                        <p class="empty-message">
+                            No experience added yet.
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+
+                      <!-- PROJECTS -->
+
+                <section class="panel-section" id="panel-projects" data-panel="projects" hidden>
+
+                    {% for project in projects %}
+
+                        <article class="content-card project-card">
+
+                            <h3>
+                                {{ project.title }}
+                            </h3>
+
+                            <p class="card-description">
+                                {{ project.description }}
+                            </p>
+
+
+                            {% if project.category %}
+
+                                <span class="card-tag">
+                                    {{ project.category }}
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if project.technologies %}
+
+                                <div class="project-technologies">
+
+                                    <span class="info-label">
+                                        Technologies
+                                    </span>
+
+                                    <p>
+                                        {{ project.technologies }}
+                                    </p>
+
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- Project Media -->
+
+                            {% for media in project.projectmedia_set.all %}
+
+                                {% if media.media_type == "image" %}
+
+                                    <figure class="project-media">
+
+                                        <img
+                                            src="{{ media.media_url }}"
+                                            alt="{{ media.caption|default:project.title }}"
+                                            loading="lazy">
+
+                                        {% if media.caption %}
+
+                                            <figcaption>
+                                                {{ media.caption }}
+                                            </figcaption>
+
+                                        {% endif %}
+
+                                    </figure>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+
+                            {% if project.project_url %}
+
+                                <a
+                                    href="{{ project.project_url }}"
+                                    class="project-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+
+                                    View Project
+
+                                    <svg class="external-icon">
+                                        <use href="#icon-external"></use>
+                                    </svg>
+
+                                </a>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% empty %}
+
+                        <p class="empty-message">
+                            No projects added yet.
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+
+                      <!-- SKILLS -->
+
+                <section class="panel-section" id="panel-skills" data-panel="skills" hidden>
+
+                    {% regroup skills by category as skill_groups %}
+
+
+                    {% for group in skill_groups %}
+
+                        <div class="skill-group">
+
+                            <h3 class="skill-category">
+                                {{ group.grouper|default:"Other Skills" }}
+                            </h3>
+
+
+                            <div class="skill-list">
+
+                                {% for skill in group.list %}
+
+                                    <div class="skill-card">
+
+                                        <span class="skill-name">
+                                            {{ skill.skill_name }}
+                                        </span>
+
+
+                                        {% if skill.proficiency_level %}
+
+                                            <span class="skill-level">
+                                                {{ skill.proficiency_level }}
+                                            </span>
+
+                                        {% endif %}
+
+
+                                        {% if skill.description %}
+
+                                            <p class="skill-description">
+                                                {{ skill.description }}
+                                            </p>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <p class="empty-message">
+                            No skills added yet.
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+
+                      <!-- CERTIFICATES -->
+
+                <section class="panel-section" id="panel-certificates" data-panel="certificates" hidden>
+
+                    {% for item in certificates %}
+
+                        <article class="content-card certificate-card">
+
+                            <h3>
+                                {{ item.certificate_name }}
+                            </h3>
+
+                            <p class="card-organization">
+                                {{ item.issuing_organization }}
+                            </p>
+
+
+                            {% if item.issue_date %}
+
+                                <div class="card-date">
+                                    Issued {{ item.issue_date|date:"F Y" }}
+                                </div>
+
+                            {% endif %}
+
+
+                            {% if item.description %}
+
+                                <p class="card-description">
+                                    {{ item.description }}
+                                </p>
+
+                            {% endif %}
+
+
+                            {% if item.certificate_url %}
+
+                                <a
+                                    href="{{ item.certificate_url }}"
+                                    class="certificate-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+
+                                    View Certificate
+
+                                    <svg class="external-icon">
+                                        <use href="#icon-external"></use>
+                                    </svg>
+
+                                </a>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% empty %}
+
+                        <p class="empty-message">
+                            No certificates added yet.
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+
+                      <!-- ACHIEVEMENTS -->
+
+                <section class="panel-section" id="panel-achievements" data-panel="achievements" hidden>
+
+                    {% for item in achievements %}
+
+                        <article class="content-card achievement-card">
+
+                            <h3>
+                                {{ item.title }}
+                            </h3>
+
+
+                            {% if item.organization %}
+
+                                <p class="card-organization">
+                                    {{ item.organization }}
+                                </p>
+
+                            {% endif %}
+
+
+                            {% if item.achievement_date %}
+
+                                <div class="card-date">
+                                    {{ item.achievement_date|date:"F Y" }}
+                                </div>
+
+                            {% endif %}
+
+
+                            {% if item.category %}
+
+                                <span class="card-tag">
+                                    {{ item.category }}
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if item.description %}
+
+                                <p class="card-description">
+                                    {{ item.description }}
+                                </p>
+
+                            {% endif %}
+
+
+                            {% if item.image_url %}
+
+                                <img
+                                    src="{{ item.image_url }}"
+                                    alt="{{ item.title }}"
+                                    class="achievement-image"
+                                    loading="lazy">
+
+                            {% endif %}
+
+                        </article>
+
+                    {% empty %}
+
+                        <p class="empty-message">
+                            No achievements added yet.
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+
+                    <!-- CONTACT -->
+
+                <section class="panel-section" id="panel-contact" data-panel="contact" hidden>
+
+                    <div class="contact-intro">
+
+                        <p>
+                            Feel free to reach out! I'd love to connect ꪮৎ.
+                        </p>
+
+                    </div>
+
+
+                    {% if contact.email %}
+
+                        <div class="contact-item">
+
+                            <svg class="contact-icon">
+                                <use href="#icon-mail"></use>
+                            </svg>
+
+                            <div>
+
+                                <span class="info-label">
+                                    Email
+                                </span>
+
+                                <a href="mailto:{{ contact.email }}">
+                                    {{ contact.email }}
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    {% if contact.phone %}
+
+                        <div class="contact-item">
+
+                            <div>
+
+                                <span class="info-label">
+                                    Phone
+                                </span>
+
+                                <p>
+                                    {{ contact.phone }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    {% if contact.location %}
+
+                        <div class="contact-item">
+
+                            <div>
+
+                                <span class="info-label">
+                                    Location
+                                </span>
+
+                                <p>
+                                    {{ contact.location }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    {% if contact.social_links %}
+
+                        <div class="social-links">
+
+                            {% for social in contact.social_links %}
+
+                                <a
+                                    href="{{ social.profile_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="social-link">
+
+                                    {{ social.platform }}
+
+                                    <svg class="external-icon">
+                                        <use href="#icon-external"></use>
+                                    </svg>
+
+                                </a>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+                </section>
+
+
+            </div><!-- panel-content -->
+
+        </div><!-- glass-panel -->
+
+    </div><!-- panel-overlay -->
+
+
+</main>
+
+
+    <!-- JAVASCRIPT -->
+
+<script src="{% static 'portfolio/js/script.js' %}"></script>
+
+</body>
+</html> 
+
