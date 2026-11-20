@@ -1,3 +1,58 @@
+/* ==========================================================================
+   XY NEX KY YM — OCEAN PIXEL BEACH PORTFOLIO
+   style.css  (complete replacement — the old override block is merged in)
+
+    1. Colour registration (smooth theme transitions)
+    2. Reset & base
+    3. Beach scene + time themes
+    4. Sky, sun / moon, stars
+    5. Clouds
+    6. Navbar + Philippine clock
+    7. Greeting
+    8. Ocean
+    9. Sand + wet sand
+   10. Shoreline swash
+   11. Shells, starfish, sparkles
+   12. Testudo + speech bubble
+   13. Left bookmarks
+   14. Popup overlay + panel
+   15. Glass cards (per section)
+   16. Responsive
+   17. Reduced motion
+   18. Generated pixel art (sprites, speckles, edges)
+   ========================================================================== */
+
+
+/* 1. COLOUR REGISTRATION ---------------------------------------------------
+   Registering the theme colours lets the browser fade between Dawn, Day,
+   Sunset and Night instead of snapping. */
+
+@property --sky-top      { syntax: "<color>"; inherits: true; initial-value: #f58eb5; }
+@property --sky-bottom   { syntax: "<color>"; inherits: true; initial-value: #ffd0df; }
+@property --cloud-color  { syntax: "<color>"; inherits: true; initial-value: #fff9f7; }
+@property --cloud-shadow { syntax: "<color>"; inherits: true; initial-value: #f2bfd3; }
+@property --cloud-hi     { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --sea-horizon  { syntax: "<color>"; inherits: true; initial-value: #a9e6f0; }
+@property --sea-far      { syntax: "<color>"; inherits: true; initial-value: #2a7fb8; }
+@property --sea-deep     { syntax: "<color>"; inherits: true; initial-value: #2b97c4; }
+@property --sea-mid      { syntax: "<color>"; inherits: true; initial-value: #2fb4c6; }
+@property --sea-shallow  { syntax: "<color>"; inherits: true; initial-value: #45cfc8; }
+@property --sea-shore    { syntax: "<color>"; inherits: true; initial-value: #8fe8dc; }
+@property --sea-foam     { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --sea-glint    { syntax: "<color>"; inherits: true; initial-value: #d9fff8; }
+@property --sand-light   { syntax: "<color>"; inherits: true; initial-value: #fff1e2; }
+@property --sand         { syntax: "<color>"; inherits: true; initial-value: #ffe2c4; }
+@property --sand-low     { syntax: "<color>"; inherits: true; initial-value: #fbd7b3; }
+@property --sand-dark    { syntax: "<color>"; inherits: true; initial-value: #eec29b; }
+@property --sand-speck   { syntax: "<color>"; inherits: true; initial-value: #e3b48a; }
+@property --sand-wet     { syntax: "<color>"; inherits: true; initial-value: #e7bb95; }
+@property --sun-core     { syntax: "<color>"; inherits: true; initial-value: #fff4c4; }
+@property --sun-glow     { syntax: "<color>"; inherits: true; initial-value: #fff0b0; }
+@property --greet-shadow { syntax: "<color>"; inherits: true; initial-value: #d2668f; }
+
+
+/* 2. RESET & BASE --------------------------------------------------------- */
+
 * {
     margin: 0;
     padding: 0;
@@ -9,6 +64,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    overscroll-behavior: none;
 }
 
 body {
@@ -25,6 +81,9 @@ a {
 
 button {
     cursor: pointer;
+    border: 0;
+    background: none;
+    color: inherit;
 }
 
 a {
@@ -33,9 +92,11 @@ a {
 }
 
 button:focus-visible,
-a:focus-visible {
-    outline: 3px solid #e8a8d1;
+a:focus-visible,
+.greeting:focus-visible {
+    outline: 3px solid #ffffff;
     outline-offset: 4px;
+    border-radius: 6px;
 }
 
 [hidden] {
@@ -53,7 +114,10 @@ a:focus-visible {
 .panel-icon,
 .close-icon,
 .contact-icon,
-.external-icon {
+.external-icon,
+.card-icon,
+.chip-icon,
+.social-icon svg {
     width: 22px;
     height: 22px;
     fill: none;
@@ -61,478 +125,384 @@ a:focus-visible {
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
+    flex-shrink: 0;
+}
+
+.px-font {
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
 }
 
 
-  /* 1. BEACH ENVIRONMENT */
+/* 3. BEACH SCENE + TIME THEMES -------------------------------------------- */
 
 .hero {
     position: relative;
     isolation: isolate;
     width: 100%;
+    height: 100vh;
     height: 100dvh;
-    min-height: 550px;
+    min-height: 320px;
     overflow: hidden;
-
     background: var(--sky-top);
 
-    transition: background 2s ease;
+    /* layout landmarks for the scenery */
+    --hero-h: max(100dvh, 320px);
+    --horizon: 46%;
+    --sand-top: 70%;
+    --sun-x: 78%;
+    --sun-y: 11%;
+    --sun-path-opacity: .28;
 
-    --sky-top: #f28bad;
-    --sky-bottom: #f8b6ca;
-
-    --cloud-color: #fff5f0;
-    --cloud-shadow: #edb4cb;
-
-    --ocean-deep: #987caf;
-    --ocean-mid: #b98bb9;
-    --ocean-light: #e6b5d2;
-
-    --ocean-pink: #f6b4d4;
-    --ocean-lavender: #c8b8ed;
-    --ocean-aqua: #9ce5e5;
-
-    --wave-foam: #fff8f6;
-
-    --sand-color: #ffe3bc;
-    --sand-shadow: #f4cda0;
-    --sand-pixel: #e8b983;
-
-    --shell-pink: #ed91bb;
-    --shell-blue: #78c9df;
-    --shell-cream: #fff3d7;
-    --shell-purple: #c1a4e8;
+    transition:
+        --sky-top 2s ease, --sky-bottom 2s ease,
+        --cloud-color 2s ease, --cloud-shadow 2s ease, --cloud-hi 2s ease,
+        --sea-horizon 2s ease, --sea-far 2s ease, --sea-deep 2s ease, --sea-mid 2s ease,
+        --sea-shallow 2s ease, --sea-shore 2s ease, --sea-foam 2s ease, --sea-glint 2s ease,
+        --sand-light 2s ease, --sand 2s ease, --sand-low 2s ease, --sand-dark 2s ease,
+        --sand-speck 2s ease, --sand-wet 2s ease,
+        --sun-core 2s ease, --sun-glow 2s ease, --greet-shadow 2s ease;
 }
 
-
-  /* 2. TIME THEMES */
-
+/* DAY · 8 AM – 3 PM */
+.hero,
 .hero[data-theme="day"] {
-    --sky-top: #f58eaf;
-    --sky-bottom: #ffc0d1;
+    --sky-top: #f58eb5;
+    --sky-bottom: #ffd3e1;
+    --cloud-color: #fff9f7;
+    --cloud-shadow: #f4c3d6;
+    --cloud-hi: #ffffff;
 
-    --cloud-color: #fff9f5;
-    --cloud-shadow: #f1c1d6;
+    --sea-horizon: #b5ecf2;
+    --sea-far: #2a82bc;
+    --sea-deep: #2a9bc8;
+    --sea-mid: #2db7c8;
+    --sea-shallow: #46d0c8;
+    --sea-shore: #92eadf;
+    --sea-foam: #ffffff;
+    --sea-glint: #d6fff7;
 
-    --ocean-deep: #9279b0;
-    --ocean-mid: #b18bc0;
-    --ocean-light: #e7b8d6;
+    --sand-light: #fff2e4;
+    --sand: #ffe3c6;
+    --sand-low: #fcd8b5;
+    --sand-dark: #efc49d;
+    --sand-speck: #e4b68c;
+    --sand-wet: #e8bd97;
 
-    --ocean-pink: #f6b4d4;
-    --ocean-lavender: #c9b7ee;
-    --ocean-aqua: #9de5e4;
-
-    --wave-foam: #fffaf8;
-
-    --sand-color: #ffe5c0;
-    --sand-shadow: #f5d0a1;
-    --sand-pixel: #e8bb88;
+    --sun-core: #fff4c4;
+    --sun-glow: #fff0b0;
+    --greet-shadow: #d46a93;
 }
 
+/* DAWN · 5 AM – 7 AM */
 .hero[data-theme="dawn"] {
-    --sky-top: #eaa3bd;
-    --sky-bottom: #ffe5c7;
+    --sky-top: #eba5c3;
+    --sky-bottom: #ffe7cf;
+    --cloud-color: #fff6ee;
+    --cloud-shadow: #f0c8d8;
+    --cloud-hi: #ffffff;
 
-    --cloud-color: #fff8ed;
-    --cloud-shadow: #eec9dc;
+    --sea-horizon: #f4e2ea;
+    --sea-far: #5c8fc0;
+    --sea-deep: #5ea6cb;
+    --sea-mid: #6bc0cd;
+    --sea-shallow: #8ad6d0;
+    --sea-shore: #c3efe6;
+    --sea-foam: #fffaf2;
+    --sea-glint: #ffe9e0;
 
-    --ocean-deep: #7699bd;
-    --ocean-mid: #9ec2d6;
-    --ocean-light: #d5e4e8;
+    --sand-light: #fff4e8;
+    --sand: #ffe7cf;
+    --sand-low: #f9dbbd;
+    --sand-dark: #ebc8a8;
+    --sand-speck: #dfb995;
+    --sand-wet: #e5c3a3;
 
-    --ocean-pink: #f5c0d4;
-    --ocean-lavender: #d5c4ed;
-    --ocean-aqua: #b5ece4;
+    --sun-core: #ffe9c4;
+    --sun-glow: #ffd9b5;
+    --greet-shadow: #c86a8e;
 
-    --wave-foam: #fffaf1;
-
-    --sand-color: #ffe9cc;
-    --sand-shadow: #edcbaa;
-    --sand-pixel: #ddb68e;
+    --sun-x: 12%;
+    --sun-y: 34%;
+    --sun-path-opacity: .55;
 }
 
+/* SUNSET · 4 PM – 6 PM */
 .hero[data-theme="sunset"] {
-    --sky-top: #ee83a5;
-    --sky-bottom: #ffc49f;
+    --sky-top: #e9789f;
+    --sky-bottom: #ffc89e;
+    --cloud-color: #ffeee6;
+    --cloud-shadow: #f0aec4;
+    --cloud-hi: #fff8f1;
 
-    --cloud-color: #fff0e9;
-    --cloud-shadow: #eeb1c9;
+    --sea-horizon: #ffd2b3;
+    --sea-far: #4870ac;
+    --sea-deep: #3f8cb8;
+    --sea-mid: #48a8b9;
+    --sea-shallow: #6cc3c0;
+    --sea-shore: #b4e6d8;
+    --sea-foam: #fff4e8;
+    --sea-glint: #ffd9b8;
 
-    --ocean-deep: #866a9f;
-    --ocean-mid: #c18bb4;
-    --ocean-light: #eeb5c9;
+    --sand-light: #ffecd8;
+    --sand: #ffdbb8;
+    --sand-low: #f7cca3;
+    --sand-dark: #e8b48c;
+    --sand-speck: #d9a27b;
+    --sand-wet: #e0ab84;
 
-    --ocean-pink: #ffc5bd;
-    --ocean-lavender: #d7b9eb;
-    --ocean-aqua: #b3e5dc;
+    --sun-core: #ffd9a0;
+    --sun-glow: #ffb98a;
+    --greet-shadow: #b9567f;
 
-    --wave-foam: #fff2e4;
-
-    --sand-color: #ffe1b9;
-    --sand-shadow: #efbd96;
-    --sand-pixel: #dca77e;
+    --sun-x: 86%;
+    --sun-y: 34%;
+    --sun-path-opacity: .8;
 }
 
+/* NIGHT · 7 PM – 4 AM */
 .hero[data-theme="night"] {
-    --sky-top: #293657;
-    --sky-bottom: #586d92;
+    --sky-top: #232f52;
+    --sky-bottom: #51698f;
+    --cloud-color: #b9c8de;
+    --cloud-shadow: #8b9dbb;
+    --cloud-hi: #d6e1f0;
 
-    --cloud-color: #cbd9e9;
-    --cloud-shadow: #9caec9;
+    --sea-horizon: #6f8db6;
+    --sea-far: #142b4b;
+    --sea-deep: #1a3f62;
+    --sea-mid: #215a76;
+    --sea-shallow: #2b7488;
+    --sea-shore: #4b98a2;
+    --sea-foam: #d3e8f0;
+    --sea-glint: #a7cde4;
 
-    --ocean-deep: #263f67;
-    --ocean-mid: #3d6287;
-    --ocean-light: #7199b4;
+    --sand-light: #d6ccd4;
+    --sand: #bdb1bf;
+    --sand-low: #aea2b3;
+    --sand-dark: #9d91a5;
+    --sand-speck: #8b8095;
+    --sand-wet: #978aa0;
 
-    --ocean-pink: #9e84b4;
-    --ocean-lavender: #a7a7dc;
-    --ocean-aqua: #83c8c9;
+    --sun-core: #eef1ff;
+    --sun-glow: #b9c7f5;
+    --greet-shadow: #121a3a;
 
-    --wave-foam: #e0edf5;
-
-    --sand-color: #c9b9bd;
-    --sand-shadow: #a69ba8;
-    --sand-pixel: #897e8e;
-
-    --shell-pink: #bb86ad;
-    --shell-blue: #81aeca;
-    --shell-cream: #d9d3c5;
-    --shell-purple: #9c92cf;
+    --sun-x: 80%;
+    --sun-y: 13%;
+    --sun-path-opacity: .5;
 }
 
 
-  /* 3. SKY */
+/* 4. SKY, SUN / MOON, STARS ----------------------------------------------- */
 
 .sky {
     position: absolute;
     inset: 0;
     z-index: -2;
-
-    background:
-        linear-gradient(
-            180deg,
-            var(--sky-top) 0%,
-            var(--sky-top) 38%,
-            var(--sky-bottom) 100%
-        );
-
-    transition: background 2s ease;
+    background: linear-gradient(
+        180deg,
+        var(--sky-top) 0%,
+        var(--sky-top) 18%,
+        var(--sky-bottom) var(--horizon)
+    );
 }
 
+.sun {
+    position: absolute;
+    z-index: 0;
+    left: var(--sun-x);
+    top: max(var(--sun-y), 104px);
+    width: clamp(56px, 6.5vw, 88px);
+    aspect-ratio: 1;
+    translate: -50% 0;
+    pointer-events: none;
+    transition: left 2s ease, top 2s ease;
+}
 
-/* SUN / MOON */
-
-.hero::before {
+/* soft glow */
+.sun::before {
     content: "";
     position: absolute;
-
-    top: 15%;
-    right: 12%;
-
-    width: 76px;
-    height: 76px;
-
-    z-index: 0;
-
+    inset: -70%;
     border-radius: 50%;
-
-    background: #fff3bd;
-
-    box-shadow:
-        0 0 0 12px rgba(255, 243, 189, 0.10),
-        0 0 45px rgba(255, 243, 189, 0.35);
-
-    transition:
-        background 2s ease,
-        box-shadow 2s ease,
-        transform 2s ease;
+    background: radial-gradient(circle, var(--sun-glow) 0%, transparent 62%);
+    opacity: .55;
 }
 
-.hero[data-theme="dawn"]::before {
-    background: #ffe9bd;
-    box-shadow: 0 0 45px rgba(255, 231, 185, 0.45);
+/* pixel disc (stepped circle) */
+.sun::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--sun-core);
+    clip-path: polygon(
+        31% 0, 69% 0, 69% 6%, 81% 6%, 81% 13%, 88% 13%, 88% 19%, 94% 19%,
+        94% 31%, 100% 31%, 100% 69%, 94% 69%, 94% 81%, 88% 81%, 88% 88%,
+        81% 88%, 81% 94%, 69% 94%, 69% 100%, 31% 100%, 31% 94%, 19% 94%,
+        19% 88%, 13% 88%, 13% 81%, 6% 81%, 6% 69%, 0 69%, 0 31%, 6% 31%,
+        6% 19%, 13% 19%, 13% 13%, 19% 13%, 19% 6%, 31% 6%
+    );
 }
 
-.hero[data-theme="sunset"]::before {
-    background: #ffdfab;
-    box-shadow: 0 0 60px rgba(255, 194, 145, 0.5);
+/* moon craters */
+.hero[data-theme="night"] .sun::after {
+    background:
+        linear-gradient(#cfd6f2, #cfd6f2) 28% 30% / 19% 19% no-repeat,
+        linear-gradient(#cfd6f2, #cfd6f2) 62% 56% / 25% 19% no-repeat,
+        linear-gradient(#cfd6f2, #cfd6f2) 38% 72% / 13% 13% no-repeat,
+        var(--sun-core);
 }
 
-.hero[data-theme="night"]::before {
-    background: #e9edff;
-
-    box-shadow:
-        -15px 5px 0 #586d92,
-        0 0 30px rgba(228, 236, 255, 0.25);
-
-    transform: translateX(-10px);
-}
-
-
-/* STARS */
-
+/* stars — only shown (and only animated) at night */
 .hero::after {
     content: "";
     position: absolute;
-
-    top: 12%;
+    top: 0;
     left: 0;
-
-    width: 4px;
-    height: 4px;
-
-    z-index: 0;
-
-    background: transparent;
-
-    box-shadow:
-        8vw 8vh #ffffff,
-        15vw 18vh #fff8d8,
-        23vw 7vh #ffffff,
-        33vw 15vh #fff8d8,
-        45vw 9vh #ffffff,
-        58vw 22vh #fff8d8,
-        68vw 8vh #ffffff,
-        77vw 19vh #fff8d8,
-        89vw 12vh #ffffff,
-        96vw 25vh #fff8d8,
-        12vw 31vh #ffffff,
-        28vw 27vh #fff8d8,
-        51vw 30vh #ffffff,
-        82vw 34vh #fff8d8;
-
+    z-index: -1;
+    width: 3px;
+    height: 3px;
     opacity: 0;
-
-    animation: star-twinkle 3s ease-in-out infinite alternate;
+    transition: opacity 2s ease;
+    pointer-events: none;
 }
 
 .hero[data-theme="night"]::after {
-    opacity: 0.9;
+    opacity: 1;
+    animation: star-twinkle 3.2s steps(3) infinite alternate;
+}
+
+.hero[data-theme="dawn"]::after {
+    opacity: .25;
 }
 
 @keyframes star-twinkle {
-    from {
-        opacity: 0.45;
-    }
-
-    to {
-        opacity: 1;
-    }
+    from { opacity: .55; }
+    to   { opacity: 1; }
 }
 
 
-  /* 4. PIXEL CLOUDS */
+/* 5. CLOUDS ---------------------------------------------------------------- */
+
+.px-sprite {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+}
+
+.px-sprite::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--u) * -1);
+    top: calc(var(--u) * -1);
+    width: var(--u);
+    height: var(--u);
+}
 
 .cloud {
     position: absolute;
-    z-index: 2;
-
-    width: 24px;
-    height: 24px;
-
-    background: var(--cloud-color);
-
-    image-rendering: pixelated;
-
-    box-shadow:
-        24px 0 var(--cloud-color),
-        48px 0 var(--cloud-color),
-        72px 0 var(--cloud-color),
-        96px 0 var(--cloud-color),
-
-        -24px 0 var(--cloud-color),
-
-        0 -24px var(--cloud-color),
-        24px -24px var(--cloud-color),
-        48px -24px var(--cloud-color),
-        72px -24px var(--cloud-color),
-
-        24px -48px var(--cloud-color),
-        48px -48px var(--cloud-color),
-        72px -48px var(--cloud-color),
-
-        96px -24px var(--cloud-color),
-        120px 0 var(--cloud-color),
-
-        120px 24px var(--cloud-color),
-        96px 24px var(--cloud-color),
-        72px 24px var(--cloud-color),
-        48px 24px var(--cloud-color),
-        24px 24px var(--cloud-color),
-        0 24px var(--cloud-color),
-
-        0 48px var(--cloud-shadow),
-        24px 48px var(--cloud-shadow),
-        48px 48px var(--cloud-shadow),
-        72px 48px var(--cloud-shadow),
-        96px 48px var(--cloud-shadow);
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+    will-change: transform;
+    animation: cloud-drift var(--speed, 60s) linear infinite;
+    animation-delay: var(--delay, 0s);
 }
 
-.cloud-one {
-    top: 12%;
-    left: -180px;
-    scale: 1.2;
-    animation: cloud-drift 42s linear infinite;
+.hero[data-theme="night"] .cloud {
+    opacity: .5;
 }
 
-.cloud-two {
-    top: 26%;
-    left: -180px;
-    scale: 0.8;
-    opacity: 0.8;
-    animation: cloud-drift 34s linear infinite -12s;
-}
-
-.cloud-three {
-    top: 8%;
-    left: -180px;
-    scale: 0.55;
-    opacity: 0.85;
-    animation: cloud-drift 48s linear infinite -20s;
-}
-
-.cloud-four {
-    top: 35%;
-    left: -180px;
-    scale: 0.95;
-    opacity: 0.65;
-    animation: cloud-drift 39s linear infinite -8s;
-}
-
-.cloud-five {
-    top: 19%;
-    left: -180px;
-    scale: 0.7;
-    opacity: 0.7;
-    animation: cloud-drift 50s linear infinite -27s;
-}
-
-.cloud-six {
-    top: 11%;
-    left: -180px;
-    scale: 0.9;
-    opacity: 0.8;
-    animation: cloud-drift 36s linear infinite -15s;
-}
-
-.cloud-seven {
-    top: 39%;
-    left: -180px;
-    scale: 0.55;
-    opacity: 0.6;
-    animation: cloud-drift 46s linear infinite -22s;
-}
-
-.cloud-eight {
-    top: 24%;
-    left: -180px;
-    scale: 0.75;
-    opacity: 0.75;
-    animation: cloud-drift 40s linear infinite -5s;
-}
+/* rows are spaced and clouds on the same row share a speed, so they
+   never pile on top of each other */
+.cloud-one   { top: 15%; scale: 1.1;  --speed: 78s; --delay: -10s; }
+.cloud-two   { top: 15%; scale: 0.9;  --speed: 78s; --delay: -49s; }
+.cloud-three { top: 24%; scale: 0.7;  --speed: 96s; --delay: -30s; opacity: .9; }
+.cloud-four  { top: 24%; scale: 0.8;  --speed: 96s; --delay: -78s; opacity: .9; }
+.cloud-five  { top: 32%; scale: 0.6;  --speed: 120s; --delay: -5s; opacity: .8; }
+.cloud-six   { top: 32%; scale: 0.55; --speed: 120s; --delay: -66s; opacity: .8; }
+.cloud-seven { top: 38%; scale: 0.45; --speed: 140s; --delay: -40s; opacity: .7; }
+.cloud-eight { top: 38%; scale: 0.5;  --speed: 140s; --delay: -105s; opacity: .7; }
 
 @keyframes cloud-drift {
-    from {
-        transform: translateX(-10vw);
-    }
-
-    to {
-        transform: translateX(125vw);
-    }
+    from { transform: translateX(-160%); }
+    to   { transform: translateX(calc(100vw + 60%)); }
 }
 
 
-  /* 5. NAVBAR */
+/* 6. NAVBAR + PHILIPPINE CLOCK -------------------------------------------- */
 
 .navbar {
     position: absolute;
-
-    top: 22px;
+    top: 20px;
     left: 50%;
+    translate: -50% 0;
+    z-index: 70;
 
-    transform: translateX(-50%);
-
-    width: min(92%, 1200px);
-    min-height: 70px;
+    width: min(94%, 1200px);
+    min-height: 66px;
 
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 24px;
+    padding: 12px 14px 12px 28px;
 
-    gap: 30px;
-    padding: 14px 30px;
-
-    z-index: 30;
-
-    background: rgba(255, 255, 255, 0.20);
-
-    border: 1px solid rgba(255, 255, 255, 0.48);
+    background: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.55);
     border-radius: 20px;
-
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow:
-        0 8px 35px rgba(88, 65, 105, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        0 8px 30px rgba(102, 75, 113, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .logo {
     flex-shrink: 0;
-
-    font-size: 1.15rem;
-    font-weight: 700;
-
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
     letter-spacing: 1.5px;
-
     color: #ffffff;
-
-    text-shadow: 0 2px 8px rgba(75, 63, 95, 0.15);
+    text-shadow: 2px 2px 0 rgba(160, 80, 120, 0.35);
 }
 
 .nav-links {
+    flex: 1;
     display: flex;
+    justify-content: flex-end;
     align-items: center;
-    gap: clamp(14px, 2.5vw, 32px);
-
+    gap: clamp(14px, 2.4vw, 32px);
     list-style: none;
 }
 
 .nav-links a {
     position: relative;
-
     display: inline-flex;
     align-items: center;
-
     padding: 8px 0;
-
-    color: white;
-
+    color: #ffffff;
     font-size: 0.88rem;
     font-weight: 500;
-
-    text-shadow: 0 1px 5px rgba(75, 63, 95, 0.18);
-
+    text-shadow: 0 1px 5px rgba(75, 63, 95, 0.22);
     transition: opacity 0.2s ease;
 }
 
 .nav-links a:hover {
-    opacity: 0.75;
+    opacity: 0.8;
 }
 
+/* pixel underline */
 .nav-links a::after {
     content: "";
-
     position: absolute;
     left: 0;
     bottom: 2px;
-
     width: 0;
-    height: 2px;
-
-    background: white;
-
-    transition: width 0.25s ease;
+    height: 3px;
+    background: #ffffff;
+    box-shadow: 0 2px 0 rgba(160, 80, 120, 0.25);
+    transition: width 0.25s steps(4);
 }
 
 .nav-links a:hover::after,
@@ -540,47 +510,81 @@ a:focus-visible {
     width: 100%;
 }
 
+.nav-clock {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
 
-  /* 6. GREETING */
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 14px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    text-shadow: 1px 1px 0 rgba(160, 80, 120, 0.3);
+    white-space: nowrap;
+}
+
+.clock-time {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+    min-width: 9.5ch;
+    text-align: right;
+}
+
+.clock-zone {
+    padding: 2px 6px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #c45f8a;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 6px;
+    text-shadow: none;
+}
+
+.hero[data-theme="night"] .clock-zone {
+    color: #2e3f69;
+}
+
+
+/* 7. GREETING -------------------------------------------------------------- */
 
 .hero-content {
     position: absolute;
-
-    top: 35%;
+    top: 33%;
     left: 50%;
-
-    transform: translate(-50%, -50%);
-
-    width: min(90%, 1000px);
-
+    translate: -50% -50%;
     z-index: 10;
-
+    width: min(90%, 1000px);
     text-align: center;
 }
 
-.hero-text {
-    width: 100%;
+.greeting {
+    display: inline-block;
+    min-height: 1.25em;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.1rem, 6vw, 5.2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fffafc;
+    text-wrap: balance;
+    text-shadow:
+        0 3px 0 color-mix(in srgb, var(--greet-shadow) 55%, transparent),
+        0 6px 22px color-mix(in srgb, var(--greet-shadow) 45%, transparent);
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.3s ease, translate 0.3s ease;
 }
 
-.greeting {
-    min-height: 1.5em;
-
-    font-family: 'Playfair Display', serif;
-
-    font-size: clamp(2.5rem, 6vw, 5.3rem);
-    font-weight: 600;
-
-    line-height: 1.2;
-
-    color: #fffafc;
-
-    text-shadow:
-        0 3px 8px rgba(112, 71, 101, 0.18),
-        0 1px 3px rgba(112, 71, 101, 0.15);
-
-    cursor: pointer;
-
-    transition: opacity 0.3s ease;
+.greeting:hover {
+    translate: 0 -2px;
 }
 
 .greeting.fade-out {
@@ -589,1346 +593,698 @@ a:focus-visible {
 
 .hero-subtitle {
     margin-top: 12px;
-
-    font-size: clamp(1rem, 1.7vw, 1.4rem);
-    font-weight: 400;
-
+    font-size: clamp(0.95rem, 1.7vw, 1.35rem);
     letter-spacing: 1px;
-
-    color: white;
-
-    text-shadow: 0 2px 8px rgba(112, 71, 101, 0.2);
+    color: #ffffff;
+    text-shadow: 0 2px 10px color-mix(in srgb, var(--greet-shadow) 50%, transparent);
 }
 
-/* REMOVE OLD INSTRUCTION */
 .greeting-instruction {
     display: none !important;
 }
 
 
-  /* 7. PIXEL OCEAN */
+/* 8. OCEAN ------------------------------------------------------------------ */
 
 .ocean {
+    --oh: calc(var(--hero-h) * 0.34);
     position: absolute;
-
-    top: 47%;
+    top: var(--horizon);
     left: 0;
-
-    width: 100%;
-    height: 36%;
-
     z-index: 3;
-
+    width: 100%;
+    height: 34%;
     overflow: hidden;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--sea-far) 0%, var(--sea-deep) 30%);
+}
 
-    background:
-        linear-gradient(
-            180deg,
-            var(--ocean-mid) 0%,
-            var(--ocean-deep) 100%
-        );
+/* lighter horizon line */
+.ocean::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    z-index: 5;
+    background: var(--sea-horizon);
+    opacity: .8;
 }
 
 .ocean-layer {
     position: absolute;
-
-    left: -15%;
-
-    width: 130%;
-    height: 100%;
-
-    image-rendering: pixelated;
+    left: -3%;
+    width: 106%;
+    bottom: 0;
+    will-change: transform;
 }
-
-
-/* BACK WAVE */
 
 .ocean-back {
-    top: 0;
-    height: 52%;
-
-    opacity: 0.8;
-
-    background: var(--ocean-light);
-
-    clip-path: polygon(
-        0 55%,
-        5% 55%,
-        5% 35%,
-        10% 35%,
-        10% 60%,
-        15% 60%,
-        15% 40%,
-        20% 40%,
-        20% 65%,
-        25% 65%,
-        25% 35%,
-        30% 35%,
-        30% 70%,
-        35% 70%,
-        35% 45%,
-        40% 45%,
-        40% 65%,
-        45% 65%,
-        45% 35%,
-        50% 35%,
-        50% 60%,
-        55% 60%,
-        55% 40%,
-        60% 40%,
-        60% 70%,
-        65% 70%,
-        65% 35%,
-        70% 35%,
-        70% 60%,
-        75% 60%,
-        75% 45%,
-        80% 45%,
-        80% 70%,
-        85% 70%,
-        85% 40%,
-        90% 40%,
-        90% 65%,
-        95% 65%,
-        95% 45%,
-        100% 45%,
-        100% 100%,
-        0 100%
-    );
-
-    animation: pixel-wave-back 10s steps(8) infinite alternate;
+    top: 9%;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sea-deep) 75%, var(--sea-far)), var(--sea-deep) 24px);
+    animation: wave-sway 14s steps(6) infinite alternate;
 }
-
-
-/* MIDDLE WAVE */
 
 .ocean-middle {
-    top: 20%;
-    height: 70%;
-
-    background: var(--ocean-pink);
-
-    opacity: 0.55;
-
-    clip-path: polygon(
-        0 20%,
-        6% 20%,
-        6% 10%,
-        12% 10%,
-        12% 25%,
-        18% 25%,
-        18% 12%,
-        24% 12%,
-        24% 30%,
-        30% 30%,
-        30% 15%,
-        36% 15%,
-        36% 35%,
-        42% 35%,
-        42% 12%,
-        48% 12%,
-        48% 28%,
-        54% 28%,
-        54% 8%,
-        60% 8%,
-        60% 25%,
-        66% 25%,
-        66% 12%,
-        72% 12%,
-        72% 32%,
-        78% 32%,
-        78% 15%,
-        84% 15%,
-        84% 30%,
-        90% 30%,
-        90% 12%,
-        96% 12%,
-        96% 25%,
-        100% 25%,
-        100% 100%,
-        0 100%
-    );
-
-    animation: pixel-wave-middle 8s steps(8) infinite alternate;
+    top: 24%;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sea-mid) 70%, var(--sea-deep)), var(--sea-mid) 28px);
+    animation: wave-sway 11s steps(6) infinite alternate-reverse;
 }
-
-
-/* FRONT WAVE */
 
 .ocean-front {
-    top: 45%;
-    height: 60%;
-
-    background: var(--ocean-lavender);
-
-    opacity: 0.7;
-
-    clip-path: polygon(
-        0 10%,
-        5% 10%,
-        5% 0,
-        10% 0,
-        10% 20%,
-        15% 20%,
-        15% 5%,
-        20% 5%,
-        20% 25%,
-        25% 25%,
-        25% 10%,
-        30% 10%,
-        30% 30%,
-        35% 30%,
-        35% 8%,
-        40% 8%,
-        40% 25%,
-        45% 25%,
-        45% 0,
-        50% 0,
-        50% 20%,
-        55% 20%,
-        55% 5%,
-        60% 5%,
-        60% 28%,
-        65% 28%,
-        65% 8%,
-        70% 8%,
-        70% 22%,
-        75% 22%,
-        75% 0,
-        80% 0,
-        80% 25%,
-        85% 25%,
-        85% 8%,
-        90% 8%,
-        90% 28%,
-        95% 28%,
-        95% 10%,
-        100% 10%,
-        100% 100%,
-        0 100%
-    );
-
-    animation: pixel-wave-front 6s steps(7) infinite alternate;
+    top: 41%;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sea-shallow) 70%, var(--sea-mid)), var(--sea-shallow) 28px);
+    animation: wave-sway 9s steps(5) infinite alternate;
 }
 
+.ocean-shallows {
+    top: 57%;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sea-shore) 55%, var(--sea-shallow)), var(--sea-shore) 22px);
+    animation: wave-sway 7s steps(5) infinite alternate-reverse;
+}
 
-/* WATER REFLECTIONS */
+@keyframes wave-sway {
+    from { transform: translateX(-12px); }
+    to   { transform: translateX(12px); }
+}
 
+/* glimmering ripple dashes: two sets that take turns */
 .ocean-glimmer {
     position: absolute;
-    inset: 0;
-
-    z-index: 4;
-
-    pointer-events: none;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent 0 6%,
-            var(--ocean-aqua) 6% 10%,
-            transparent 10% 20%,
-            var(--ocean-pink) 20% 25%,
-            transparent 25% 39%,
-            var(--wave-foam) 39% 44%,
-            transparent 44% 58%,
-            var(--ocean-lavender) 58% 64%,
-            transparent 64% 80%,
-            var(--ocean-aqua) 80% 85%,
-            transparent 85% 100%
-        );
-
-    background-size: 320px 8px;
-
-    opacity: 0.16;
-
-    animation: water-reflection 5s steps(8) infinite;
-}
-
-@keyframes pixel-wave-back {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-45px);
-    }
-}
-
-@keyframes pixel-wave-middle {
-    from {
-        transform: translateX(-30px);
-    }
-
-    to {
-        transform: translateX(40px);
-    }
-}
-
-@keyframes pixel-wave-front {
-    from {
-        transform: translateX(30px);
-    }
-
-    to {
-        transform: translateX(-45px);
-    }
-}
-
-@keyframes water-reflection {
-    from {
-        background-position: 0 0;
-    }
-
-    to {
-        background-position: -320px 0;
-    }
-}
-
-
-  /* 8. PIXEL SHORELINE */
-
-.shoreline {
-    position: absolute;
-
-    top: 75%;
-    left: 0;
-
-    width: 100%;
-    height: 12%;
-
-    z-index: 5;
-
-    overflow: hidden;
-}
-
-.foam {
-    position: absolute;
-
-    left: -10%;
-
-    width: 120%;
-    height: 100%;
-
-    image-rendering: pixelated;
-}
-
-
-/* BACK FOAM */
-
-.foam-back {
     top: 0;
-    height: 50%;
+    left: 0;
+    z-index: 4;
+    width: 4px;
+    height: 4px;
+    --g1: var(--sea-glint);
+    --g2: var(--sea-foam);
+    will-change: opacity, transform;
+    animation: glimmer 4.8s steps(1) infinite;
+}
 
-    background: var(--wave-foam);
+.ocean-glimmer::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 0;
+    width: 4px;
+    height: 4px;
+}
 
-    opacity: 0.6;
+.ocean-glimmer-alt {
+    animation-delay: -2.4s;
+}
 
-    clip-path: polygon(
-        0 30%,
-        5% 30%,
-        5% 0,
-        10% 0,
-        10% 45%,
-        15% 45%,
-        15% 15%,
-        20% 15%,
-        20% 50%,
-        25% 50%,
-        25% 10%,
-        30% 10%,
-        30% 40%,
-        35% 40%,
-        35% 0,
-        40% 0,
-        40% 50%,
-        45% 50%,
-        45% 15%,
-        50% 15%,
-        50% 45%,
-        55% 45%,
-        55% 0,
-        60% 0,
-        60% 50%,
-        65% 50%,
-        65% 10%,
-        70% 10%,
-        70% 40%,
-        75% 40%,
-        75% 0,
-        80% 0,
-        80% 45%,
-        85% 45%,
-        85% 15%,
-        90% 15%,
-        90% 50%,
-        95% 50%,
-        95% 20%,
-        100% 20%,
-        100% 100%,
-        0 100%
-    );
+@keyframes glimmer {
+    0%   { opacity: .85; transform: translateX(0); }
+    25%  { opacity: .55; transform: translateX(4px); }
+    50%  { opacity: .15; transform: translateX(8px); }
+    75%  { opacity: .45; transform: translateX(4px); }
+    100% { opacity: .85; transform: translateX(0); }
+}
 
-    animation: foam-drift 5s steps(7) infinite alternate;
+.hero[data-theme="night"] .ocean-glimmer {
+    --g2: var(--sea-glint);
+}
+
+/* reflection column under the sun / moon */
+.sun-path {
+    position: absolute;
+    top: 0;
+    left: var(--sun-x);
+    z-index: 4;
+    width: 4px;
+    height: 4px;
+    opacity: var(--sun-path-opacity);
+    transition: left 2s ease, opacity 2s ease;
+    animation: sun-path-shimmer 3s steps(2) infinite alternate;
+}
+
+.sun-path::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 4px;
+}
+
+@keyframes sun-path-shimmer {
+    from { translate: -2px 0; }
+    to   { translate: 2px 0; }
 }
 
 
-/* FRONT FOAM */
-
-.foam-front {
-    top: 25%;
-    height: 75%;
-
-    background: var(--wave-foam);
-
-    clip-path: polygon(
-        0 15%,
-        5% 15%,
-        5% 0,
-        10% 0,
-        10% 35%,
-        15% 35%,
-        15% 10%,
-        20% 10%,
-        20% 45%,
-        25% 45%,
-        25% 15%,
-        30% 15%,
-        30% 50%,
-        35% 50%,
-        35% 10%,
-        40% 10%,
-        40% 40%,
-        45% 40%,
-        45% 0,
-        50% 0,
-        50% 45%,
-        55% 45%,
-        55% 10%,
-        60% 10%,
-        60% 50%,
-        65% 50%,
-        65% 15%,
-        70% 15%,
-        70% 40%,
-        75% 40%,
-        75% 0,
-        80% 0,
-        80% 35%,
-        85% 35%,
-        85% 10%,
-        90% 10%,
-        90% 45%,
-        95% 45%,
-        95% 15%,
-        100% 15%,
-        100% 100%,
-        0 100%
-    );
-
-    opacity: 0.95;
-
-    animation: foam-drift 3.5s steps(7) infinite alternate-reverse;
-}
-
-@keyframes foam-drift {
-    from {
-        transform: translateX(-35px);
-    }
-
-    to {
-        transform: translateX(35px);
-    }
-}
-
-
-  /* 9. SAND */
+/* 9. SAND + WET SAND ------------------------------------------------------- */
 
 .sand {
+    --sh: calc(var(--hero-h) * 0.30);
     position: absolute;
-
-    bottom: 0;
     left: 0;
-
+    bottom: 0;
+    z-index: 5;
     width: 100%;
-    height: 25%;
-
-    z-index: 6;
-
-    background: var(--sand-color);
-
-    transition: background 2s ease;
-
-    clip-path: polygon(
-        0 5%,
-        5% 5%,
-        5% 0,
-        10% 0,
-        10% 8%,
-        15% 8%,
-        15% 3%,
-        20% 3%,
-        20% 10%,
-        25% 10%,
-        25% 5%,
-        30% 5%,
-        30% 12%,
-        35% 12%,
-        35% 6%,
-        40% 6%,
-        40% 15%,
-        45% 15%,
-        45% 5%,
-        50% 5%,
-        50% 12%,
-        55% 12%,
-        55% 4%,
-        60% 4%,
-        60% 10%,
-        65% 10%,
-        65% 5%,
-        70% 5%,
-        70% 13%,
-        75% 13%,
-        75% 4%,
-        80% 4%,
-        80% 10%,
-        85% 10%,
-        85% 5%,
-        90% 5%,
-        90% 12%,
-        95% 12%,
-        95% 7%,
-        100% 7%,
-        100% 100%,
-        0 100%
-    );
+    height: calc(100% - var(--sand-top));
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--sand) 0%, var(--sand) 45%, var(--sand-low) 100%);
 }
 
+/* darker damp band that the waves keep re-soaking */
+.wet-sand {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sand-wet) 88%, #9b6f5c), var(--sand-wet));
+    opacity: .55;
+    animation: wet-sand 8s steps(8) infinite;
+}
 
-/* SUBTLE SAND TEXTURE */
+@keyframes wet-sand {
+    0%   { opacity: .45; }
+    42%  { opacity: .95; }
+    100% { opacity: .45; }
+}
 
 .sand-texture {
     position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 3px;
+    --k1: var(--sand-speck);
+    --k2: var(--sand-dark);
+    --k3: var(--sand-light);
+    --k4: color-mix(in srgb, var(--sand-dark) 70%, #b9a9b8);
+    --k5: color-mix(in srgb, var(--sand-speck) 80%, #ffffff);
+}
+
+.sand-texture::before,
+.sand-texture::after {
+    content: "";
+    position: absolute;
+    left: -3px;
+    top: 0;
+    width: 3px;
+    height: 3px;
+}
+
+
+/* 10. SHORELINE SWASH ------------------------------------------------------
+   Two sheets of shallow water with a pixel-foam lip slide up the sand and
+   back on different rhythms, so the water reaches different spots. */
+
+.shoreline {
+    position: absolute;
+    top: calc(var(--sand-top) - 48px);
+    left: 0;
+    z-index: 6;
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.swash {
+    position: absolute;
+    left: -4%;
+    top: 0;
+    width: 108%;
+    height: 100%;
+    will-change: transform;
+}
+
+.swash-water,
+.swash-foam {
+    position: absolute;
     inset: 0;
+}
 
-    background:
-        repeating-linear-gradient(
-            90deg,
-            transparent 0 28px,
-            var(--sand-shadow) 28px 31px,
-            transparent 31px 68px
-        ),
-        repeating-linear-gradient(
-            0deg,
-            transparent 0 34px,
-            var(--sand-pixel) 34px 38px,
-            transparent 38px 70px
-        );
+.swash-water {
+    background: linear-gradient(
+        180deg,
+        transparent 0,
+        color-mix(in srgb, var(--sea-shore) 70%, transparent) 36px,
+        color-mix(in srgb, var(--sea-shore) 80%, var(--sand-wet)) 100%
+    );
+    opacity: .85;
+}
 
-    opacity: 0.12;
+.swash-foam {
+    background: var(--sea-foam);
+}
+
+.swash-a {
+    animation: swash 8s infinite;
+}
+
+.swash-b {
+    animation: swash 11s infinite -4s;
+    opacity: .75;
+}
+
+@keyframes swash {
+    0%   { transform: translate(0, -40px); animation-timing-function: steps(7); }
+    38%  { transform: translate(-8px, 8px); animation-timing-function: steps(1); }
+    48%  { transform: translate(-8px, 8px); animation-timing-function: steps(12); }
+    100% { transform: translate(0, -40px); }
 }
 
 
-  /* 10. SHELLS */
+/* 11. SHELLS, STARFISH, SPARKLES ------------------------------------------ */
 
-.shell {
+.sand-decor {
     position: absolute;
-    z-index: 2;
-
-    image-rendering: pixelated;
-
-    filter: drop-shadow(2px 4px 0 rgba(155, 111, 101, 0.12));
+    inset: 0;
 }
 
-
-/* PINK SHELL */
-
-.shell-one {
-    left: 9%;
-    bottom: 17%;
-
-    width: 36px;
-    height: 32px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent 20%,
-            rgba(255,255,255,0.25) 20% 35%,
-            transparent 35% 65%,
-            rgba(255,255,255,0.25) 65% 80%,
-            transparent 80%
-        ),
-        var(--shell-pink);
-
-    clip-path: polygon(
-        25% 0,
-        75% 0,
-        100% 25%,
-        100% 75%,
-        75% 100%,
-        25% 100%,
-        0 75%,
-        0 25%
-    );
-
-    animation: shell-float 5s ease-in-out infinite;
+.hero[data-theme="night"] .sand-decor {
+    filter: brightness(.8) saturate(.75);
 }
 
-
-/* CREAM SHELL */
-
-.shell-two {
-    left: 19%;
-    bottom: 10%;
-
-    width: 40px;
-    height: 32px;
-
-    background: var(--shell-cream);
-
-    clip-path: polygon(
-        25% 0,
-        50% 0,
-        75% 0,
-        100% 25%,
-        100% 75%,
-        75% 100%,
-        25% 100%,
-        0 75%,
-        0 25%
-    );
-
-    animation: shell-float 6s ease-in-out infinite -2s;
+.deco {
+    left: var(--x);
+    top: var(--y);
+    transform:
+        translate(-50%, -50%)
+        rotate(var(--r, 0deg))
+        scale(calc(var(--s, 1) * var(--fx, 1)), var(--s, 1));
+    filter: drop-shadow(0 3px 0 rgba(150, 96, 80, 0.16));
 }
 
-
-/* BLUE SHELL */
-
-.shell-three {
-    left: 32%;
-    bottom: 20%;
-
-    width: 32px;
-    height: 24px;
-
-    background: var(--shell-blue);
-
-    clip-path: polygon(
-        25% 0,
-        75% 0,
-        100% 25%,
-        100% 75%,
-        75% 100%,
-        25% 100%,
-        0 75%,
-        0 25%
-    );
-
-    animation: shell-float 4s ease-in-out infinite -1s;
+.deco-float {
+    animation: deco-float 5s steps(2) infinite;
 }
 
-
-/* PURPLE SHELL */
-
-.shell-four {
-    right: 20%;
-    bottom: 10%;
-
-    width: 32px;
-    height: 24px;
-
-    background: var(--shell-purple);
-
-    clip-path: polygon(
-        25% 0,
-        75% 0,
-        100% 25%,
-        100% 75%,
-        75% 100%,
-        25% 100%,
-        0 75%,
-        0 25%
-    );
-
-    animation: shell-float 5s ease-in-out infinite -3s;
+@keyframes deco-float {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -3px; }
 }
 
+.tint-pink     { --c: #f4a3c0; --cd: #c86f90; --cl: #ffd8e5; }
+.tint-cream    { --c: #f8e2bf; --cd: #c4a176; --cl: #fff8ea; }
+.tint-peach    { --c: #ffbe9c; --cd: #d18066; --cl: #ffe2d1; }
+.tint-lavender { --c: #ccb3ee; --cd: #8e72c0; --cl: #eee3ff; }
+.tint-coral    { --c: #f69b9c; --cd: #c66265; --cl: #ffd2cd; }
 
-/* CORAL SHELL */
-
-.shell-five {
-    right: 8%;
-    bottom: 20%;
-
-    width: 40px;
-    height: 32px;
-
-    background: var(--shell-pink);
-
-    clip-path: polygon(
-        0 25%,
-        25% 0,
-        75% 0,
-        100% 25%,
-        100% 75%,
-        75% 100%,
-        25% 100%,
-        0 75%
-    );
-
-    animation: shell-float 6s ease-in-out infinite -2.5s;
-}
-
-@keyframes shell-float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-4px);
-    }
-}
-
-
- /* 11. STARFISH & BEACH DETAILS */
-
-.sand-detail {
+.sparkle {
     position: absolute;
-    z-index: 2;
+    left: var(--x);
+    top: var(--y);
+    width: 3px;
+    height: 3px;
+    background: #ffffff;
+    box-shadow: 3px 0 #ffffff, -3px 0 #ffffff, 0 3px #ffffff, 0 -3px #ffffff;
+    opacity: 0;
+    animation: sparkle 6.3s steps(1) infinite;
+    animation-delay: var(--d, 0s);
+}
 
-    width: 8px;
-    height: 8px;
-
-    background: var(--sand-pixel);
+@keyframes sparkle {
+    0%, 86%, 100% { opacity: 0; }
+    90%           { opacity: .9; }
+    94%           { opacity: .4; }
 }
 
 
-/* Small pixel starfish */
-
-.detail-one,
-.detail-four {
-    width: 20px;
-    height: 20px;
-
-    background: #f1a4b7;
-
-    clip-path: polygon(
-        40% 0,
-        60% 0,
-        65% 30%,
-        100% 25%,
-        75% 50%,
-        100% 75%,
-        65% 70%,
-        60% 100%,
-        40% 100%,
-        35% 70%,
-        0 75%,
-        25% 50%,
-        0 25%,
-        35% 30%
-    );
-}
-
-.detail-one {
-    left: 42%;
-    bottom: 24%;
-}
-
-.detail-four {
-    right: 35%;
-    bottom: 10%;
-
-    background: #eaa2be;
-
-    scale: 0.8;
-}
-
-
-/* Sand pixels */
-
-.detail-two {
-    left: 52%;
-    bottom: 15%;
-}
-
-.detail-three {
-    left: 65%;
-    bottom: 20%;
-    width: 16px;
-}
-
-.detail-five {
-    right: 28%;
-    bottom: 30%;
-    width: 16px;
-}
-
-
- /*  12. TESTUDO — TURTLE COMPANION */
+/* 12. TESTUDO + SPEECH BUBBLE --------------------------------------------- */
 
 .turtle-companion {
     position: absolute;
-
-    left: 5%;
-    bottom: 5%;
-
-    z-index: 15;
-
-    display: flex;
-    align-items: flex-end;
-
-    gap: 14px;
-
-    animation: turtle-wander 24s ease-in-out infinite;
+    left: 0;
+    bottom: 3%;
+    z-index: 20;
+    transform: translate3d(var(--turtle-start, 18vw), 0, 0);
+    will-change: transform;
 }
 
-
-/* TURTLE MOVEMENT */
-
-@keyframes turtle-wander {
-    0%, 100% {
-        transform: translateX(0);
-    }
-
-    45% {
-        transform: translateX(22vw);
-    }
-
-    55% {
-        transform: translateX(22vw);
-    }
-
-    95% {
-        transform: translateX(0);
-    }
+.turtle-body {
+    position: relative;
+    display: block;
+    padding: 0;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-
-/* TURTLE BODY */
+.turtle-name {
+    position: absolute;
+    left: 50%;
+    top: -22px;
+    translate: -50% 0;
+    padding: 2px 7px 3px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    line-height: 1.2;
+    color: #326847;
+    background: #e3f6d9;
+    box-shadow:
+        0 -2px 0 #91ca9b, 0 2px 0 #91ca9b, -2px 0 0 #91ca9b, 2px 0 0 #91ca9b,
+        2px 4px 0 rgba(60, 110, 76, .35);
+    white-space: nowrap;
+    pointer-events: none;
+}
 
 .turtle-art {
     position: relative;
-
-    width: 116px;
+    display: block;
+    width: 144px;
     height: 92px;
+    filter: drop-shadow(0 4px 0 rgba(90, 70, 60, 0.14));
+}
 
-    flex-shrink: 0;
+.turtle-companion.is-facing-left .turtle-art {
+    transform: scaleX(-1);
+}
 
+.turtle-frame {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-size: 100% 100%;
     image-rendering: pixelated;
-
-    animation: turtle-bob 0.8s steps(2) infinite;
 }
 
-
-/* NAME TAG */
-
-.turtle-art::before {
-    content: "TESTUDO";
-
-    position: absolute;
-
-    left: 22px;
-    top: -20px;
-
-    padding: 3px 7px;
-
-    font-family: 'Poppins', sans-serif;
-    font-size: 9px;
-    font-weight: 700;
-
-    letter-spacing: 1px;
-
-    color: #397458;
-
-    background: #e4f4d8;
-
-    border: 2px solid #9bd0a8;
-
-    box-shadow: 2px 2px 0 #78b78b;
+.turtle-frame-b {
+    opacity: 0;
 }
 
-
-/* SHELL */
-
-.turtle-shell {
-    position: absolute;
-
-    left: 26px;
-    top: 20px;
-
-    width: 64px;
-    height: 52px;
-
-    background: #478e6b;
-
-    border: 8px solid #356d55;
-
-    box-shadow:
-        0 8px 0 #2b5946,
-        inset 0 4px 0 #6eaf82;
+.turtle-companion.is-walking .turtle-art {
+    animation: turtle-bob 0.56s steps(1) infinite;
 }
 
-
-/* SHELL PATTERNS */
-
-.shell-pattern {
-    position: absolute;
-    background: #85bd8a;
+.turtle-companion.is-walking .turtle-frame-a {
+    animation: frame-a 0.56s steps(1) infinite;
 }
 
-.shell-pattern-one {
-    left: 12px;
-    top: 4px;
-
-    width: 16px;
-    height: 16px;
+.turtle-companion.is-walking .turtle-frame-b {
+    animation: frame-b 0.56s steps(1) infinite;
 }
 
-.shell-pattern-two {
-    left: 28px;
-    top: 16px;
-
-    width: 12px;
-    height: 12px;
+@keyframes frame-a {
+    0%   { opacity: 1; }
+    50%  { opacity: 0; }
 }
 
-.shell-pattern-three {
-    left: 4px;
-    top: 20px;
-
-    width: 12px;
-    height: 12px;
-}
-
-
-/* HEAD */
-
-.turtle-head {
-    position: absolute;
-
-    right: 0;
-    top: 30px;
-
-    width: 32px;
-    height: 28px;
-
-    background: #78bd91;
-
-    box-shadow:
-        8px 0 #78bd91,
-        0 8px #78bd91,
-        8px 8px #78bd91,
-        0 16px #78bd91,
-        8px 16px #78bd91;
-}
-
-
-/* EYE */
-
-.turtle-eye {
-    position: absolute;
-
-    right: 6px;
-    top: 6px;
-
-    width: 6px;
-    height: 6px;
-
-    background: #244b3a;
-
-    box-shadow: 2px 2px white;
-}
-
-
-/* LEGS */
-
-.turtle-leg {
-    position: absolute;
-
-    width: 24px;
-    height: 20px;
-
-    background: #78bd91;
-}
-
-
-/* Front/back legs */
-
-.turtle-leg-one {
-    left: 22px;
-    top: 10px;
-
-    animation: leg-step 0.4s steps(2) infinite;
-}
-
-.turtle-leg-two {
-    right: 16px;
-    top: 10px;
-
-    animation: leg-step 0.4s steps(2) infinite -0.2s;
-}
-
-.turtle-leg-three {
-    left: 22px;
-    bottom: 0;
-
-    animation: leg-step 0.4s steps(2) infinite -0.2s;
-}
-
-.turtle-leg-four {
-    right: 16px;
-    bottom: 0;
-
-    animation: leg-step 0.4s steps(2) infinite;
-}
-
-
-/* TAIL */
-
-.turtle-tail {
-    position: absolute;
-
-    left: 8px;
-    top: 40px;
-
-    width: 16px;
-    height: 16px;
-
-    background: #78bd91;
-
-    clip-path: polygon(
-        0 0,
-        100% 25%,
-        100% 75%,
-        0 100%
-    );
-}
-
-
-/* WALKING ANIMATION */
-
-@keyframes leg-step {
-    0%, 100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-5px);
-    }
+@keyframes frame-b {
+    0%   { opacity: 0; }
+    50%  { opacity: 1; }
 }
 
 @keyframes turtle-bob {
-    0%, 100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-2px);
-    }
+    0%   { translate: 0 0; }
+    50%  { translate: 0 -4px; }
 }
 
+.hero[data-theme="night"] .turtle-art {
+    filter: drop-shadow(0 4px 0 rgba(10, 20, 40, 0.25)) brightness(.85) saturate(.85);
+}
 
-  /* 13. TESTUDO DIALOGUE */
-
+/* speech bubble */
 .turtle-dialogue {
-    position: relative;
+    position: absolute;
+    left: 8px;
+    bottom: calc(100% + 34px);
+    width: max-content;
+    max-width: min(250px, 70vw);
+    padding: 12px 16px;
 
-    max-width: 260px;
-
-    margin-bottom: 48px;
-
-    padding: 13px 17px;
-
-    background: rgba(255, 250, 246, 0.88);
-
-    border: 1px solid rgba(255, 255, 255, 0.85);
-
-    border-radius: 15px;
-
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-
+    background: #fffaf4;
     box-shadow:
-        0 8px 25px rgba(91, 73, 98, 0.10),
-        inset 0 1px 0 white;
+        0 -4px 0 0 #6d5a72,
+        0 4px 0 0 #6d5a72,
+        -4px 0 0 0 #6d5a72,
+        4px 0 0 0 #6d5a72,
+        inset 0 4px 0 0 #ffffff,
+        inset 0 -4px 0 0 #f3e2d6,
+        8px 8px 0 0 rgba(109, 90, 114, 0.22);
+
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 8px;
+    transition:
+        opacity 0.25s steps(3),
+        translate 0.25s steps(3),
+        visibility 0s linear 0.25s;
+    pointer-events: none;
 }
 
+.turtle-dialogue.is-visible {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    transition:
+        opacity 0.25s steps(3),
+        translate 0.25s steps(3),
+        visibility 0s;
+}
+
+/* pixel tail: a little staircase pointing at Testudo */
 .turtle-dialogue::after {
     content: "";
-
     position: absolute;
+    left: 26px;
+    top: calc(100% + 4px);
+    width: 4px;
+    height: 4px;
+    background: #6d5a72;
+    box-shadow:
+        4px 0 #fffaf4, 8px 0 #fffaf4, 12px 0 #6d5a72,
+        4px 4px #6d5a72, 8px 4px #fffaf4, 12px 4px #6d5a72,
+        8px 8px #6d5a72, 12px 8px #6d5a72,
+        12px 12px #6d5a72,
+        16px 0 rgba(109, 90, 114, 0.22), 16px 4px rgba(109, 90, 114, 0.22);
+}
 
-    left: 18px;
-    bottom: -8px;
+.turtle-dialogue.is-flipped {
+    left: auto;
+    right: 8px;
+}
 
-    width: 12px;
-    height: 12px;
-
-    background: rgba(255, 250, 246, 0.88);
-
-    transform: rotate(45deg);
-
-    border-right: 1px solid rgba(255,255,255,0.7);
-    border-bottom: 1px solid rgba(255,255,255,0.7);
+.turtle-dialogue.is-flipped::after {
+    left: auto;
+    right: 42px;
+    transform: scaleX(-1);
 }
 
 .turtle-dialogue p {
-    font-size: 0.73rem;
-    line-height: 1.7;
-
-    color: #49677d;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: #4f4560;
 }
 
 
-  /* 14. LEFT BOOKMARKS */
+/* 13. LEFT BOOKMARKS ------------------------------------------------------- */
 
 .bookmark-navigation {
     position: absolute;
-
     left: 18px;
     top: 50%;
-
-    transform: translateY(-50%);
-
-    z-index: 35;
-
+    translate: 0 -50%;
+    z-index: 70;
     display: flex;
     flex-direction: column;
-
     gap: 12px;
 }
 
 .bookmark {
     position: relative;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     width: 48px;
     height: 48px;
-
     padding: 0;
-
     color: #53738b;
-
-    background: rgba(255, 255, 255, 0.35);
-
-    border: 1px solid rgba(255, 255, 255, 0.65);
-
+    background: rgba(255, 255, 255, 0.42);
+    border: 2px solid rgba(255, 255, 255, 0.7);
     border-radius: 14px;
-
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-
     box-shadow:
-        0 4px 14px rgba(70, 92, 119, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-
+        0 4px 12px rgba(83, 99, 133, 0.1),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.55);
     transition:
-        transform 0.25s ease,
-        background 0.25s ease,
-        box-shadow 0.25s ease;
+        transform 0.2s steps(3),
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
-.bookmark:hover {
-    transform: translateX(5px);
-
-    background: rgba(255, 255, 255, 0.75);
-
-    box-shadow: 0 6px 18px rgba(70, 92, 119, 0.12);
+.bookmark:hover,
+.bookmark:focus-visible {
+    transform: translateX(6px);
+    background: rgba(255, 255, 255, 0.85);
 }
 
-.bookmark-icon {
-    width: 22px;
-    height: 22px;
+/* active state: filled + a pixel marker on the left edge */
+.bookmark.is-active {
+    color: #ffffff;
+    background: #f08db4;
+    border-color: #ffffff;
+    transform: translateX(6px);
 }
 
-
-/* BOOKMARK LABEL */
+.bookmark.is-active::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 4px;
+    height: 16px;
+    translate: 0 -50%;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgba(240, 141, 180, .5);
+}
 
 .bookmark-label {
     position: absolute;
-
-    left: 58px;
-
+    left: 60px;
     white-space: nowrap;
-
-    padding: 6px 10px;
-
-    font-size: 0.72rem;
-    font-weight: 500;
-
-    color: #49677d;
-
-    background: rgba(255, 255, 255, 0.8);
-
-    border: 1px solid rgba(255, 255, 255, 0.65);
-
-    border-radius: 8px;
-
-    backdrop-filter: blur(12px);
-
+    padding: 5px 10px 6px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    color: #4f4560;
+    background: #fffaf4;
+    box-shadow:
+        0 -2px 0 #6d5a72, 0 2px 0 #6d5a72, -2px 0 0 #6d5a72, 2px 0 0 #6d5a72,
+        4px 4px 0 rgba(109, 90, 114, .2);
     opacity: 0;
     visibility: hidden;
-
-    transform: translateX(-5px);
-
-    transition: 0.2s ease;
+    translate: -6px 0;
+    transition: opacity .2s steps(3), translate .2s steps(3), visibility 0s .2s;
+    pointer-events: none;
 }
 
-.bookmark:hover .bookmark-label {
+.bookmark:hover .bookmark-label,
+.bookmark:focus-visible .bookmark-label {
     opacity: 1;
     visibility: visible;
-
-    transform: translateX(0);
+    translate: 0 0;
+    transition: opacity .2s steps(3), translate .2s steps(3), visibility 0s;
 }
 
 
-  /* 15. POPUP OVERLAY */
+/* 14. POPUP OVERLAY + PANEL ----------------------------------------------- */
 
 .panel-overlay {
     position: absolute;
     inset: 0;
-
     z-index: 60;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    padding: 100px 7% 50px;
-
-    background: rgba(72, 71, 106, 0.15);
-
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-
+    padding: 104px 6% var(--panel-gap-bottom, 40px) 96px;
+    /* no backdrop-filter here on purpose: it would stop the panel's own
+       glass blur from seeing the beach behind it */
+    background: rgba(91, 83, 115, 0.22);
     animation: overlay-appear 0.25s ease;
 }
 
-@keyframes overlay-appear {
-    from {
-        opacity: 0;
+/* on tall screens Testudo stays above the overlay so you can read him,
+   and the panel leaves him a strip of beach at the bottom */
+@media (min-height: 641px) {
+    .panel-overlay {
+        --panel-gap-bottom: clamp(124px, 17vh, 160px);
     }
 
-    to {
-        opacity: 1;
+    .hero.is-panel-open .turtle-companion {
+        z-index: 65;
     }
 }
 
-
-
-  /* 16. GLASS CONTAINER */
+@keyframes overlay-appear {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
 
 .glass-panel {
     position: relative;
-
-    width: min(760px, 100%);
+    width: min(880px, 100%);
     max-height: 100%;
-
     display: flex;
     flex-direction: column;
-
     overflow: hidden;
-
-    background: rgba(255, 250, 250, 0.68);
-
-    border: 1px solid rgba(255, 255, 255, 0.85);
-
+    background: rgba(255, 249, 248, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: 24px;
-
-    backdrop-filter: blur(26px);
-    -webkit-backdrop-filter: blur(26px);
-
+    backdrop-filter: blur(22px) saturate(1.1);
+    -webkit-backdrop-filter: blur(22px) saturate(1.1);
     box-shadow:
-        0 20px 60px rgba(72, 71, 106, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.75);
-
+        0 20px 60px rgba(92, 75, 107, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     animation: panel-appear 0.3s ease;
 }
 
-@keyframes panel-appear {
-    from {
-        opacity: 0;
-        transform: translateY(15px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.glass-panel:focus {
+    outline: none;
 }
 
-
-/* PANEL HEADER */
+@keyframes panel-appear {
+    from { opacity: 0; transform: translateY(15px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+}
 
 .panel-header {
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     gap: 20px;
-
-    padding: 22px 28px;
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+    padding: 20px 26px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
 }
 
 .panel-heading {
     display: flex;
     align-items: center;
+    gap: 14px;
+}
 
-    gap: 12px;
+.panel-icon-tile {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    color: #ffffff;
+    background: #f08db4;
+    border-radius: 12px;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12), 0 4px 12px rgba(240, 141, 180, 0.35);
 }
 
 .panel-icon {
-    width: 26px;
-    height: 26px;
-
-    color: #7899b1;
+    width: 24px;
+    height: 24px;
 }
 
 .panel-header h2 {
     font-family: 'Playfair Display', serif;
-
     font-size: clamp(1.3rem, 3vw, 1.8rem);
     font-weight: 600;
-
     color: #46647e;
 }
 
-
-/* CLOSE BUTTON */
-
 .panel-close {
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    width: 38px;
-    height: 38px;
-
+    width: 40px;
+    height: 40px;
     color: #55748c;
-
-    background: rgba(255, 255, 255, 0.55);
-
-    border: 1px solid rgba(255, 255, 255, 0.8);
-
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     border-radius: 12px;
-
-    transition: 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .panel-close:hover {
-    background: white;
+    background: #ffffff;
     transform: rotate(90deg);
 }
 
@@ -1937,319 +1293,169 @@ a:focus-visible {
     height: 20px;
 }
 
-
-  /* 17. PANEL CONTENT */
-
 .panel-content {
     flex: 1;
-
     min-height: 0;
-
     overflow-y: auto;
     overflow-x: hidden;
-
-    padding: 26px 30px 30px;
-
+    overscroll-behavior: contain;
+    padding: 24px 26px 28px;
     scrollbar-width: thin;
-    scrollbar-color: #b6cbd9 transparent;
+    scrollbar-color: rgba(240, 141, 180, 0.55) transparent;
 }
 
-.panel-content::-webkit-scrollbar {
-    width: 7px;
-}
-
-.panel-content::-webkit-scrollbar-track {
-    background: transparent;
-}
-
+.panel-content::-webkit-scrollbar { width: 8px; }
+.panel-content::-webkit-scrollbar-track { background: transparent; }
 .panel-content::-webkit-scrollbar-thumb {
-    background: rgba(120, 165, 190, 0.45);
+    background: rgba(240, 141, 180, 0.5);
     border-radius: 20px;
 }
 
 .panel-section {
     display: flex;
     flex-direction: column;
+    gap: 16px;
+    animation: section-in .3s ease;
+}
 
-    gap: 18px;
+@keyframes section-in {
+    from { opacity: 0; translate: 0 6px; }
+    to   { opacity: 1; translate: 0 0; }
 }
 
 
-  /* 18. CONTENT CARDS */
+/* 15. GLASS CARDS (each section gets its own containers) ------------------ */
 
-.content-card {
-    padding: 20px;
-
-    background: rgba(255, 255, 255, 0.48);
-
-    border: 1px solid rgba(255, 255, 255, 0.75);
-
-    border-radius: 16px;
-
-    box-shadow: 0 4px 16px rgba(67, 103, 126, 0.04);
+.glass-card {
+    position: relative;
+    padding: 20px 22px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 18px;
+    box-shadow:
+        0 6px 20px rgba(92, 75, 107, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
-.content-card h3 {
-    font-size: 1rem;
+.glass-card.is-hoverable:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.66);
+    box-shadow:
+        0 12px 28px rgba(92, 75, 107, 0.13),
+        inset 0 1px 0 #ffffff;
+}
+
+.glass-card h3 {
+    font-size: 1.02rem;
     font-weight: 600;
-    line-height: 1.6;
-
+    line-height: 1.5;
     color: #42647d;
 }
 
-.card-subtitle {
-    margin-top: 4px;
+.card-heading {
+    margin-bottom: 12px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: .5px;
+    color: #c4628c;
+}
 
+.card-subtitle {
+    margin-top: 2px;
     font-size: 0.88rem;
     color: #65869c;
 }
 
 .card-organization {
-    margin-top: 6px;
-
-    font-size: 0.85rem;
+    margin-top: 4px;
+    font-size: 0.86rem;
     font-weight: 500;
-
     color: #64869b;
 }
 
 .card-date {
-    margin-top: 10px;
-
-    font-size: 0.75rem;
-    color: #7994a6;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    color: #8a7aa0;
 }
 
 .card-description {
-    margin-top: 12px;
-
-    font-size: 0.82rem;
+    margin-top: 10px;
+    font-size: 0.85rem;
     line-height: 1.8;
-
     color: #587489;
+    white-space: pre-line;
 }
 
 .card-tag {
     display: inline-flex;
-
     width: fit-content;
-
-    margin-top: 10px;
-    padding: 5px 10px;
-
-    font-size: 0.7rem;
-
-    color: #557991;
-
-    background: rgba(191, 224, 237, 0.5);
-
-    border-radius: 8px;
-}
-
-
-    /* 19. ABOUT */
-
-.about-content {
-    display: flex;
-    flex-direction: column;
-
-    gap: 18px;
-}
-
-.profile-image-container {
-    display: flex;
-    justify-content: center;
-
-    margin-bottom: 10px;
-}
-
-.profile-image {
-    width: 140px;
-    height: 140px;
-
-    object-fit: cover;
-
-    border: 4px solid rgba(255, 255, 255, 0.85);
-
-    border-radius: 50%;
-
-    box-shadow: 0 8px 24px rgba(55, 91, 115, 0.12);
-}
-
-.about-description {
-    font-size: 0.9rem;
-    line-height: 1.9;
-
-    color: #526f84;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-
-    gap: 5px;
-}
-
-.info-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-
-    letter-spacing: 0.7px;
-    text-transform: uppercase;
-
-    color: #86a0b1;
-}
-
-
-    /* 20. SKILLS */
-
-.skill-group {
-    display: flex;
-    flex-direction: column;
-
-    gap: 12px;
-}
-
-.skill-category {
-    font-size: 0.95rem;
-    font-weight: 600;
-
-    color: #53748c;
-}
-
-.skill-list {
-    display: grid;
-
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    gap: 12px;
-}
-
-.skill-card {
-    padding: 15px;
-
-    background: rgba(255, 255, 255, 0.5);
-
-    border: 1px solid rgba(255, 255, 255, 0.7);
-
-    border-radius: 12px;
-}
-
-.skill-name {
-    display: block;
-
-    font-size: 0.82rem;
-    font-weight: 500;
-
-    color: #496a82;
-}
-
-.skill-level {
-    display: inline-block;
-
-    margin-top: 6px;
-    padding: 3px 8px;
-
-    font-size: 0.65rem;
-
-    color: #6b8ca2;
-
-    background: rgba(194, 226, 237, 0.5);
-
+    padding: 3px 10px 4px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.78rem;
+    color: #3f7387;
+    background: rgba(146, 234, 223, 0.45);
     border-radius: 6px;
 }
 
-.skill-description {
-    margin-top: 8px;
-
-    font-size: 0.73rem;
-    line-height: 1.6;
-
-    color: #6e899c;
-}
-
-
-   /* 21. PROJECTS */
-
-.project-card {
+.card-meta {
     display: flex;
-    flex-direction: column;
-
-    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
 }
 
-.project-technologies {
-    display: flex;
-    flex-direction: column;
-
-    gap: 5px;
-
-    margin-top: 5px;
-}
-
-.project-technologies p {
-    font-size: 0.8rem;
-    line-height: 1.7;
-
-    color: #64849a;
-}
-
-.project-media {
-    margin-top: 8px;
-
-    overflow: hidden;
-
-    border-radius: 12px;
-}
-
-.project-media img {
+.info-label {
     display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #9a8bab;
+}
 
-    width: 100%;
-    max-height: 300px;
-
-    object-fit: cover;
-
+.icon-tile {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    color: #c4628c;
+    background: #ffe3ee;
     border-radius: 12px;
+    box-shadow: inset 0 -3px 0 rgba(196, 98, 140, 0.15);
 }
 
-.project-media figcaption {
-    margin-top: 8px;
+.icon-tile.is-aqua   { color: #2f8a95; background: #d6f6f1; box-shadow: inset 0 -3px 0 rgba(47, 138, 149, .15); }
+.icon-tile.is-sand   { color: #b2784a; background: #ffeedd; box-shadow: inset 0 -3px 0 rgba(178, 120, 74, .15); }
+.icon-tile.is-lilac  { color: #7c64b3; background: #eee5ff; box-shadow: inset 0 -3px 0 rgba(124, 100, 179, .15); }
 
-    font-size: 0.72rem;
-    color: #7892a5;
-}
-
-.project-link,
-.certificate-link {
+.text-link {
     display: inline-flex;
     align-items: center;
-
     gap: 8px;
-
     width: fit-content;
-
-    margin-top: 8px;
-    padding: 9px 14px;
-
-    font-size: 0.75rem;
+    margin-top: 12px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
     font-weight: 500;
-
-    color: #557991;
-
-    background: rgba(215, 237, 245, 0.65);
-
-    border: 1px solid rgba(255, 255, 255, 0.7);
-
+    color: #ffffff;
+    background: #f08db4;
     border-radius: 10px;
-
-    transition: 0.2s ease;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.project-link:hover,
-.certificate-link:hover {
-    background: white;
+.text-link:hover {
     transform: translateY(-2px);
+    background: #e77aa6;
 }
 
 .external-icon {
@@ -2257,268 +1463,516 @@ a:focus-visible {
     height: 15px;
 }
 
-
-    /* 22. CERTIFICATES */
-
-.certificate-card {
-    display: flex;
-    flex-direction: column;
-
-    gap: 8px;
+.empty-message {
+    padding: 24px;
+    font-size: 0.88rem;
+    text-align: center;
+    color: #7893a5;
+    background: rgba(255, 255, 255, 0.4);
+    border: 2px dashed rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
 }
 
+/* ABOUT */
+.about-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 26px;
+    align-items: center;
+    padding: 26px;
+}
 
-    /* 23. ACHIEVEMENTS */
+.about-card.no-photo {
+    grid-template-columns: 1fr;
+}
 
-.achievement-card {
+.profile-frame {
+    position: relative;
+    width: 150px;
+    aspect-ratio: 1;
+    padding: 6px;
+    background: #fffaf4;
+    /* pixel frame with notched corners */
+    box-shadow:
+        0 -4px 0 #f08db4, 0 4px 0 #f08db4, -4px 0 0 #f08db4, 4px 0 0 #f08db4,
+        8px 8px 0 rgba(240, 141, 180, 0.3);
+}
+
+.profile-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-eyebrow {
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    color: #c4628c;
+}
+
+.about-name {
+    margin-top: 2px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem !important;
+    color: #42647d;
+}
+
+.about-role {
+    margin-top: 2px;
+    font-size: 0.9rem;
+    color: #2f8a95;
+    font-weight: 500;
+}
+
+.about-description {
+    margin-top: 12px;
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: #526f84;
+    white-space: pre-line;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    color: #55748b;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid #ffffff;
+    border-radius: 999px;
+}
+
+.chip-icon {
+    width: 16px;
+    height: 16px;
+    color: #c4628c;
+}
+
+/* TIMELINE (experience + education) */
+.timeline {
+    position: relative;
     display: flex;
     flex-direction: column;
+    gap: 16px;
+    padding-left: 28px;
+}
 
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 10px;
+    bottom: 10px;
+    width: 4px;
+    background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0 8px, transparent 8px 14px);
+}
+
+.timeline-card::before {
+    content: "";
+    position: absolute;
+    left: -26px;
+    top: 24px;
+    width: 12px;
+    height: 12px;
+    background: #f08db4;
+    box-shadow: 0 0 0 3px #ffffff, 3px 3px 0 3px rgba(240, 141, 180, .3);
+}
+
+.timeline-card.education-card::before {
+    background: #46d0c8;
+}
+
+.timeline-head {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+/* PROJECTS */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.project-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.project-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.project-gallery:not(:has(figure)) {
+    display: none;
+}
+
+.project-media {
+    position: relative;
+    overflow: hidden;
+}
+
+.project-media:first-child {
+    grid-column: 1 / -1;
+}
+
+.project-media img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.project-card:hover .project-media img {
+    transform: scale(1.03);
+}
+
+.project-media figcaption {
+    padding: 6px 12px 8px;
+    font-size: 0.72rem;
+    color: #7892a5;
+}
+
+.project-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 18px 20px 20px;
+}
+
+.project-body h3 {
+    margin-top: 8px;
+}
+
+.project-technologies {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(109, 90, 114, 0.2);
+}
+
+.project-technologies p {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: #64849a;
+}
+
+.project-body .text-link {
+    margin-top: auto;
+}
+
+.project-body .project-technologies + .text-link,
+.project-body .card-description + .text-link {
+    margin-top: 14px;
+}
+
+/* SKILLS */
+.skill-group .card-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.skill-group .card-heading::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background: #f08db4;
+    box-shadow: 4px 4px 0 rgba(240, 141, 180, .35);
+}
+
+.skill-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+}
+
+.skill-card {
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid #ffffff;
+    border-radius: 12px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.skill-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.skill-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    flex-wrap: wrap;
+}
+
+.skill-name {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #496a82;
+}
+
+.skill-level {
+    padding: 2px 8px 3px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    color: #2f8a95;
+    background: rgba(146, 234, 223, 0.4);
+    border-radius: 6px;
+}
+
+.skill-description {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: #6e899c;
+}
+
+/* CERTIFICATES — "achievement unlocked" */
+.certificate-card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding-top: 30px;
+}
+
+.unlock-banner {
+    position: absolute;
+    top: 0;
+    left: 22px;
+    padding: 3px 10px 4px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #ffffff;
+    background: #8f74c2;
+    border-radius: 0 0 8px 8px;
+}
+
+.unlock-banner::before {
+    content: "★ ";
+    color: #ffe58a;
+}
+
+.card-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ACHIEVEMENTS */
+.achievement-card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
 }
 
 .achievement-image {
     display: block;
-
     width: 100%;
     max-height: 280px;
-
-    margin-top: 10px;
-
+    margin-top: 14px;
     object-fit: contain;
-
+    background: rgba(255, 255, 255, 0.6);
     border-radius: 12px;
 }
 
+/* CONTACT */
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
 
+.contact-intro-card {
+    grid-column: 1 / -1;
+}
 
-   /* 24. CONTACT */
-
-.contact-intro p {
-    font-size: 0.88rem;
+.contact-intro-card p {
+    font-size: 0.95rem;
     line-height: 1.8;
-
     color: #607c91;
 }
 
-.contact-item {
+.contact-card {
     display: flex;
     align-items: center;
-
     gap: 14px;
-
-    padding: 15px;
-
-    background: rgba(255, 255, 255, 0.5);
-
-    border: 1px solid rgba(255, 255, 255, 0.7);
-
-    border-radius: 12px;
+    min-width: 0;
 }
 
-.contact-icon {
-    flex-shrink: 0;
-
-    width: 22px;
-    height: 22px;
-
-    color: #789bb2;
-}
-
-.contact-item p,
-.contact-item a {
-    margin-top: 4px;
-
-    font-size: 0.82rem;
-
-    color: #55748b;
-
+.contact-card .contact-value {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: #4d6d83;
     overflow-wrap: anywhere;
 }
 
-.contact-item a:hover {
-    color: #d58eb6;
+a.contact-card:hover .contact-value {
+    color: #c4628c;
 }
 
 .social-links {
-    display: flex;
-    flex-wrap: wrap;
-
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 10px;
 }
 
 .social-link {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-
-    gap: 6px;
-
-    padding: 9px 12px;
-
-    font-size: 0.75rem;
-
-    color: #557991;
-
-    background: rgba(255, 255, 255, 0.5);
-
-    border: 1px solid rgba(255, 255, 255, 0.7);
-
-    border-radius: 10px;
-
-    transition: background 0.2s ease;
+    gap: 12px;
+    padding: 10px 14px 10px 10px;
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: #4d6d83;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid #ffffff;
+    border-radius: 14px;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .social-link:hover {
-    background: white;
+    transform: translateY(-2px);
+    color: #c4628c;
+    background: #ffffff;
+}
+
+.social-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    color: #ffffff;
+    background: #f08db4;
+    border-radius: 10px;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+}
+
+.social-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.social-link.is-email .social-icon    { background: #46bfc8; }
+.social-link.is-linkedin .social-icon { background: #6d8fd8; }
+.social-link.is-github .social-icon   { background: #6d5a72; }
+
+.social-name {
+    flex: 1;
+}
+
+.social-link .external-icon {
+    opacity: .6;
 }
 
 
-    /* 25. EMPTY STATES */
+/* 16. RESPONSIVE ----------------------------------------------------------- */
 
-.empty-message {
-    padding: 24px;
-
-    font-size: 0.85rem;
-    text-align: center;
-
-    color: #7893a5;
-
-    background: rgba(255, 255, 255, 0.35);
-
-    border: 1px dashed rgba(255, 255, 255, 0.8);
-
-    border-radius: 14px;
-}
-
-
-    /* 26. TABLET */
-
-@media (max-width: 900px) {
+/* TABLET */
+@media (max-width: 1024px) {
     .navbar {
-        width: 94%;
-        padding: 13px 20px;
-        gap: 20px;
-    }
-
-    .logo {
-        font-size: 1rem;
+        gap: 16px;
+        padding: 10px 12px 10px 20px;
     }
 
     .nav-links {
-        gap: 18px;
+        gap: 16px;
     }
 
     .nav-links a {
-        font-size: 0.78rem;
-    }
-
-    .hero-content {
-        top: 36%;
-    }
-
-    .bookmark-navigation {
-        left: 12px;
-    }
-
-    .bookmark {
-        width: 44px;
-        height: 44px;
+        font-size: 0.8rem;
     }
 
     .panel-overlay {
-        padding: 90px 8% 35px 70px;
+        padding-left: 84px;
+        padding-right: 4%;
     }
 
-    .glass-panel {
-        width: min(680px, 100%);
-    }
-
-    .turtle-companion {
-        left: 3%;
+    .project-grid {
+        grid-template-columns: 1fr;
     }
 }
 
-
-   /* 27. MOBILE  */
-
+/* MOBILE: navbar becomes two rows (logo + clock, then links) */
 @media (max-width: 768px) {
-    .hero {
-        min-height: 500px;
-    }
-
-    /* NAVBAR */
-
     .navbar {
-        top: 12px;
-
-        width: 94%;
-        min-height: 60px;
-
-        flex-direction: column;
-        justify-content: center;
-
-        gap: 8px;
+        top: 10px;
+        flex-wrap: wrap;
+        row-gap: 6px;
+        column-gap: 10px;
+        min-height: 0;
         padding: 10px 12px;
     }
 
     .logo {
-        font-size: 0.9rem;
-        letter-spacing: 1px;
+        font-size: 1.05rem;
+    }
+
+    .nav-clock {
+        margin-left: auto;
+        padding: 5px 10px;
+        gap: 6px;
+    }
+
+    .clock-time {
+        font-size: 0.88rem;
     }
 
     .nav-links {
-        width: 100%;
-
-        justify-content: center;
-
-        gap: clamp(8px, 3vw, 20px);
+        order: 3;
+        flex-basis: 100%;
+        justify-content: space-between;
+        gap: 4px;
+        padding: 0 4px;
     }
 
     .nav-links a {
-        font-size: clamp(0.62rem, 2.4vw, 0.75rem);
+        font-size: clamp(0.7rem, 3.1vw, 0.82rem);
         padding: 4px 0;
     }
 
-    /* GREETING */
-
     .hero-content {
-        top: 34%;
-        width: 92%;
+        top: 32%;
     }
 
     .greeting {
-        font-size: clamp(2rem, 7.5vw, 3.5rem);
+        font-size: clamp(1.9rem, 8.2vw, 3.4rem);
     }
 
     .hero-subtitle {
-        margin-top: 10px;
-        font-size: 0.9rem;
+        margin-top: 8px;
+        font-size: 0.92rem;
     }
 
-    /* CLOUDS */
-
-    .cloud-one { scale: 0.85; }
-    .cloud-two { scale: 0.65; }
-    .cloud-three { scale: 0.45; }
-    .cloud-four { scale: 0.65; }
-    .cloud-five { scale: 0.5; }
-    .cloud-six { scale: 0.6; }
-    .cloud-seven { scale: 0.45; }
-    .cloud-eight { scale: 0.55; }
-
-    /* BOOKMARKS */
+    .cloud-one, .cloud-two { scale: .8; }
+    .cloud-three, .cloud-four { scale: .55; }
+    .cloud-five, .cloud-six, .cloud-seven, .cloud-eight { scale: .42; }
 
     .bookmark-navigation {
         left: 8px;
-        top: 54%;
-
+        top: 55%;
         gap: 8px;
     }
 
     .bookmark {
-        width: 38px;
-        height: 38px;
-
+        width: 40px;
+        height: 40px;
         border-radius: 11px;
     }
 
@@ -2531,35 +1985,28 @@ a:focus-visible {
         display: none;
     }
 
-    /* TURTLE */
-
-    .turtle-companion {
-        left: 4%;
-        bottom: 4%;
-
-        gap: 8px;
+    .turtle-art {
+        width: 108px;
+        height: 69px;
     }
 
-    .turtle-art {
-        scale: 0.8;
-        transform-origin: bottom left;
+    .turtle-frame {
+        width: 108px !important;
+        height: 69px !important;
     }
 
     .turtle-dialogue {
-        max-width: 190px;
-
-        margin-bottom: 35px;
+        bottom: calc(100% + 30px);
+        max-width: min(210px, 62vw);
         padding: 10px 12px;
     }
 
     .turtle-dialogue p {
-        font-size: 0.65rem;
+        font-size: 0.85rem;
     }
 
-    /* PANEL */
-
     .panel-overlay {
-        padding: 85px 12px 15px 54px;
+        padding: 112px 10px var(--panel-gap-bottom, 12px) 58px;
     }
 
     .glass-panel {
@@ -2568,143 +2015,162 @@ a:focus-visible {
     }
 
     .panel-header {
-        padding: 16px 18px;
+        padding: 14px 16px;
+    }
+
+    .panel-icon-tile {
+        width: 36px;
+        height: 36px;
     }
 
     .panel-content {
-        padding: 18px;
+        padding: 16px;
     }
 
-    .panel-header h2 {
-        font-size: 1.35rem;
+    .glass-card {
+        padding: 16px;
     }
 
-    .content-card {
-        padding: 15px;
+    .about-card {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        gap: 18px;
+        padding: 22px 18px;
+    }
+
+    .profile-frame {
+        width: 124px;
+    }
+
+    .timeline {
+        padding-left: 22px;
+    }
+
+    .timeline::before {
+        left: 5px;
+    }
+
+    .timeline-card::before {
+        left: -21px;
+    }
+
+    .deco-extra {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero[data-theme="dawn"],
+    .hero[data-theme="sunset"] {
+        --sun-y: 38%;
+    }
+}
+
+@media (max-width: 768px) and (min-height: 641px) {
+    .panel-overlay {
+        --panel-gap-bottom: 104px;
+    }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 480px) {
+    .logo {
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+    }
+
+    .clock-zone {
+        display: none;
+    }
+
+    .bookmark-navigation {
+        left: 6px;
+    }
+
+    .bookmark {
+        width: 36px;
+        height: 36px;
+    }
+
+    .panel-overlay {
+        padding-left: 50px;
+        padding-right: 8px;
+    }
+
+    .timeline-head .icon-tile,
+    .certificate-card .icon-tile,
+    .achievement-card .icon-tile {
+        display: none;
+    }
+
+    .social-links,
+    .contact-grid {
+        grid-template-columns: 1fr;
     }
 
     .skill-list {
         grid-template-columns: 1fr;
     }
-
-    /* BEACH DETAILS */
-
-    .shell-three,
-    .shell-four {
-        display: block;
-    }
 }
 
-
-    /* 28. SMALL MOBILE */
-
-@media (max-width: 480px) {
-    .navbar {
-        gap: 5px;
-        padding: 8px 10px;
-    }
-
-    .nav-links {
-        gap: 10px;
-    }
-
-    .nav-links a {
-        font-size: 0.62rem;
-    }
-
-    .hero-content {
-        top: 35%;
-    }
-
-    .greeting {
-        font-size: clamp(1.85rem, 8vw, 2.5rem);
-    }
-
-    .bookmark-navigation {
-        left: 6px;
-        top: 56%;
-    }
-
-    .bookmark {
-        width: 34px;
-        height: 34px;
-    }
-
-    .panel-overlay {
-        padding: 78px 8px 12px 46px;
-    }
-
-    .panel-header {
-        padding: 12px 14px;
-    }
-
-    .panel-content {
-        padding: 14px;
-    }
-
-    .turtle-companion {
-        left: 2%;
-        bottom: 3%;
-    }
-
-    .turtle-art {
-        scale: 0.65;
-        width: 90px;
-        height: 75px;
-    }
-
-    .turtle-dialogue {
-        max-width: 160px;
-        margin-bottom: 25px;
-    }
-
-    .turtle-dialogue p {
-        font-size: 0.58rem;
-    }
-
-    .shell-one,
-    .shell-two,
-    .shell-five {
-        scale: 0.7;
-    }
-
-    .hero::before {
-        width: 48px;
-        height: 48px;
-        top: 17%;
-        right: 8%;
-    }
-}
-
-
-    /* 29. LANDSCAPE MOBILE */
-
+/* LANDSCAPE MOBILE: short screens, keep everything in one compact row */
 @media (max-height: 500px) and (orientation: landscape) {
     .hero {
-        min-height: 400px;
+        --horizon: 48%;
+        --sand-top: 72%;
     }
 
     .navbar {
         top: 8px;
-        min-height: 48px;
-        padding: 8px 18px;
+        flex-wrap: nowrap;
+        min-height: 0;
+        padding: 6px 10px 6px 16px;
+        gap: 12px;
+    }
+
+    .nav-links {
+        order: 0;
+        flex-basis: auto;
+        justify-content: flex-end;
+        gap: 14px;
+    }
+
+    .nav-links a {
+        font-size: 0.74rem;
+    }
+
+    .nav-clock {
+        margin-left: 0;
+        padding: 4px 8px;
+    }
+
+    .clock-time {
+        font-size: 0.8rem;
     }
 
     .hero-content {
-        top: 38%;
-        width: 75%;
+        top: 34%;
+        width: 70%;
     }
 
     .greeting {
-        font-size: clamp(1.8rem, 5vw, 3rem);
+        font-size: clamp(1.6rem, 4.6vw, 2.6rem);
     }
 
     .hero-subtitle {
-        margin-top: 5px;
+        margin-top: 4px;
+        font-size: 0.8rem;
+    }
+
+    .sun {
+        top: max(var(--sun-y), 64px);
+        width: 44px;
     }
 
     .bookmark-navigation {
-        gap: 5px;
+        top: 56%;
+        gap: 6px;
     }
 
     .bookmark {
@@ -2712,18 +2178,45 @@ a:focus-visible {
         height: 34px;
     }
 
-    .turtle-companion {
-        scale: 0.7;
-        transform-origin: bottom left;
+    .turtle-art,
+    .turtle-frame {
+        width: 86px !important;
+        height: 55px !important;
+    }
+
+    .turtle-name {
+        font-size: 9px;
+        top: -18px;
+    }
+
+    .turtle-dialogue {
+        bottom: calc(100% + 24px);
+        padding: 8px 10px;
+    }
+
+    .turtle-dialogue p {
+        font-size: 0.78rem;
+    }
+
+    .deco-extra {
+        display: none;
+    }
+
+    .deco {
+        scale: .7;
     }
 
     .panel-overlay {
-        padding: 60px 8% 15px 60px;
+        padding: 60px 4% 10px 56px;
+    }
+
+    .panel-header {
+        padding: 10px 14px;
     }
 }
 
 
-    /* 30. REDUCED MOTION */
+/* 17. REDUCED MOTION ------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -2733,4 +2226,193 @@ a:focus-visible {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+
+    .cloud,
+    .ocean-layer,
+    .ocean-glimmer,
+    .sun-path,
+    .swash,
+    .wet-sand,
+    .sparkle,
+    .deco-float,
+    .turtle-art,
+    .turtle-frame {
+        animation: none !important;
+    }
+
+    .swash {
+        transform: translateY(-8px);
+    }
+}
+
+
+/* 18. GENERATED PIXEL ART ---------------------------------------------------
+   Produced from small pixel grids: Testudo's two walking frames, shells,
+   starfish, clouds, sand speckles, ocean glimmers and the irregular
+   shoreline edges. Edit the grids, not these numbers. */
+
+/* ---- Testudo (two walking frames, 4px pixels) ---- */
+
+.turtle-frame-a {
+    width: 144px;
+    height: 92px;
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 23' shape-rendering='crispEdges'><rect x='10' y='2' width='9' height='1' fill='%232c5638'/><rect x='8' y='3' width='2' height='1' fill='%232c5638'/><rect x='10' y='3' width='4' height='1' fill='%23b9e48c'/><rect x='14' y='3' width='1' height='1' fill='%237fbd5c'/><rect x='15' y='3' width='1' height='1' fill='%233f7737'/><rect x='16' y='3' width='3' height='1' fill='%235e9f4c'/><rect x='19' y='3' width='2' height='1' fill='%232c5638'/><rect x='7' y='4' width='1' height='1' fill='%232c5638'/><rect x='8' y='4' width='6' height='1' fill='%23b9e48c'/><rect x='14' y='4' width='1' height='1' fill='%237fbd5c'/><rect x='15' y='4' width='1' height='1' fill='%233f7737'/><rect x='16' y='4' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='4' width='1' height='1' fill='%233f7737'/><rect x='21' y='4' width='1' height='1' fill='%232c5638'/><rect x='27' y='4' width='5' height='1' fill='%232c5638'/><rect x='6' y='5' width='1' height='1' fill='%232c5638'/><rect x='7' y='5' width='7' height='1' fill='%23b9e48c'/><rect x='14' y='5' width='1' height='1' fill='%237fbd5c'/><rect x='15' y='5' width='1' height='1' fill='%233f7737'/><rect x='16' y='5' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='5' width='1' height='1' fill='%233f7737'/><rect x='21' y='5' width='1' height='1' fill='%235e9f4c'/><rect x='22' y='5' width='1' height='1' fill='%232c5638'/><rect x='26' y='5' width='1' height='1' fill='%232c5638'/><rect x='27' y='5' width='5' height='1' fill='%2398d47d'/><rect x='32' y='5' width='1' height='1' fill='%232c5638'/><rect x='5' y='6' width='1' height='1' fill='%232c5638'/><rect x='6' y='6' width='1' height='1' fill='%235e9f4c'/><rect x='7' y='6' width='5' height='1' fill='%23b9e48c'/><rect x='12' y='6' width='3' height='1' fill='%237fbd5c'/><rect x='15' y='6' width='1' height='1' fill='%233f7737'/><rect x='16' y='6' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='6' width='1' height='1' fill='%233f7737'/><rect x='21' y='6' width='2' height='1' fill='%235e9f4c'/><rect x='23' y='6' width='1' height='1' fill='%232c5638'/><rect x='25' y='6' width='1' height='1' fill='%232c5638'/><rect x='26' y='6' width='7' height='1' fill='%2398d47d'/><rect x='33' y='6' width='1' height='1' fill='%232c5638'/><rect x='5' y='7' width='1' height='1' fill='%232c5638'/><rect x='6' y='7' width='4' height='1' fill='%235e9f4c'/><rect x='10' y='7' width='1' height='1' fill='%233f7737'/><rect x='11' y='7' width='4' height='1' fill='%237fbd5c'/><rect x='15' y='7' width='1' height='1' fill='%233f7737'/><rect x='16' y='7' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='7' width='1' height='1' fill='%233f7737'/><rect x='21' y='7' width='2' height='1' fill='%235e9f4c'/><rect x='23' y='7' width='2' height='1' fill='%232c5638'/><rect x='25' y='7' width='5' height='1' fill='%2398d47d'/><rect x='30' y='7' width='1' height='1' fill='%23ffffff'/><rect x='31' y='7' width='1' height='1' fill='%231c2a21'/><rect x='32' y='7' width='2' height='1' fill='%2398d47d'/><rect x='34' y='7' width='1' height='1' fill='%232c5638'/><rect x='4' y='8' width='1' height='1' fill='%232c5638'/><rect x='5' y='8' width='19' height='1' fill='%233f7737'/><rect x='24' y='8' width='1' height='1' fill='%232c5638'/><rect x='25' y='8' width='5' height='1' fill='%2398d47d'/><rect x='30' y='8' width='2' height='1' fill='%231c2a21'/><rect x='32' y='8' width='2' height='1' fill='%2398d47d'/><rect x='34' y='8' width='1' height='1' fill='%232c5638'/><rect x='4' y='9' width='1' height='1' fill='%232c5638'/><rect x='5' y='9' width='2' height='1' fill='%235e9f4c'/><rect x='7' y='9' width='1' height='1' fill='%233f7737'/><rect x='8' y='9' width='5' height='1' fill='%235e9f4c'/><rect x='13' y='9' width='1' height='1' fill='%233f7737'/><rect x='14' y='9' width='4' height='1' fill='%237fbd5c'/><rect x='18' y='9' width='1' height='1' fill='%233f7737'/><rect x='19' y='9' width='4' height='1' fill='%235e9f4c'/><rect x='23' y='9' width='1' height='1' fill='%233f7737'/><rect x='24' y='9' width='1' height='1' fill='%232c5638'/><rect x='25' y='9' width='5' height='1' fill='%2398d47d'/><rect x='30' y='9' width='2' height='1' fill='%231c2a21'/><rect x='32' y='9' width='2' height='1' fill='%2398d47d'/><rect x='34' y='9' width='1' height='1' fill='%232c5638'/><rect x='3' y='10' width='1' height='1' fill='%232c5638'/><rect x='4' y='10' width='3' height='1' fill='%235e9f4c'/><rect x='7' y='10' width='1' height='1' fill='%233f7737'/><rect x='8' y='10' width='5' height='1' fill='%235e9f4c'/><rect x='13' y='10' width='1' height='1' fill='%233f7737'/><rect x='14' y='10' width='4' height='1' fill='%237fbd5c'/><rect x='18' y='10' width='1' height='1' fill='%233f7737'/><rect x='19' y='10' width='4' height='1' fill='%235e9f4c'/><rect x='23' y='10' width='1' height='1' fill='%233f7737'/><rect x='24' y='10' width='1' height='1' fill='%235e9f4c'/><rect x='25' y='10' width='1' height='1' fill='%232c5638'/><rect x='26' y='10' width='8' height='1' fill='%2398d47d'/><rect x='34' y='10' width='1' height='1' fill='%232c5638'/><rect x='1' y='11' width='25' height='1' fill='%232c5638'/><rect x='26' y='11' width='2' height='1' fill='%2398d47d'/><rect x='28' y='11' width='1' height='1' fill='%23f5a3b7'/><rect x='29' y='11' width='1' height='1' fill='%232c5638'/><rect x='30' y='11' width='2' height='1' fill='%2398d47d'/><rect x='32' y='11' width='2' height='1' fill='%23f5a3b7'/><rect x='0' y='12' width='2' height='1' fill='%232c5638'/><rect x='2' y='12' width='1' height='1' fill='%2398d47d'/><rect x='3' y='12' width='1' height='1' fill='%232c5638'/><rect x='4' y='12' width='22' height='1' fill='%23efe0a1'/><rect x='26' y='12' width='1' height='1' fill='%232c5638'/><rect x='27' y='12' width='3' height='1' fill='%2371b45e'/><rect x='30' y='12' width='3' height='1' fill='%232c5638'/><rect x='2' y='13' width='2' height='1' fill='%232c5638'/><rect x='4' y='13' width='22' height='1' fill='%23efe0a1'/><rect x='26' y='13' width='6' height='1' fill='%232c5638'/><rect x='3' y='14' width='1' height='1' fill='%232c5638'/><rect x='4' y='14' width='22' height='1' fill='%23cdb873'/><rect x='26' y='14' width='2' height='1' fill='%232c5638'/><rect x='4' y='15' width='22' height='1' fill='%232c5638'/><rect x='5' y='16' width='1' height='1' fill='%232c5638'/><rect x='6' y='16' width='4' height='1' fill='%2398d47d'/><rect x='10' y='16' width='1' height='1' fill='%232c5638'/><rect x='18' y='16' width='1' height='1' fill='%232c5638'/><rect x='19' y='16' width='4' height='1' fill='%2398d47d'/><rect x='23' y='16' width='1' height='1' fill='%232c5638'/><rect x='4' y='17' width='1' height='1' fill='%232c5638'/><rect x='5' y='17' width='5' height='1' fill='%2398d47d'/><rect x='10' y='17' width='1' height='1' fill='%232c5638'/><rect x='18' y='17' width='1' height='1' fill='%232c5638'/><rect x='19' y='17' width='5' height='1' fill='%2398d47d'/><rect x='24' y='17' width='1' height='1' fill='%232c5638'/><rect x='4' y='18' width='1' height='1' fill='%232c5638'/><rect x='5' y='18' width='5' height='1' fill='%2371b45e'/><rect x='10' y='18' width='1' height='1' fill='%232c5638'/><rect x='18' y='18' width='1' height='1' fill='%232c5638'/><rect x='19' y='18' width='5' height='1' fill='%2371b45e'/><rect x='24' y='18' width='1' height='1' fill='%232c5638'/><rect x='4' y='19' width='7' height='1' fill='%232c5638'/><rect x='18' y='19' width='7' height='1' fill='%232c5638'/></svg>");
+}
+
+.turtle-frame-b {
+    width: 144px;
+    height: 92px;
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 23' shape-rendering='crispEdges'><rect x='10' y='2' width='9' height='1' fill='%232c5638'/><rect x='8' y='3' width='2' height='1' fill='%232c5638'/><rect x='10' y='3' width='4' height='1' fill='%23b9e48c'/><rect x='14' y='3' width='1' height='1' fill='%237fbd5c'/><rect x='15' y='3' width='1' height='1' fill='%233f7737'/><rect x='16' y='3' width='3' height='1' fill='%235e9f4c'/><rect x='19' y='3' width='2' height='1' fill='%232c5638'/><rect x='7' y='4' width='1' height='1' fill='%232c5638'/><rect x='8' y='4' width='6' height='1' fill='%23b9e48c'/><rect x='14' y='4' width='1' height='1' fill='%237fbd5c'/><rect x='15' y='4' width='1' height='1' fill='%233f7737'/><rect x='16' y='4' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='4' width='1' height='1' fill='%233f7737'/><rect x='21' y='4' width='1' height='1' fill='%232c5638'/><rect x='27' y='4' width='5' height='1' fill='%232c5638'/><rect x='6' y='5' width='1' height='1' fill='%232c5638'/><rect x='7' y='5' width='7' height='1' fill='%23b9e48c'/><rect x='14' y='5' width='1' height='1' fill='%237fbd5c'/><rect x='15' y='5' width='1' height='1' fill='%233f7737'/><rect x='16' y='5' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='5' width='1' height='1' fill='%233f7737'/><rect x='21' y='5' width='1' height='1' fill='%235e9f4c'/><rect x='22' y='5' width='1' height='1' fill='%232c5638'/><rect x='26' y='5' width='1' height='1' fill='%232c5638'/><rect x='27' y='5' width='5' height='1' fill='%2398d47d'/><rect x='32' y='5' width='1' height='1' fill='%232c5638'/><rect x='5' y='6' width='1' height='1' fill='%232c5638'/><rect x='6' y='6' width='1' height='1' fill='%235e9f4c'/><rect x='7' y='6' width='5' height='1' fill='%23b9e48c'/><rect x='12' y='6' width='3' height='1' fill='%237fbd5c'/><rect x='15' y='6' width='1' height='1' fill='%233f7737'/><rect x='16' y='6' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='6' width='1' height='1' fill='%233f7737'/><rect x='21' y='6' width='2' height='1' fill='%235e9f4c'/><rect x='23' y='6' width='1' height='1' fill='%232c5638'/><rect x='25' y='6' width='1' height='1' fill='%232c5638'/><rect x='26' y='6' width='7' height='1' fill='%2398d47d'/><rect x='33' y='6' width='1' height='1' fill='%232c5638'/><rect x='5' y='7' width='1' height='1' fill='%232c5638'/><rect x='6' y='7' width='4' height='1' fill='%235e9f4c'/><rect x='10' y='7' width='1' height='1' fill='%233f7737'/><rect x='11' y='7' width='4' height='1' fill='%237fbd5c'/><rect x='15' y='7' width='1' height='1' fill='%233f7737'/><rect x='16' y='7' width='4' height='1' fill='%235e9f4c'/><rect x='20' y='7' width='1' height='1' fill='%233f7737'/><rect x='21' y='7' width='2' height='1' fill='%235e9f4c'/><rect x='23' y='7' width='2' height='1' fill='%232c5638'/><rect x='25' y='7' width='5' height='1' fill='%2398d47d'/><rect x='30' y='7' width='1' height='1' fill='%23ffffff'/><rect x='31' y='7' width='1' height='1' fill='%231c2a21'/><rect x='32' y='7' width='2' height='1' fill='%2398d47d'/><rect x='34' y='7' width='1' height='1' fill='%232c5638'/><rect x='4' y='8' width='1' height='1' fill='%232c5638'/><rect x='5' y='8' width='19' height='1' fill='%233f7737'/><rect x='24' y='8' width='1' height='1' fill='%232c5638'/><rect x='25' y='8' width='5' height='1' fill='%2398d47d'/><rect x='30' y='8' width='2' height='1' fill='%231c2a21'/><rect x='32' y='8' width='2' height='1' fill='%2398d47d'/><rect x='34' y='8' width='1' height='1' fill='%232c5638'/><rect x='4' y='9' width='1' height='1' fill='%232c5638'/><rect x='5' y='9' width='2' height='1' fill='%235e9f4c'/><rect x='7' y='9' width='1' height='1' fill='%233f7737'/><rect x='8' y='9' width='5' height='1' fill='%235e9f4c'/><rect x='13' y='9' width='1' height='1' fill='%233f7737'/><rect x='14' y='9' width='4' height='1' fill='%237fbd5c'/><rect x='18' y='9' width='1' height='1' fill='%233f7737'/><rect x='19' y='9' width='4' height='1' fill='%235e9f4c'/><rect x='23' y='9' width='1' height='1' fill='%233f7737'/><rect x='24' y='9' width='1' height='1' fill='%232c5638'/><rect x='25' y='9' width='5' height='1' fill='%2398d47d'/><rect x='30' y='9' width='2' height='1' fill='%231c2a21'/><rect x='32' y='9' width='2' height='1' fill='%2398d47d'/><rect x='34' y='9' width='1' height='1' fill='%232c5638'/><rect x='3' y='10' width='1' height='1' fill='%232c5638'/><rect x='4' y='10' width='3' height='1' fill='%235e9f4c'/><rect x='7' y='10' width='1' height='1' fill='%233f7737'/><rect x='8' y='10' width='5' height='1' fill='%235e9f4c'/><rect x='13' y='10' width='1' height='1' fill='%233f7737'/><rect x='14' y='10' width='4' height='1' fill='%237fbd5c'/><rect x='18' y='10' width='1' height='1' fill='%233f7737'/><rect x='19' y='10' width='4' height='1' fill='%235e9f4c'/><rect x='23' y='10' width='1' height='1' fill='%233f7737'/><rect x='24' y='10' width='1' height='1' fill='%235e9f4c'/><rect x='25' y='10' width='1' height='1' fill='%232c5638'/><rect x='26' y='10' width='8' height='1' fill='%2398d47d'/><rect x='34' y='10' width='1' height='1' fill='%232c5638'/><rect x='1' y='11' width='25' height='1' fill='%232c5638'/><rect x='26' y='11' width='2' height='1' fill='%2398d47d'/><rect x='28' y='11' width='1' height='1' fill='%23f5a3b7'/><rect x='29' y='11' width='1' height='1' fill='%232c5638'/><rect x='30' y='11' width='2' height='1' fill='%2398d47d'/><rect x='32' y='11' width='2' height='1' fill='%23f5a3b7'/><rect x='0' y='12' width='2' height='1' fill='%232c5638'/><rect x='2' y='12' width='1' height='1' fill='%2398d47d'/><rect x='3' y='12' width='1' height='1' fill='%232c5638'/><rect x='4' y='12' width='22' height='1' fill='%23efe0a1'/><rect x='26' y='12' width='1' height='1' fill='%232c5638'/><rect x='27' y='12' width='3' height='1' fill='%2371b45e'/><rect x='30' y='12' width='3' height='1' fill='%232c5638'/><rect x='2' y='13' width='2' height='1' fill='%232c5638'/><rect x='4' y='13' width='22' height='1' fill='%23efe0a1'/><rect x='26' y='13' width='6' height='1' fill='%232c5638'/><rect x='3' y='14' width='1' height='1' fill='%232c5638'/><rect x='4' y='14' width='22' height='1' fill='%23cdb873'/><rect x='26' y='14' width='2' height='1' fill='%232c5638'/><rect x='4' y='15' width='22' height='1' fill='%232c5638'/><rect x='7' y='16' width='1' height='1' fill='%232c5638'/><rect x='8' y='16' width='5' height='1' fill='%2398d47d'/><rect x='13' y='16' width='1' height='1' fill='%232c5638'/><rect x='15' y='16' width='1' height='1' fill='%232c5638'/><rect x='16' y='16' width='5' height='1' fill='%2398d47d'/><rect x='21' y='16' width='1' height='1' fill='%232c5638'/><rect x='7' y='17' width='1' height='1' fill='%232c5638'/><rect x='8' y='17' width='5' height='1' fill='%2398d47d'/><rect x='13' y='17' width='1' height='1' fill='%232c5638'/><rect x='15' y='17' width='1' height='1' fill='%232c5638'/><rect x='16' y='17' width='5' height='1' fill='%2398d47d'/><rect x='21' y='17' width='1' height='1' fill='%232c5638'/><rect x='7' y='18' width='7' height='1' fill='%232c5638'/><rect x='15' y='18' width='7' height='1' fill='%232c5638'/></svg>");
+}
+
+/* ---- Shells & starfish (3px pixels, colours come from the tint classes) ---- */
+
+.deco-scallop {
+    --u: 3px;
+    width: 39px;
+    height: 36px;
+}
+
+.deco-scallop::before {
+    box-shadow: 12px 12px 0 .5px var(--cd), 15px 12px 0 .5px var(--cd), 18px 12px 0 .5px var(--cd), 21px 12px 0 .5px var(--cd), 24px 12px 0 .5px var(--cd), 27px 12px 0 .5px var(--cd), 30px 12px 0 .5px var(--cd), 9px 15px 0 .5px var(--cd), 12px 15px 0 .5px var(--c), 15px 15px 0 .5px var(--cl), 18px 15px 0 .5px var(--cl), 21px 15px 0 .5px var(--cl), 24px 15px 0 .5px var(--c), 27px 15px 0 .5px var(--c), 30px 15px 0 .5px var(--cl), 33px 15px 0 .5px var(--cd), 6px 18px 0 .5px var(--cd), 9px 18px 0 .5px var(--c), 12px 18px 0 .5px var(--c), 15px 18px 0 .5px var(--cl), 18px 18px 0 .5px var(--cl), 21px 18px 0 .5px var(--cl), 24px 18px 0 .5px var(--c), 27px 18px 0 .5px var(--c), 30px 18px 0 .5px var(--cl), 33px 18px 0 .5px var(--cl), 36px 18px 0 .5px var(--cd), 3px 21px 0 .5px var(--cd), 6px 21px 0 .5px var(--cl), 9px 21px 0 .5px var(--cl), 12px 21px 0 .5px var(--c), 15px 21px 0 .5px var(--c), 18px 21px 0 .5px var(--cl), 21px 21px 0 .5px var(--cl), 24px 21px 0 .5px var(--c), 27px 21px 0 .5px var(--cl), 30px 21px 0 .5px var(--cl), 33px 21px 0 .5px var(--c), 36px 21px 0 .5px var(--c), 39px 21px 0 .5px var(--cd), 3px 24px 0 .5px var(--cd), 6px 24px 0 .5px var(--cl), 9px 24px 0 .5px var(--cl), 12px 24px 0 .5px var(--cl), 15px 24px 0 .5px var(--c), 18px 24px 0 .5px var(--cl), 21px 24px 0 .5px var(--cl), 24px 24px 0 .5px var(--c), 27px 24px 0 .5px var(--cl), 30px 24px 0 .5px var(--c), 33px 24px 0 .5px var(--c), 36px 24px 0 .5px var(--c), 39px 24px 0 .5px var(--cd), 3px 27px 0 .5px var(--cd), 6px 27px 0 .5px var(--c), 9px 27px 0 .5px var(--cl), 12px 27px 0 .5px var(--cl), 15px 27px 0 .5px var(--cl), 18px 27px 0 .5px var(--c), 21px 27px 0 .5px var(--cl), 24px 27px 0 .5px var(--cl), 27px 27px 0 .5px var(--c), 30px 27px 0 .5px var(--c), 33px 27px 0 .5px var(--c), 36px 27px 0 .5px var(--cl), 39px 27px 0 .5px var(--cd), 3px 30px 0 .5px var(--cd), 6px 30px 0 .5px var(--c), 9px 30px 0 .5px var(--c), 12px 30px 0 .5px var(--c), 15px 30px 0 .5px var(--c), 18px 30px 0 .5px var(--cl), 21px 30px 0 .5px var(--cl), 24px 30px 0 .5px var(--c), 27px 30px 0 .5px var(--cl), 30px 30px 0 .5px var(--cl), 33px 30px 0 .5px var(--cl), 36px 30px 0 .5px var(--cl), 39px 30px 0 .5px var(--cd), 3px 33px 0 .5px var(--cd), 6px 33px 0 .5px var(--cd), 9px 33px 0 .5px var(--cd), 12px 33px 0 .5px var(--cd), 15px 33px 0 .5px var(--c), 18px 33px 0 .5px var(--c), 21px 33px 0 .5px var(--cl), 24px 33px 0 .5px var(--c), 27px 33px 0 .5px var(--c), 30px 33px 0 .5px var(--cd), 33px 33px 0 .5px var(--cd), 36px 33px 0 .5px var(--cd), 39px 33px 0 .5px var(--cd), 15px 36px 0 .5px var(--cd), 18px 36px 0 .5px var(--cd), 21px 36px 0 .5px var(--cd), 24px 36px 0 .5px var(--cd), 27px 36px 0 .5px var(--cd);
+}
+
+.deco-clam {
+    --u: 3px;
+    width: 36px;
+    height: 27px;
+}
+
+.deco-clam::before {
+    box-shadow: 15px 3px 0 .5px var(--cd), 18px 3px 0 .5px var(--cd), 21px 3px 0 .5px var(--cd), 24px 3px 0 .5px var(--cd), 9px 6px 0 .5px var(--cd), 12px 6px 0 .5px var(--cd), 15px 6px 0 .5px var(--cl), 18px 6px 0 .5px var(--cl), 21px 6px 0 .5px var(--cl), 24px 6px 0 .5px var(--cl), 27px 6px 0 .5px var(--cd), 30px 6px 0 .5px var(--cd), 6px 9px 0 .5px var(--cd), 9px 9px 0 .5px var(--cl), 12px 9px 0 .5px var(--cl), 15px 9px 0 .5px var(--cl), 18px 9px 0 .5px var(--cl), 21px 9px 0 .5px var(--cl), 24px 9px 0 .5px var(--cl), 27px 9px 0 .5px var(--cl), 30px 9px 0 .5px var(--cl), 33px 9px 0 .5px var(--cd), 3px 12px 0 .5px var(--cd), 6px 12px 0 .5px var(--cd), 9px 12px 0 .5px var(--cd), 12px 12px 0 .5px var(--cd), 15px 12px 0 .5px var(--cd), 18px 12px 0 .5px var(--cd), 21px 12px 0 .5px var(--cd), 24px 12px 0 .5px var(--cd), 27px 12px 0 .5px var(--cd), 30px 12px 0 .5px var(--cd), 33px 12px 0 .5px var(--cd), 36px 12px 0 .5px var(--cd), 3px 15px 0 .5px var(--cd), 6px 15px 0 .5px var(--c), 9px 15px 0 .5px var(--c), 12px 15px 0 .5px var(--c), 15px 15px 0 .5px var(--c), 18px 15px 0 .5px var(--c), 21px 15px 0 .5px var(--c), 24px 15px 0 .5px var(--c), 27px 15px 0 .5px var(--c), 30px 15px 0 .5px var(--c), 33px 15px 0 .5px var(--c), 36px 15px 0 .5px var(--cd), 3px 18px 0 .5px var(--cd), 6px 18px 0 .5px var(--c), 9px 18px 0 .5px var(--c), 12px 18px 0 .5px var(--c), 15px 18px 0 .5px var(--c), 18px 18px 0 .5px var(--c), 21px 18px 0 .5px var(--c), 24px 18px 0 .5px var(--c), 27px 18px 0 .5px var(--c), 30px 18px 0 .5px var(--c), 33px 18px 0 .5px var(--c), 36px 18px 0 .5px var(--cd), 6px 21px 0 .5px var(--cd), 9px 21px 0 .5px var(--cd), 12px 21px 0 .5px var(--cd), 15px 21px 0 .5px var(--cd), 18px 21px 0 .5px var(--cd), 21px 21px 0 .5px var(--cd), 24px 21px 0 .5px var(--cd), 27px 21px 0 .5px var(--cd), 30px 21px 0 .5px var(--cd), 33px 21px 0 .5px var(--cd), 6px 24px 0 .5px var(--cd), 9px 24px 0 .5px var(--cd), 12px 24px 0 .5px var(--c), 15px 24px 0 .5px var(--c), 18px 24px 0 .5px var(--c), 21px 24px 0 .5px var(--c), 24px 24px 0 .5px var(--c), 27px 24px 0 .5px var(--c), 30px 24px 0 .5px var(--cd), 33px 24px 0 .5px var(--cd), 12px 27px 0 .5px var(--cd), 15px 27px 0 .5px var(--cd), 18px 27px 0 .5px var(--cd), 21px 27px 0 .5px var(--cd), 24px 27px 0 .5px var(--cd), 27px 27px 0 .5px var(--cd);
+}
+
+.deco-conch {
+    --u: 3px;
+    width: 33px;
+    height: 39px;
+}
+
+.deco-conch::before {
+    box-shadow: 15px 3px 0 .5px var(--cd), 18px 3px 0 .5px var(--cd), 21px 3px 0 .5px var(--cd), 12px 6px 0 .5px var(--cd), 15px 6px 0 .5px var(--cl), 18px 6px 0 .5px var(--cl), 21px 6px 0 .5px var(--cl), 24px 6px 0 .5px var(--cd), 9px 9px 0 .5px var(--cd), 12px 9px 0 .5px var(--cl), 15px 9px 0 .5px var(--c), 18px 9px 0 .5px var(--c), 21px 9px 0 .5px var(--cl), 24px 9px 0 .5px var(--cl), 27px 9px 0 .5px var(--cd), 9px 12px 0 .5px var(--cd), 12px 12px 0 .5px var(--c), 15px 12px 0 .5px var(--cl), 18px 12px 0 .5px var(--cd), 21px 12px 0 .5px var(--c), 24px 12px 0 .5px var(--cl), 27px 12px 0 .5px var(--cd), 6px 15px 0 .5px var(--cd), 9px 15px 0 .5px var(--cl), 12px 15px 0 .5px var(--c), 15px 15px 0 .5px var(--cd), 18px 15px 0 .5px var(--cl), 21px 15px 0 .5px var(--cd), 24px 15px 0 .5px var(--c), 27px 15px 0 .5px var(--cl), 30px 15px 0 .5px var(--cd), 6px 18px 0 .5px var(--cd), 9px 18px 0 .5px var(--c), 12px 18px 0 .5px var(--c), 15px 18px 0 .5px var(--cd), 18px 18px 0 .5px var(--cd), 21px 18px 0 .5px var(--cd), 24px 18px 0 .5px var(--c), 27px 18px 0 .5px var(--c), 30px 18px 0 .5px var(--cd), 3px 21px 0 .5px var(--cd), 6px 21px 0 .5px var(--cl), 9px 21px 0 .5px var(--c), 12px 21px 0 .5px var(--c), 15px 21px 0 .5px var(--c), 18px 21px 0 .5px var(--cd), 21px 21px 0 .5px var(--c), 24px 21px 0 .5px var(--c), 27px 21px 0 .5px var(--c), 30px 21px 0 .5px var(--cl), 33px 21px 0 .5px var(--cd), 3px 24px 0 .5px var(--cd), 6px 24px 0 .5px var(--c), 9px 24px 0 .5px var(--c), 12px 24px 0 .5px var(--cl), 15px 24px 0 .5px var(--c), 18px 24px 0 .5px var(--c), 21px 24px 0 .5px var(--c), 24px 24px 0 .5px var(--cl), 27px 24px 0 .5px var(--c), 30px 24px 0 .5px var(--c), 33px 24px 0 .5px var(--cd), 6px 27px 0 .5px var(--cd), 9px 27px 0 .5px var(--c), 12px 27px 0 .5px var(--c), 15px 27px 0 .5px var(--c), 18px 27px 0 .5px var(--cl), 21px 27px 0 .5px var(--c), 24px 27px 0 .5px var(--c), 27px 27px 0 .5px var(--c), 30px 27px 0 .5px var(--cd), 9px 30px 0 .5px var(--cd), 12px 30px 0 .5px var(--c), 15px 30px 0 .5px var(--c), 18px 30px 0 .5px var(--c), 21px 30px 0 .5px var(--c), 24px 30px 0 .5px var(--c), 27px 30px 0 .5px var(--cd), 12px 33px 0 .5px var(--cd), 15px 33px 0 .5px var(--c), 18px 33px 0 .5px var(--c), 21px 33px 0 .5px var(--c), 24px 33px 0 .5px var(--cd), 15px 36px 0 .5px var(--cd), 18px 36px 0 .5px var(--c), 21px 36px 0 .5px var(--cd), 18px 39px 0 .5px var(--cd);
+}
+
+.deco-cockle {
+    --u: 3px;
+    width: 24px;
+    height: 21px;
+}
+
+.deco-cockle::before {
+    box-shadow: 9px 3px 0 .5px var(--cd), 12px 3px 0 .5px var(--cd), 15px 3px 0 .5px var(--cd), 18px 3px 0 .5px var(--cd), 6px 6px 0 .5px var(--cd), 9px 6px 0 .5px var(--cl), 12px 6px 0 .5px var(--cl), 15px 6px 0 .5px var(--cl), 18px 6px 0 .5px var(--cl), 21px 6px 0 .5px var(--cd), 3px 9px 0 .5px var(--cd), 6px 9px 0 .5px var(--cl), 9px 9px 0 .5px var(--c), 12px 9px 0 .5px var(--cl), 15px 9px 0 .5px var(--c), 18px 9px 0 .5px var(--cl), 21px 9px 0 .5px var(--c), 24px 9px 0 .5px var(--cd), 3px 12px 0 .5px var(--cd), 6px 12px 0 .5px var(--c), 9px 12px 0 .5px var(--cl), 12px 12px 0 .5px var(--c), 15px 12px 0 .5px var(--cl), 18px 12px 0 .5px var(--c), 21px 12px 0 .5px var(--cl), 24px 12px 0 .5px var(--cd), 3px 15px 0 .5px var(--cd), 6px 15px 0 .5px var(--c), 9px 15px 0 .5px var(--c), 12px 15px 0 .5px var(--c), 15px 15px 0 .5px var(--c), 18px 15px 0 .5px var(--c), 21px 15px 0 .5px var(--c), 24px 15px 0 .5px var(--cd), 6px 18px 0 .5px var(--cd), 9px 18px 0 .5px var(--c), 12px 18px 0 .5px var(--c), 15px 18px 0 .5px var(--c), 18px 18px 0 .5px var(--c), 21px 18px 0 .5px var(--cd), 9px 21px 0 .5px var(--cd), 12px 21px 0 .5px var(--cd), 15px 21px 0 .5px var(--cd), 18px 21px 0 .5px var(--cd);
+}
+
+.deco-starfish {
+    --u: 3px;
+    width: 45px;
+    height: 45px;
+}
+
+.deco-starfish::before {
+    box-shadow: 24px 9px 0 .5px var(--cd), 21px 12px 0 .5px var(--cd), 24px 12px 0 .5px var(--c), 27px 12px 0 .5px var(--cd), 21px 15px 0 .5px var(--cd), 24px 15px 0 .5px var(--c), 27px 15px 0 .5px var(--cd), 12px 18px 0 .5px var(--cd), 15px 18px 0 .5px var(--cd), 18px 18px 0 .5px var(--cd), 21px 18px 0 .5px var(--c), 24px 18px 0 .5px var(--cl), 27px 18px 0 .5px var(--c), 30px 18px 0 .5px var(--cd), 33px 18px 0 .5px var(--cd), 36px 18px 0 .5px var(--cd), 12px 21px 0 .5px var(--cd), 15px 21px 0 .5px var(--c), 18px 21px 0 .5px var(--c), 21px 21px 0 .5px var(--cl), 24px 21px 0 .5px var(--c), 27px 21px 0 .5px var(--c), 30px 21px 0 .5px var(--cl), 33px 21px 0 .5px var(--c), 36px 21px 0 .5px var(--cd), 12px 24px 0 .5px var(--cd), 15px 24px 0 .5px var(--c), 18px 24px 0 .5px var(--cl), 21px 24px 0 .5px var(--c), 24px 24px 0 .5px var(--c), 27px 24px 0 .5px var(--c), 30px 24px 0 .5px var(--c), 33px 24px 0 .5px var(--c), 36px 24px 0 .5px var(--cd), 15px 27px 0 .5px var(--cd), 18px 27px 0 .5px var(--c), 21px 27px 0 .5px var(--c), 24px 27px 0 .5px var(--c), 27px 27px 0 .5px var(--c), 30px 27px 0 .5px var(--c), 33px 27px 0 .5px var(--cd), 15px 30px 0 .5px var(--cd), 18px 30px 0 .5px var(--c), 21px 30px 0 .5px var(--cl), 24px 30px 0 .5px var(--c), 27px 30px 0 .5px var(--c), 30px 30px 0 .5px var(--cl), 33px 30px 0 .5px var(--cd), 15px 33px 0 .5px var(--cd), 18px 33px 0 .5px var(--cl), 21px 33px 0 .5px var(--c), 24px 33px 0 .5px var(--cd), 27px 33px 0 .5px var(--cl), 30px 33px 0 .5px var(--c), 33px 33px 0 .5px var(--cd), 15px 36px 0 .5px var(--cd), 18px 36px 0 .5px var(--cd), 21px 36px 0 .5px var(--cd), 27px 36px 0 .5px var(--cd), 30px 36px 0 .5px var(--cd), 33px 36px 0 .5px var(--cd);
+}
+
+/* ---- Clouds (6px pixels) ---- */
+
+.cloud-a {
+    --u: 6px;
+    width: 132px;
+    height: 54px;
+}
+
+.cloud-a::before {
+    box-shadow: 54px 6px 0 .5px var(--cloud-hi), 60px 6px 0 .5px var(--cloud-hi), 66px 6px 0 .5px var(--cloud-hi), 72px 6px 0 .5px var(--cloud-hi), 36px 12px 0 .5px var(--cloud-hi), 42px 12px 0 .5px var(--cloud-hi), 48px 12px 0 .5px var(--cloud-hi), 54px 12px 0 .5px var(--cloud-color), 60px 12px 0 .5px var(--cloud-color), 66px 12px 0 .5px var(--cloud-color), 72px 12px 0 .5px var(--cloud-color), 78px 12px 0 .5px var(--cloud-hi), 84px 12px 0 .5px var(--cloud-hi), 30px 18px 0 .5px var(--cloud-hi), 36px 18px 0 .5px var(--cloud-color), 42px 18px 0 .5px var(--cloud-color), 48px 18px 0 .5px var(--cloud-color), 54px 18px 0 .5px var(--cloud-color), 60px 18px 0 .5px var(--cloud-color), 66px 18px 0 .5px var(--cloud-color), 72px 18px 0 .5px var(--cloud-color), 78px 18px 0 .5px var(--cloud-color), 84px 18px 0 .5px var(--cloud-color), 90px 18px 0 .5px var(--cloud-color), 102px 18px 0 .5px var(--cloud-hi), 108px 18px 0 .5px var(--cloud-hi), 114px 18px 0 .5px var(--cloud-hi), 18px 24px 0 .5px var(--cloud-hi), 24px 24px 0 .5px var(--cloud-hi), 30px 24px 0 .5px var(--cloud-color), 36px 24px 0 .5px var(--cloud-color), 42px 24px 0 .5px var(--cloud-color), 48px 24px 0 .5px var(--cloud-color), 54px 24px 0 .5px var(--cloud-color), 60px 24px 0 .5px var(--cloud-color), 66px 24px 0 .5px var(--cloud-color), 72px 24px 0 .5px var(--cloud-color), 78px 24px 0 .5px var(--cloud-color), 84px 24px 0 .5px var(--cloud-color), 90px 24px 0 .5px var(--cloud-color), 96px 24px 0 .5px var(--cloud-hi), 102px 24px 0 .5px var(--cloud-color), 108px 24px 0 .5px var(--cloud-color), 114px 24px 0 .5px var(--cloud-color), 120px 24px 0 .5px var(--cloud-color), 12px 30px 0 .5px var(--cloud-hi), 18px 30px 0 .5px var(--cloud-color), 24px 30px 0 .5px var(--cloud-color), 30px 30px 0 .5px var(--cloud-color), 36px 30px 0 .5px var(--cloud-color), 42px 30px 0 .5px var(--cloud-color), 48px 30px 0 .5px var(--cloud-color), 54px 30px 0 .5px var(--cloud-color), 60px 30px 0 .5px var(--cloud-color), 66px 30px 0 .5px var(--cloud-color), 72px 30px 0 .5px var(--cloud-color), 78px 30px 0 .5px var(--cloud-color), 84px 30px 0 .5px var(--cloud-color), 90px 30px 0 .5px var(--cloud-color), 96px 30px 0 .5px var(--cloud-color), 102px 30px 0 .5px var(--cloud-color), 108px 30px 0 .5px var(--cloud-color), 114px 30px 0 .5px var(--cloud-color), 120px 30px 0 .5px var(--cloud-color), 126px 30px 0 .5px var(--cloud-color), 6px 36px 0 .5px var(--cloud-hi), 12px 36px 0 .5px var(--cloud-color), 18px 36px 0 .5px var(--cloud-color), 24px 36px 0 .5px var(--cloud-color), 30px 36px 0 .5px var(--cloud-color), 36px 36px 0 .5px var(--cloud-color), 42px 36px 0 .5px var(--cloud-color), 48px 36px 0 .5px var(--cloud-color), 54px 36px 0 .5px var(--cloud-color), 60px 36px 0 .5px var(--cloud-color), 66px 36px 0 .5px var(--cloud-color), 72px 36px 0 .5px var(--cloud-color), 78px 36px 0 .5px var(--cloud-color), 84px 36px 0 .5px var(--cloud-color), 90px 36px 0 .5px var(--cloud-color), 96px 36px 0 .5px var(--cloud-color), 102px 36px 0 .5px var(--cloud-color), 108px 36px 0 .5px var(--cloud-color), 114px 36px 0 .5px var(--cloud-color), 120px 36px 0 .5px var(--cloud-color), 126px 36px 0 .5px var(--cloud-color), 132px 36px 0 .5px var(--cloud-color), 6px 42px 0 .5px var(--cloud-color), 12px 42px 0 .5px var(--cloud-color), 18px 42px 0 .5px var(--cloud-color), 24px 42px 0 .5px var(--cloud-color), 30px 42px 0 .5px var(--cloud-color), 36px 42px 0 .5px var(--cloud-color), 42px 42px 0 .5px var(--cloud-color), 48px 42px 0 .5px var(--cloud-color), 54px 42px 0 .5px var(--cloud-color), 60px 42px 0 .5px var(--cloud-color), 66px 42px 0 .5px var(--cloud-color), 72px 42px 0 .5px var(--cloud-color), 78px 42px 0 .5px var(--cloud-color), 84px 42px 0 .5px var(--cloud-color), 90px 42px 0 .5px var(--cloud-color), 96px 42px 0 .5px var(--cloud-color), 102px 42px 0 .5px var(--cloud-color), 108px 42px 0 .5px var(--cloud-color), 114px 42px 0 .5px var(--cloud-color), 120px 42px 0 .5px var(--cloud-color), 126px 42px 0 .5px var(--cloud-color), 132px 42px 0 .5px var(--cloud-color), 12px 48px 0 .5px var(--cloud-shadow), 18px 48px 0 .5px var(--cloud-shadow), 24px 48px 0 .5px var(--cloud-shadow), 30px 48px 0 .5px var(--cloud-shadow), 36px 48px 0 .5px var(--cloud-color), 42px 48px 0 .5px var(--cloud-color), 48px 48px 0 .5px var(--cloud-color), 54px 48px 0 .5px var(--cloud-color), 60px 48px 0 .5px var(--cloud-color), 66px 48px 0 .5px var(--cloud-color), 72px 48px 0 .5px var(--cloud-color), 78px 48px 0 .5px var(--cloud-color), 84px 48px 0 .5px var(--cloud-color), 90px 48px 0 .5px var(--cloud-color), 96px 48px 0 .5px var(--cloud-color), 102px 48px 0 .5px var(--cloud-color), 108px 48px 0 .5px var(--cloud-shadow), 114px 48px 0 .5px var(--cloud-shadow), 120px 48px 0 .5px var(--cloud-shadow), 126px 48px 0 .5px var(--cloud-shadow), 30px 54px 0 .5px var(--cloud-shadow), 36px 54px 0 .5px var(--cloud-shadow), 42px 54px 0 .5px var(--cloud-shadow), 48px 54px 0 .5px var(--cloud-shadow), 54px 54px 0 .5px var(--cloud-shadow), 60px 54px 0 .5px var(--cloud-shadow), 66px 54px 0 .5px var(--cloud-shadow), 72px 54px 0 .5px var(--cloud-shadow), 78px 54px 0 .5px var(--cloud-shadow), 84px 54px 0 .5px var(--cloud-shadow), 90px 54px 0 .5px var(--cloud-shadow), 96px 54px 0 .5px var(--cloud-shadow), 102px 54px 0 .5px var(--cloud-shadow), 108px 54px 0 .5px var(--cloud-shadow);
+}
+
+.cloud-b {
+    --u: 6px;
+    width: 84px;
+    height: 48px;
+}
+
+.cloud-b::before {
+    box-shadow: 42px 6px 0 .5px var(--cloud-hi), 48px 6px 0 .5px var(--cloud-hi), 54px 6px 0 .5px var(--cloud-hi), 30px 12px 0 .5px var(--cloud-hi), 36px 12px 0 .5px var(--cloud-hi), 42px 12px 0 .5px var(--cloud-color), 48px 12px 0 .5px var(--cloud-color), 54px 12px 0 .5px var(--cloud-color), 60px 12px 0 .5px var(--cloud-hi), 18px 18px 0 .5px var(--cloud-hi), 24px 18px 0 .5px var(--cloud-hi), 30px 18px 0 .5px var(--cloud-color), 36px 18px 0 .5px var(--cloud-color), 42px 18px 0 .5px var(--cloud-color), 48px 18px 0 .5px var(--cloud-color), 54px 18px 0 .5px var(--cloud-color), 60px 18px 0 .5px var(--cloud-color), 66px 18px 0 .5px var(--cloud-hi), 72px 18px 0 .5px var(--cloud-hi), 12px 24px 0 .5px var(--cloud-hi), 18px 24px 0 .5px var(--cloud-color), 24px 24px 0 .5px var(--cloud-color), 30px 24px 0 .5px var(--cloud-color), 36px 24px 0 .5px var(--cloud-color), 42px 24px 0 .5px var(--cloud-color), 48px 24px 0 .5px var(--cloud-color), 54px 24px 0 .5px var(--cloud-color), 60px 24px 0 .5px var(--cloud-color), 66px 24px 0 .5px var(--cloud-color), 72px 24px 0 .5px var(--cloud-color), 78px 24px 0 .5px var(--cloud-color), 6px 30px 0 .5px var(--cloud-hi), 12px 30px 0 .5px var(--cloud-color), 18px 30px 0 .5px var(--cloud-color), 24px 30px 0 .5px var(--cloud-color), 30px 30px 0 .5px var(--cloud-color), 36px 30px 0 .5px var(--cloud-color), 42px 30px 0 .5px var(--cloud-color), 48px 30px 0 .5px var(--cloud-color), 54px 30px 0 .5px var(--cloud-color), 60px 30px 0 .5px var(--cloud-color), 66px 30px 0 .5px var(--cloud-color), 72px 30px 0 .5px var(--cloud-color), 78px 30px 0 .5px var(--cloud-color), 84px 30px 0 .5px var(--cloud-color), 6px 36px 0 .5px var(--cloud-color), 12px 36px 0 .5px var(--cloud-color), 18px 36px 0 .5px var(--cloud-color), 24px 36px 0 .5px var(--cloud-color), 30px 36px 0 .5px var(--cloud-color), 36px 36px 0 .5px var(--cloud-color), 42px 36px 0 .5px var(--cloud-color), 48px 36px 0 .5px var(--cloud-color), 54px 36px 0 .5px var(--cloud-color), 60px 36px 0 .5px var(--cloud-color), 66px 36px 0 .5px var(--cloud-color), 72px 36px 0 .5px var(--cloud-color), 78px 36px 0 .5px var(--cloud-color), 84px 36px 0 .5px var(--cloud-color), 12px 42px 0 .5px var(--cloud-shadow), 18px 42px 0 .5px var(--cloud-shadow), 24px 42px 0 .5px var(--cloud-shadow), 30px 42px 0 .5px var(--cloud-color), 36px 42px 0 .5px var(--cloud-color), 42px 42px 0 .5px var(--cloud-color), 48px 42px 0 .5px var(--cloud-color), 54px 42px 0 .5px var(--cloud-color), 60px 42px 0 .5px var(--cloud-color), 66px 42px 0 .5px var(--cloud-shadow), 72px 42px 0 .5px var(--cloud-shadow), 78px 42px 0 .5px var(--cloud-shadow), 24px 48px 0 .5px var(--cloud-shadow), 30px 48px 0 .5px var(--cloud-shadow), 36px 48px 0 .5px var(--cloud-shadow), 42px 48px 0 .5px var(--cloud-shadow), 48px 48px 0 .5px var(--cloud-shadow), 54px 48px 0 .5px var(--cloud-shadow), 60px 48px 0 .5px var(--cloud-shadow), 66px 48px 0 .5px var(--cloud-shadow);
+}
+
+.cloud-c {
+    --u: 6px;
+    width: 150px;
+    height: 54px;
+}
+
+.cloud-c::before {
+    box-shadow: 72px 6px 0 .5px var(--cloud-hi), 78px 6px 0 .5px var(--cloud-hi), 84px 6px 0 .5px var(--cloud-hi), 18px 12px 0 .5px var(--cloud-hi), 24px 12px 0 .5px var(--cloud-hi), 30px 12px 0 .5px var(--cloud-hi), 60px 12px 0 .5px var(--cloud-hi), 66px 12px 0 .5px var(--cloud-hi), 72px 12px 0 .5px var(--cloud-color), 78px 12px 0 .5px var(--cloud-color), 84px 12px 0 .5px var(--cloud-color), 90px 12px 0 .5px var(--cloud-hi), 96px 12px 0 .5px var(--cloud-hi), 12px 18px 0 .5px var(--cloud-hi), 18px 18px 0 .5px var(--cloud-color), 24px 18px 0 .5px var(--cloud-color), 30px 18px 0 .5px var(--cloud-color), 36px 18px 0 .5px var(--cloud-hi), 54px 18px 0 .5px var(--cloud-hi), 60px 18px 0 .5px var(--cloud-color), 66px 18px 0 .5px var(--cloud-color), 72px 18px 0 .5px var(--cloud-color), 78px 18px 0 .5px var(--cloud-color), 84px 18px 0 .5px var(--cloud-color), 90px 18px 0 .5px var(--cloud-color), 96px 18px 0 .5px var(--cloud-color), 102px 18px 0 .5px var(--cloud-hi), 120px 18px 0 .5px var(--cloud-hi), 126px 18px 0 .5px var(--cloud-hi), 132px 18px 0 .5px var(--cloud-hi), 6px 24px 0 .5px var(--cloud-hi), 12px 24px 0 .5px var(--cloud-color), 18px 24px 0 .5px var(--cloud-color), 24px 24px 0 .5px var(--cloud-color), 30px 24px 0 .5px var(--cloud-color), 36px 24px 0 .5px var(--cloud-color), 42px 24px 0 .5px var(--cloud-hi), 48px 24px 0 .5px var(--cloud-hi), 54px 24px 0 .5px var(--cloud-color), 60px 24px 0 .5px var(--cloud-color), 66px 24px 0 .5px var(--cloud-color), 72px 24px 0 .5px var(--cloud-color), 78px 24px 0 .5px var(--cloud-color), 84px 24px 0 .5px var(--cloud-color), 90px 24px 0 .5px var(--cloud-color), 96px 24px 0 .5px var(--cloud-color), 102px 24px 0 .5px var(--cloud-color), 108px 24px 0 .5px var(--cloud-hi), 114px 24px 0 .5px var(--cloud-hi), 120px 24px 0 .5px var(--cloud-color), 126px 24px 0 .5px var(--cloud-color), 132px 24px 0 .5px var(--cloud-color), 138px 24px 0 .5px var(--cloud-hi), 6px 30px 0 .5px var(--cloud-color), 12px 30px 0 .5px var(--cloud-color), 18px 30px 0 .5px var(--cloud-color), 24px 30px 0 .5px var(--cloud-color), 30px 30px 0 .5px var(--cloud-color), 36px 30px 0 .5px var(--cloud-color), 42px 30px 0 .5px var(--cloud-color), 48px 30px 0 .5px var(--cloud-color), 54px 30px 0 .5px var(--cloud-color), 60px 30px 0 .5px var(--cloud-color), 66px 30px 0 .5px var(--cloud-color), 72px 30px 0 .5px var(--cloud-color), 78px 30px 0 .5px var(--cloud-color), 84px 30px 0 .5px var(--cloud-color), 90px 30px 0 .5px var(--cloud-color), 96px 30px 0 .5px var(--cloud-color), 102px 30px 0 .5px var(--cloud-color), 108px 30px 0 .5px var(--cloud-color), 114px 30px 0 .5px var(--cloud-color), 120px 30px 0 .5px var(--cloud-color), 126px 30px 0 .5px var(--cloud-color), 132px 30px 0 .5px var(--cloud-color), 138px 30px 0 .5px var(--cloud-color), 144px 30px 0 .5px var(--cloud-hi), 6px 36px 0 .5px var(--cloud-color), 12px 36px 0 .5px var(--cloud-color), 18px 36px 0 .5px var(--cloud-color), 24px 36px 0 .5px var(--cloud-color), 30px 36px 0 .5px var(--cloud-color), 36px 36px 0 .5px var(--cloud-color), 42px 36px 0 .5px var(--cloud-color), 48px 36px 0 .5px var(--cloud-color), 54px 36px 0 .5px var(--cloud-color), 60px 36px 0 .5px var(--cloud-color), 66px 36px 0 .5px var(--cloud-color), 72px 36px 0 .5px var(--cloud-color), 78px 36px 0 .5px var(--cloud-color), 84px 36px 0 .5px var(--cloud-color), 90px 36px 0 .5px var(--cloud-color), 96px 36px 0 .5px var(--cloud-color), 102px 36px 0 .5px var(--cloud-color), 108px 36px 0 .5px var(--cloud-color), 114px 36px 0 .5px var(--cloud-color), 120px 36px 0 .5px var(--cloud-color), 126px 36px 0 .5px var(--cloud-color), 132px 36px 0 .5px var(--cloud-color), 138px 36px 0 .5px var(--cloud-color), 144px 36px 0 .5px var(--cloud-color), 150px 36px 0 .5px var(--cloud-color), 12px 42px 0 .5px var(--cloud-shadow), 18px 42px 0 .5px var(--cloud-shadow), 24px 42px 0 .5px var(--cloud-color), 30px 42px 0 .5px var(--cloud-color), 36px 42px 0 .5px var(--cloud-color), 42px 42px 0 .5px var(--cloud-color), 48px 42px 0 .5px var(--cloud-color), 54px 42px 0 .5px var(--cloud-color), 60px 42px 0 .5px var(--cloud-color), 66px 42px 0 .5px var(--cloud-color), 72px 42px 0 .5px var(--cloud-color), 78px 42px 0 .5px var(--cloud-color), 84px 42px 0 .5px var(--cloud-color), 90px 42px 0 .5px var(--cloud-color), 96px 42px 0 .5px var(--cloud-color), 102px 42px 0 .5px var(--cloud-color), 108px 42px 0 .5px var(--cloud-color), 114px 42px 0 .5px var(--cloud-color), 120px 42px 0 .5px var(--cloud-color), 126px 42px 0 .5px var(--cloud-color), 132px 42px 0 .5px var(--cloud-color), 138px 42px 0 .5px var(--cloud-shadow), 144px 42px 0 .5px var(--cloud-shadow), 24px 48px 0 .5px var(--cloud-shadow), 30px 48px 0 .5px var(--cloud-shadow), 36px 48px 0 .5px var(--cloud-shadow), 42px 48px 0 .5px var(--cloud-shadow), 48px 48px 0 .5px var(--cloud-shadow), 54px 48px 0 .5px var(--cloud-shadow), 60px 48px 0 .5px var(--cloud-shadow), 66px 48px 0 .5px var(--cloud-color), 72px 48px 0 .5px var(--cloud-color), 78px 48px 0 .5px var(--cloud-color), 84px 48px 0 .5px var(--cloud-color), 90px 48px 0 .5px var(--cloud-color), 96px 48px 0 .5px var(--cloud-shadow), 102px 48px 0 .5px var(--cloud-shadow), 108px 48px 0 .5px var(--cloud-shadow), 114px 48px 0 .5px var(--cloud-shadow), 120px 48px 0 .5px var(--cloud-shadow), 126px 48px 0 .5px var(--cloud-shadow), 132px 48px 0 .5px var(--cloud-shadow), 66px 54px 0 .5px var(--cloud-shadow), 72px 54px 0 .5px var(--cloud-shadow), 78px 54px 0 .5px var(--cloud-shadow), 84px 54px 0 .5px var(--cloud-shadow), 90px 54px 0 .5px var(--cloud-shadow);
+}
+
+/* ---- Irregular shoreline & wave edges ---- */
+
+.sand {
+    clip-path: polygon(0.00% 12px, 4.92% 12px, 4.92% 16px, 11.67% 16px, 11.67% 8px, 18.29% 8px, 18.29% 16px, 20.92% 16px, 20.92% 16px, 24.75% 16px, 24.75% 20px, 30.04% 20px, 30.04% 16px, 32.31% 16px, 32.31% 20px, 38.84% 20px, 38.84% 16px, 42.74% 16px, 42.74% 8px, 48.62% 8px, 48.62% 4px, 51.77% 4px, 51.77% 8px, 60.81% 8px, 60.81% 16px, 65.41% 16px, 65.41% 16px, 69.70% 16px, 69.70% 12px, 73.71% 12px, 73.71% 16px, 78.59% 16px, 78.59% 8px, 83.18% 8px, 83.18% 0px, 89.81% 0px, 89.81% 8px, 92.13% 8px, 92.13% 4px, 95.54% 4px, 95.54% 0px, 97.66% 0px, 97.66% 0px, 100.00% 0px, 100% 100%, 0 100%);
+}
+
+.wet-sand {
+    clip-path: polygon(0 0, 100% 0, 100.00% 28px, 97.47% 28px, 97.47% 32px, 93.23% 32px, 93.23% 28px, 87.64% 28px, 87.64% 32px, 84.32% 32px, 84.32% 28px, 78.95% 28px, 78.95% 28px, 68.74% 28px, 68.74% 28px, 65.27% 28px, 65.27% 28px, 53.24% 28px, 53.24% 28px, 49.95% 28px, 49.95% 32px, 46.32% 32px, 46.32% 28px, 40.60% 28px, 40.60% 32px, 35.58% 32px, 35.58% 28px, 29.72% 28px, 29.72% 28px, 24.00% 28px, 24.00% 28px, 16.46% 28px, 16.46% 32px, 10.54% 32px, 10.54% 28px, 4.89% 28px, 4.89% 36px, 0.00% 36px);
+}
+
+.swash-a .swash-water {
+    clip-path: polygon(0 0, 100% 0, 100.00% 76px, 99.21% 76px, 99.21% 76px, 95.44% 76px, 95.44% 80px, 91.51% 80px, 91.51% 80px, 87.20% 80px, 87.20% 72px, 82.29% 72px, 82.29% 64px, 71.63% 64px, 71.63% 68px, 60.86% 68px, 60.86% 64px, 56.42% 64px, 56.42% 60px, 53.80% 60px, 53.80% 56px, 51.84% 56px, 51.84% 56px, 47.04% 56px, 47.04% 60px, 38.57% 60px, 38.57% 68px, 36.64% 68px, 36.64% 68px, 34.03% 68px, 34.03% 60px, 27.68% 60px, 27.68% 56px, 23.86% 56px, 23.86% 60px, 19.90% 60px, 19.90% 68px, 17.75% 68px, 17.75% 72px, 14.77% 72px, 14.77% 68px, 6.45% 68px, 6.45% 72px, 2.12% 72px, 2.12% 80px, 0.00% 80px);
+}
+
+.swash-a .swash-foam {
+    clip-path: polygon(0.00% 72px, 2.12% 72px, 2.12% 64px, 6.45% 64px, 6.45% 60px, 14.77% 60px, 14.77% 64px, 17.75% 64px, 17.75% 60px, 19.90% 60px, 19.90% 52px, 23.86% 52px, 23.86% 48px, 27.68% 48px, 27.68% 52px, 34.03% 52px, 34.03% 60px, 36.64% 60px, 36.64% 60px, 38.57% 60px, 38.57% 52px, 47.04% 52px, 47.04% 48px, 51.84% 48px, 51.84% 48px, 53.80% 48px, 53.80% 52px, 56.42% 52px, 56.42% 56px, 60.86% 56px, 60.86% 60px, 71.63% 60px, 71.63% 56px, 82.29% 56px, 82.29% 64px, 87.20% 64px, 87.20% 72px, 91.51% 72px, 91.51% 72px, 95.44% 72px, 95.44% 68px, 99.21% 68px, 99.21% 68px, 100.00% 68px, 100.00% 76px, 99.21% 76px, 99.21% 76px, 95.44% 76px, 95.44% 80px, 91.51% 80px, 91.51% 80px, 87.20% 80px, 87.20% 72px, 82.29% 72px, 82.29% 64px, 71.63% 64px, 71.63% 68px, 60.86% 68px, 60.86% 64px, 56.42% 64px, 56.42% 60px, 53.80% 60px, 53.80% 56px, 51.84% 56px, 51.84% 56px, 47.04% 56px, 47.04% 60px, 38.57% 60px, 38.57% 68px, 36.64% 68px, 36.64% 68px, 34.03% 68px, 34.03% 60px, 27.68% 60px, 27.68% 56px, 23.86% 56px, 23.86% 60px, 19.90% 60px, 19.90% 68px, 17.75% 68px, 17.75% 72px, 14.77% 72px, 14.77% 68px, 6.45% 68px, 6.45% 72px, 2.12% 72px, 2.12% 80px, 0.00% 80px);
+}
+
+.swash-b .swash-water {
+    clip-path: polygon(0 0, 100% 0, 100.00% 80px, 90.81% 80px, 90.81% 76px, 88.14% 76px, 88.14% 80px, 84.57% 80px, 84.57% 80px, 80.66% 80px, 80.66% 76px, 79.02% 76px, 79.02% 72px, 75.06% 72px, 75.06% 72px, 71.26% 72px, 71.26% 76px, 68.29% 76px, 68.29% 68px, 66.42% 68px, 66.42% 72px, 62.48% 72px, 62.48% 68px, 59.09% 68px, 59.09% 64px, 54.13% 64px, 54.13% 64px, 52.51% 64px, 52.51% 68px, 50.53% 68px, 50.53% 64px, 46.59% 64px, 46.59% 68px, 44.53% 68px, 44.53% 60px, 42.92% 60px, 42.92% 68px, 39.58% 68px, 39.58% 72px, 35.50% 72px, 35.50% 80px, 31.14% 80px, 31.14% 76px, 29.28% 76px, 29.28% 80px, 24.58% 80px, 24.58% 80px, 18.81% 80px, 18.81% 78px, 16.20% 78px, 16.20% 78px, 12.56% 78px, 12.56% 74px, 1.73% 74px, 1.73% 70px, 0.00% 70px);
+}
+
+.swash-b .swash-foam {
+    clip-path: polygon(0.00% 62px, 1.73% 62px, 1.73% 66px, 12.56% 66px, 12.56% 70px, 16.20% 70px, 16.20% 70px, 18.81% 70px, 18.81% 72px, 24.58% 72px, 24.58% 72px, 29.28% 72px, 29.28% 68px, 31.14% 68px, 31.14% 72px, 35.50% 72px, 35.50% 64px, 39.58% 64px, 39.58% 60px, 42.92% 60px, 42.92% 52px, 44.53% 52px, 44.53% 60px, 46.59% 60px, 46.59% 56px, 50.53% 56px, 50.53% 60px, 52.51% 60px, 52.51% 56px, 54.13% 56px, 54.13% 56px, 59.09% 56px, 59.09% 60px, 62.48% 60px, 62.48% 64px, 66.42% 64px, 66.42% 60px, 68.29% 60px, 68.29% 68px, 71.26% 68px, 71.26% 64px, 75.06% 64px, 75.06% 64px, 79.02% 64px, 79.02% 68px, 80.66% 68px, 80.66% 72px, 84.57% 72px, 84.57% 72px, 88.14% 72px, 88.14% 68px, 90.81% 68px, 90.81% 72px, 100.00% 72px, 100.00% 80px, 90.81% 80px, 90.81% 76px, 88.14% 76px, 88.14% 80px, 84.57% 80px, 84.57% 80px, 80.66% 80px, 80.66% 76px, 79.02% 76px, 79.02% 72px, 75.06% 72px, 75.06% 72px, 71.26% 72px, 71.26% 76px, 68.29% 76px, 68.29% 68px, 66.42% 68px, 66.42% 72px, 62.48% 72px, 62.48% 68px, 59.09% 68px, 59.09% 64px, 54.13% 64px, 54.13% 64px, 52.51% 64px, 52.51% 68px, 50.53% 68px, 50.53% 64px, 46.59% 64px, 46.59% 68px, 44.53% 68px, 44.53% 60px, 42.92% 60px, 42.92% 68px, 39.58% 68px, 39.58% 72px, 35.50% 72px, 35.50% 80px, 31.14% 80px, 31.14% 76px, 29.28% 76px, 29.28% 80px, 24.58% 80px, 24.58% 80px, 18.81% 80px, 18.81% 78px, 16.20% 78px, 16.20% 78px, 12.56% 78px, 12.56% 74px, 1.73% 74px, 1.73% 70px, 0.00% 70px);
+}
+
+.ocean-back {
+    clip-path: polygon(0.00% 0px, 2.18% 0px, 2.18% 0px, 5.35% 0px, 5.35% 0px, 9.40% 0px, 9.40% 0px, 12.50% 0px, 12.50% 0px, 15.70% 0px, 15.70% 4px, 20.26% 4px, 20.26% 4px, 22.83% 4px, 22.83% 0px, 27.59% 0px, 27.59% 0px, 32.32% 0px, 32.32% 0px, 36.58% 0px, 36.58% 4px, 39.25% 4px, 39.25% 0px, 40.92% 0px, 40.92% 0px, 44.92% 0px, 44.92% 4px, 48.21% 4px, 48.21% 0px, 51.42% 0px, 51.42% 0px, 53.59% 0px, 53.59% 4px, 59.00% 4px, 59.00% 0px, 63.67% 0px, 63.67% 4px, 70.28% 4px, 70.28% 0px, 72.68% 0px, 72.68% 8px, 75.63% 8px, 75.63% 0px, 85.19% 0px, 85.19% 4px, 89.92% 4px, 89.92% 8px, 91.89% 8px, 91.89% 4px, 96.74% 4px, 96.74% 8px, 98.87% 8px, 98.87% 4px, 100.00% 4px, 100% 100%, 0 100%);
+}
+
+.ocean-middle {
+    clip-path: polygon(0.00% 16px, 5.46% 16px, 5.46% 20px, 9.51% 20px, 9.51% 16px, 12.64% 16px, 12.64% 24px, 14.79% 24px, 14.79% 16px, 16.37% 16px, 16.37% 8px, 21.37% 8px, 21.37% 12px, 23.39% 12px, 23.39% 12px, 25.91% 12px, 25.91% 8px, 30.63% 8px, 30.63% 4px, 35.35% 4px, 35.35% 4px, 42.75% 4px, 42.75% 0px, 46.44% 0px, 46.44% 4px, 51.37% 4px, 51.37% 12px, 55.58% 12px, 55.58% 12px, 57.70% 12px, 57.70% 16px, 60.04% 16px, 60.04% 16px, 61.73% 16px, 61.73% 20px, 66.91% 20px, 66.91% 24px, 71.90% 24px, 71.90% 20px, 76.53% 20px, 76.53% 16px, 81.46% 16px, 81.46% 20px, 84.06% 20px, 84.06% 24px, 85.59% 24px, 85.59% 24px, 88.14% 24px, 88.14% 24px, 90.32% 24px, 90.32% 24px, 95.25% 24px, 95.25% 20px, 97.18% 20px, 97.18% 16px, 98.73% 16px, 98.73% 20px, 100.00% 20px, 100% 100%, 0 100%);
+}
+
+.ocean-front {
+    clip-path: polygon(0.00% 4px, 2.95% 4px, 2.95% 4px, 6.47% 4px, 6.47% 0px, 9.86% 0px, 9.86% 8px, 20.85% 8px, 20.85% 0px, 26.18% 0px, 26.18% 4px, 30.09% 4px, 30.09% 12px, 32.95% 12px, 32.95% 8px, 37.86% 8px, 37.86% 8px, 45.04% 8px, 45.04% 4px, 46.73% 4px, 46.73% 0px, 51.15% 0px, 51.15% 0px, 55.22% 0px, 55.22% 0px, 58.16% 0px, 58.16% 0px, 61.17% 0px, 61.17% 4px, 65.85% 4px, 65.85% 0px, 69.68% 0px, 69.68% 0px, 71.49% 0px, 71.49% 4px, 75.87% 4px, 75.87% 0px, 81.16% 0px, 81.16% 0px, 84.67% 0px, 84.67% 4px, 87.19% 4px, 87.19% 12px, 91.05% 12px, 91.05% 16px, 92.64% 16px, 92.64% 20px, 96.83% 20px, 96.83% 16px, 100.00% 16px, 100% 100%, 0 100%);
+}
+
+.ocean-shallows {
+    clip-path: polygon(0.00% 8px, 1.98% 8px, 1.98% 8px, 4.68% 8px, 4.68% 4px, 6.33% 4px, 6.33% 8px, 7.96% 8px, 7.96% 8px, 11.25% 8px, 11.25% 0px, 14.86% 0px, 14.86% 0px, 21.39% 0px, 21.39% 0px, 25.64% 0px, 25.64% 0px, 30.99% 0px, 30.99% 4px, 36.00% 4px, 36.00% 0px, 40.93% 0px, 40.93% 8px, 44.49% 8px, 44.49% 8px, 46.11% 8px, 46.11% 12px, 50.81% 12px, 50.81% 8px, 52.96% 8px, 52.96% 8px, 57.29% 8px, 57.29% 12px, 62.25% 12px, 62.25% 8px, 66.01% 8px, 66.01% 8px, 71.18% 8px, 71.18% 12px, 75.10% 12px, 75.10% 16px, 86.04% 16px, 86.04% 16px, 89.80% 16px, 89.80% 12px, 99.75% 12px, 99.75% 8px, 100.00% 8px, 100% 100%, 0 100%);
+}
+
+/* ---- Ocean glimmers (two alternating sets) ---- */
+
+.ocean-glimmer::before {
+    box-shadow: calc(49.31vw + 4px) calc(var(--oh) * 0.367) var(--g2), calc(49.31vw + 8px) calc(var(--oh) * 0.367) var(--g2), calc(49.31vw + 12px) calc(var(--oh) * 0.367) var(--g2), calc(49.31vw + 16px) calc(var(--oh) * 0.367) var(--g2), calc(49.31vw + 20px) calc(var(--oh) * 0.367) var(--g2), calc(71.26vw + 4px) calc(var(--oh) * 0.281) var(--g1), calc(71.26vw + 8px) calc(var(--oh) * 0.281) var(--g1), calc(71.26vw + 12px) calc(var(--oh) * 0.281) var(--g1), calc(71.26vw + 16px) calc(var(--oh) * 0.281) var(--g1), calc(71.26vw + 20px) calc(var(--oh) * 0.281) var(--g1), calc(89.18vw + 4px) calc(var(--oh) * 0.230) var(--g1), calc(89.18vw + 8px) calc(var(--oh) * 0.230) var(--g1), calc(89.18vw + 12px) calc(var(--oh) * 0.230) var(--g1), calc(69.38vw + 4px) calc(var(--oh) * 0.142) var(--g1), calc(69.38vw + 8px) calc(var(--oh) * 0.142) var(--g1), calc(69.38vw + 12px) calc(var(--oh) * 0.142) var(--g1), calc(45.28vw + 4px) calc(var(--oh) * 0.239) var(--g1), calc(45.28vw + 8px) calc(var(--oh) * 0.239) var(--g1), calc(45.28vw + 12px) calc(var(--oh) * 0.239) var(--g1), calc(93.39vw + 4px) calc(var(--oh) * 0.644) var(--g2), calc(93.39vw + 8px) calc(var(--oh) * 0.644) var(--g2), calc(93.39vw + 12px) calc(var(--oh) * 0.644) var(--g2), calc(9.55vw + 4px) calc(var(--oh) * 0.298) var(--g1), calc(9.55vw + 8px) calc(var(--oh) * 0.298) var(--g1), calc(9.55vw + 12px) calc(var(--oh) * 0.298) var(--g1), calc(9.55vw + 16px) calc(var(--oh) * 0.298) var(--g1), calc(5.49vw + 4px) calc(var(--oh) * 0.307) var(--g1), calc(5.49vw + 8px) calc(var(--oh) * 0.307) var(--g1), calc(96.25vw + 4px) calc(var(--oh) * 0.393) var(--g2), calc(96.25vw + 8px) calc(var(--oh) * 0.393) var(--g2), calc(29.66vw + 4px) calc(var(--oh) * 0.426) var(--g2), calc(29.66vw + 8px) calc(var(--oh) * 0.426) var(--g2), calc(29.66vw + 12px) calc(var(--oh) * 0.426) var(--g2), calc(14.76vw + 4px) calc(var(--oh) * 0.473) var(--g2), calc(14.76vw + 8px) calc(var(--oh) * 0.473) var(--g2), calc(20.81vw + 4px) calc(var(--oh) * 0.527) var(--g2), calc(20.81vw + 8px) calc(var(--oh) * 0.527) var(--g2), calc(20.81vw + 12px) calc(var(--oh) * 0.527) var(--g2), calc(20.81vw + 16px) calc(var(--oh) * 0.527) var(--g2), calc(60.10vw + 4px) calc(var(--oh) * 0.212) var(--g1), calc(60.10vw + 8px) calc(var(--oh) * 0.212) var(--g1), calc(60.10vw + 12px) calc(var(--oh) * 0.212) var(--g1), calc(58.10vw + 4px) calc(var(--oh) * 0.291) var(--g1), calc(58.10vw + 8px) calc(var(--oh) * 0.291) var(--g1), calc(58.10vw + 12px) calc(var(--oh) * 0.291) var(--g1), calc(58.10vw + 16px) calc(var(--oh) * 0.291) var(--g1), calc(58.10vw + 20px) calc(var(--oh) * 0.291) var(--g1), calc(49.69vw + 4px) calc(var(--oh) * 0.076) var(--g1), calc(49.69vw + 8px) calc(var(--oh) * 0.076) var(--g1), calc(8.67vw + 4px) calc(var(--oh) * 0.274) var(--g1), calc(8.67vw + 8px) calc(var(--oh) * 0.274) var(--g1), calc(8.67vw + 12px) calc(var(--oh) * 0.274) var(--g1), calc(8.67vw + 16px) calc(var(--oh) * 0.274) var(--g1), calc(46.18vw + 4px) calc(var(--oh) * 0.241) var(--g1), calc(46.18vw + 8px) calc(var(--oh) * 0.241) var(--g1), calc(46.18vw + 12px) calc(var(--oh) * 0.241) var(--g1), calc(46.18vw + 16px) calc(var(--oh) * 0.241) var(--g1), calc(46.18vw + 20px) calc(var(--oh) * 0.241) var(--g1), calc(35.15vw + 4px) calc(var(--oh) * 0.538) var(--g2), calc(35.15vw + 8px) calc(var(--oh) * 0.538) var(--g2), calc(35.15vw + 12px) calc(var(--oh) * 0.538) var(--g2), calc(72.55vw + 4px) calc(var(--oh) * 0.356) var(--g1), calc(72.55vw + 8px) calc(var(--oh) * 0.356) var(--g1), calc(72.55vw + 12px) calc(var(--oh) * 0.356) var(--g1), calc(11.84vw + 4px) calc(var(--oh) * 0.193) var(--g1), calc(11.84vw + 8px) calc(var(--oh) * 0.193) var(--g1), calc(93.85vw + 4px) calc(var(--oh) * 0.314) var(--g1), calc(93.85vw + 8px) calc(var(--oh) * 0.314) var(--g1), calc(93.85vw + 12px) calc(var(--oh) * 0.314) var(--g1), calc(93.85vw + 16px) calc(var(--oh) * 0.314) var(--g1), calc(93.85vw + 20px) calc(var(--oh) * 0.314) var(--g1), calc(93.85vw + 24px) calc(var(--oh) * 0.314) var(--g1), calc(78.75vw + 4px) calc(var(--oh) * 0.525) var(--g2), calc(78.75vw + 8px) calc(var(--oh) * 0.525) var(--g2), calc(97.27vw + 4px) calc(var(--oh) * 0.282) var(--g1), calc(97.27vw + 8px) calc(var(--oh) * 0.282) var(--g1), calc(97.27vw + 12px) calc(var(--oh) * 0.282) var(--g1), calc(49.45vw + 4px) calc(var(--oh) * 0.143) var(--g1), calc(49.45vw + 8px) calc(var(--oh) * 0.143) var(--g1), calc(49.45vw + 12px) calc(var(--oh) * 0.143) var(--g1), calc(22.83vw + 4px) calc(var(--oh) * 0.268) var(--g1), calc(22.83vw + 8px) calc(var(--oh) * 0.268) var(--g1), calc(22.83vw + 12px) calc(var(--oh) * 0.268) var(--g1), calc(22.83vw + 16px) calc(var(--oh) * 0.268) var(--g1), calc(5.99vw + 4px) calc(var(--oh) * 0.066) var(--g1), calc(5.99vw + 8px) calc(var(--oh) * 0.066) var(--g1), calc(5.99vw + 12px) calc(var(--oh) * 0.066) var(--g1), calc(5.99vw + 16px) calc(var(--oh) * 0.066) var(--g1), calc(36.49vw + 4px) calc(var(--oh) * 0.395) var(--g2), calc(36.49vw + 8px) calc(var(--oh) * 0.395) var(--g2), calc(36.49vw + 12px) calc(var(--oh) * 0.395) var(--g2), calc(36.49vw + 16px) calc(var(--oh) * 0.395) var(--g2), calc(48.45vw + 4px) calc(var(--oh) * 0.405) var(--g2), calc(48.45vw + 8px) calc(var(--oh) * 0.405) var(--g2), calc(48.45vw + 12px) calc(var(--oh) * 0.405) var(--g2), calc(48.45vw + 16px) calc(var(--oh) * 0.405) var(--g2), calc(48.45vw + 20px) calc(var(--oh) * 0.405) var(--g2), calc(81.30vw + 4px) calc(var(--oh) * 0.102) var(--g1), calc(81.30vw + 8px) calc(var(--oh) * 0.102) var(--g1), calc(81.30vw + 12px) calc(var(--oh) * 0.102) var(--g1), calc(81.30vw + 16px) calc(var(--oh) * 0.102) var(--g1), calc(73.91vw + 4px) calc(var(--oh) * 0.455) var(--g2), calc(73.91vw + 8px) calc(var(--oh) * 0.455) var(--g2), calc(73.91vw + 12px) calc(var(--oh) * 0.455) var(--g2), calc(73.91vw + 16px) calc(var(--oh) * 0.455) var(--g2), calc(73.91vw + 20px) calc(var(--oh) * 0.455) var(--g2), calc(60.02vw + 4px) calc(var(--oh) * 0.607) var(--g2), calc(60.02vw + 8px) calc(var(--oh) * 0.607) var(--g2), calc(2.93vw + 4px) calc(var(--oh) * 0.350) var(--g1), calc(2.93vw + 8px) calc(var(--oh) * 0.350) var(--g1), calc(2.93vw + 12px) calc(var(--oh) * 0.350) var(--g1), calc(2.93vw + 16px) calc(var(--oh) * 0.350) var(--g1), calc(2.93vw + 20px) calc(var(--oh) * 0.350) var(--g1), calc(91.11vw + 4px) calc(var(--oh) * 0.122) var(--g1), calc(91.11vw + 8px) calc(var(--oh) * 0.122) var(--g1), calc(91.11vw + 12px) calc(var(--oh) * 0.122) var(--g1), calc(91.11vw + 16px) calc(var(--oh) * 0.122) var(--g1), calc(91.11vw + 20px) calc(var(--oh) * 0.122) var(--g1), calc(91.11vw + 24px) calc(var(--oh) * 0.122) var(--g1), calc(48.98vw + 4px) calc(var(--oh) * 0.587) var(--g2), calc(48.98vw + 8px) calc(var(--oh) * 0.587) var(--g2), calc(79.64vw + 4px) calc(var(--oh) * 0.368) var(--g2), calc(79.64vw + 8px) calc(var(--oh) * 0.368) var(--g2), calc(79.64vw + 12px) calc(var(--oh) * 0.368) var(--g2), calc(79.64vw + 16px) calc(var(--oh) * 0.368) var(--g2), calc(60.35vw + 4px) calc(var(--oh) * 0.606) var(--g2), calc(60.35vw + 8px) calc(var(--oh) * 0.606) var(--g2), calc(60.35vw + 12px) calc(var(--oh) * 0.606) var(--g2), calc(60.35vw + 16px) calc(var(--oh) * 0.606) var(--g2), calc(60.35vw + 20px) calc(var(--oh) * 0.606) var(--g2), calc(28.80vw + 4px) calc(var(--oh) * 0.453) var(--g2), calc(28.80vw + 8px) calc(var(--oh) * 0.453) var(--g2), calc(28.80vw + 12px) calc(var(--oh) * 0.453) var(--g2), calc(26.75vw + 4px) calc(var(--oh) * 0.185) var(--g1), calc(26.75vw + 8px) calc(var(--oh) * 0.185) var(--g1), calc(1.54vw + 4px) calc(var(--oh) * 0.645) var(--g2), calc(1.54vw + 8px) calc(var(--oh) * 0.645) var(--g2), calc(85.71vw + 4px) calc(var(--oh) * 0.157) var(--g1), calc(85.71vw + 8px) calc(var(--oh) * 0.157) var(--g1), calc(90.70vw + 4px) calc(var(--oh) * 0.264) var(--g1), calc(90.70vw + 8px) calc(var(--oh) * 0.264) var(--g1), calc(90.70vw + 12px) calc(var(--oh) * 0.264) var(--g1), calc(90.70vw + 16px) calc(var(--oh) * 0.264) var(--g1), calc(90.70vw + 20px) calc(var(--oh) * 0.264) var(--g1), calc(40.98vw + 4px) calc(var(--oh) * 0.099) var(--g1), calc(40.98vw + 8px) calc(var(--oh) * 0.099) var(--g1), calc(98.00vw + 4px) calc(var(--oh) * 0.565) var(--g2), calc(98.00vw + 8px) calc(var(--oh) * 0.565) var(--g2), calc(98.00vw + 12px) calc(var(--oh) * 0.565) var(--g2), calc(98.00vw + 16px) calc(var(--oh) * 0.565) var(--g2), calc(98.00vw + 20px) calc(var(--oh) * 0.565) var(--g2), calc(98.00vw + 24px) calc(var(--oh) * 0.565) var(--g2), calc(16.57vw + 4px) calc(var(--oh) * 0.088) var(--g1), calc(16.57vw + 8px) calc(var(--oh) * 0.088) var(--g1), calc(16.57vw + 12px) calc(var(--oh) * 0.088) var(--g1), calc(10.33vw + 4px) calc(var(--oh) * 0.247) var(--g1), calc(10.33vw + 8px) calc(var(--oh) * 0.247) var(--g1), calc(10.33vw + 12px) calc(var(--oh) * 0.247) var(--g1), calc(10.33vw + 16px) calc(var(--oh) * 0.247) var(--g1), calc(10.33vw + 20px) calc(var(--oh) * 0.247) var(--g1), calc(10.33vw + 24px) calc(var(--oh) * 0.247) var(--g1), calc(22.33vw + 4px) calc(var(--oh) * 0.128) var(--g1), calc(22.33vw + 8px) calc(var(--oh) * 0.128) var(--g1), calc(36.58vw + 4px) calc(var(--oh) * 0.179) var(--g1), calc(36.58vw + 8px) calc(var(--oh) * 0.179) var(--g1), calc(44.91vw + 4px) calc(var(--oh) * 0.357) var(--g1), calc(44.91vw + 8px) calc(var(--oh) * 0.357) var(--g1), calc(44.91vw + 12px) calc(var(--oh) * 0.357) var(--g1), calc(44.91vw + 16px) calc(var(--oh) * 0.357) var(--g1), calc(44.91vw + 20px) calc(var(--oh) * 0.357) var(--g1), calc(44.91vw + 24px) calc(var(--oh) * 0.357) var(--g1), calc(5.29vw + 4px) calc(var(--oh) * 0.317) var(--g1), calc(5.29vw + 8px) calc(var(--oh) * 0.317) var(--g1), calc(5.29vw + 12px) calc(var(--oh) * 0.317) var(--g1), calc(5.29vw + 16px) calc(var(--oh) * 0.317) var(--g1), calc(73.27vw + 4px) calc(var(--oh) * 0.147) var(--g1), calc(73.27vw + 8px) calc(var(--oh) * 0.147) var(--g1), calc(73.27vw + 12px) calc(var(--oh) * 0.147) var(--g1), calc(73.27vw + 16px) calc(var(--oh) * 0.147) var(--g1), calc(83.82vw + 4px) calc(var(--oh) * 0.306) var(--g1), calc(83.82vw + 8px) calc(var(--oh) * 0.306) var(--g1), calc(83.82vw + 12px) calc(var(--oh) * 0.306) var(--g1), calc(83.82vw + 16px) calc(var(--oh) * 0.306) var(--g1), calc(83.82vw + 20px) calc(var(--oh) * 0.306) var(--g1), calc(13.83vw + 4px) calc(var(--oh) * 0.055) var(--g1), calc(13.83vw + 8px) calc(var(--oh) * 0.055) var(--g1), calc(13.83vw + 12px) calc(var(--oh) * 0.055) var(--g1), calc(13.59vw + 4px) calc(var(--oh) * 0.059) var(--g1), calc(13.59vw + 8px) calc(var(--oh) * 0.059) var(--g1), calc(13.59vw + 12px) calc(var(--oh) * 0.059) var(--g1), calc(13.59vw + 16px) calc(var(--oh) * 0.059) var(--g1), calc(13.59vw + 20px) calc(var(--oh) * 0.059) var(--g1), calc(13.59vw + 24px) calc(var(--oh) * 0.059) var(--g1), calc(8.04vw + 4px) calc(var(--oh) * 0.403) var(--g2), calc(8.04vw + 8px) calc(var(--oh) * 0.403) var(--g2), calc(77.81vw + 4px) calc(var(--oh) * 0.409) var(--g2), calc(77.81vw + 8px) calc(var(--oh) * 0.409) var(--g2), calc(77.81vw + 12px) calc(var(--oh) * 0.409) var(--g2), calc(77.81vw + 16px) calc(var(--oh) * 0.409) var(--g2), calc(77.81vw + 20px) calc(var(--oh) * 0.409) var(--g2), calc(77.81vw + 24px) calc(var(--oh) * 0.409) var(--g2), calc(28.47vw + 4px) calc(var(--oh) * 0.463) var(--g2), calc(28.47vw + 8px) calc(var(--oh) * 0.463) var(--g2), calc(28.47vw + 12px) calc(var(--oh) * 0.463) var(--g2), calc(28.47vw + 16px) calc(var(--oh) * 0.463) var(--g2), calc(28.47vw + 20px) calc(var(--oh) * 0.463) var(--g2), calc(28.47vw + 24px) calc(var(--oh) * 0.463) var(--g2), calc(4.61vw + 4px) calc(var(--oh) * 0.688) var(--g2), calc(4.61vw + 8px) calc(var(--oh) * 0.688) var(--g2), calc(48.93vw + 4px) calc(var(--oh) * 0.275) var(--g1), calc(48.93vw + 8px) calc(var(--oh) * 0.275) var(--g1), calc(48.93vw + 12px) calc(var(--oh) * 0.275) var(--g1), calc(48.93vw + 16px) calc(var(--oh) * 0.275) var(--g1), calc(48.93vw + 20px) calc(var(--oh) * 0.275) var(--g1), calc(96.14vw + 4px) calc(var(--oh) * 0.242) var(--g1), calc(96.14vw + 8px) calc(var(--oh) * 0.242) var(--g1), calc(96.14vw + 12px) calc(var(--oh) * 0.242) var(--g1), calc(29.84vw + 4px) calc(var(--oh) * 0.041) var(--g1), calc(29.84vw + 8px) calc(var(--oh) * 0.041) var(--g1), calc(29.84vw + 12px) calc(var(--oh) * 0.041) var(--g1), calc(29.84vw + 16px) calc(var(--oh) * 0.041) var(--g1);
+}
+
+.ocean-glimmer-alt::before {
+    box-shadow: calc(2.35vw + 4px) calc(var(--oh) * 0.423) var(--g2), calc(2.35vw + 8px) calc(var(--oh) * 0.423) var(--g2), calc(2.35vw + 12px) calc(var(--oh) * 0.423) var(--g2), calc(9.63vw + 4px) calc(var(--oh) * 0.291) var(--g1), calc(9.63vw + 8px) calc(var(--oh) * 0.291) var(--g1), calc(9.63vw + 12px) calc(var(--oh) * 0.291) var(--g1), calc(9.63vw + 16px) calc(var(--oh) * 0.291) var(--g1), calc(9.63vw + 20px) calc(var(--oh) * 0.291) var(--g1), calc(9.63vw + 24px) calc(var(--oh) * 0.291) var(--g1), calc(55.27vw + 4px) calc(var(--oh) * 0.292) var(--g1), calc(55.27vw + 8px) calc(var(--oh) * 0.292) var(--g1), calc(30.57vw + 4px) calc(var(--oh) * 0.194) var(--g1), calc(30.57vw + 8px) calc(var(--oh) * 0.194) var(--g1), calc(30.57vw + 12px) calc(var(--oh) * 0.194) var(--g1), calc(98.13vw + 4px) calc(var(--oh) * 0.160) var(--g1), calc(98.13vw + 8px) calc(var(--oh) * 0.160) var(--g1), calc(22.23vw + 4px) calc(var(--oh) * 0.245) var(--g1), calc(22.23vw + 8px) calc(var(--oh) * 0.245) var(--g1), calc(22.23vw + 12px) calc(var(--oh) * 0.245) var(--g1), calc(9.05vw + 4px) calc(var(--oh) * 0.287) var(--g1), calc(9.05vw + 8px) calc(var(--oh) * 0.287) var(--g1), calc(59.48vw + 4px) calc(var(--oh) * 0.462) var(--g2), calc(59.48vw + 8px) calc(var(--oh) * 0.462) var(--g2), calc(59.48vw + 12px) calc(var(--oh) * 0.462) var(--g2), calc(54.88vw + 4px) calc(var(--oh) * 0.385) var(--g2), calc(54.88vw + 8px) calc(var(--oh) * 0.385) var(--g2), calc(14.92vw + 4px) calc(var(--oh) * 0.470) var(--g2), calc(14.92vw + 8px) calc(var(--oh) * 0.470) var(--g2), calc(14.92vw + 12px) calc(var(--oh) * 0.470) var(--g2), calc(14.92vw + 16px) calc(var(--oh) * 0.470) var(--g2), calc(14.92vw + 20px) calc(var(--oh) * 0.470) var(--g2), calc(74.84vw + 4px) calc(var(--oh) * 0.291) var(--g1), calc(74.84vw + 8px) calc(var(--oh) * 0.291) var(--g1), calc(74.84vw + 12px) calc(var(--oh) * 0.291) var(--g1), calc(74.84vw + 16px) calc(var(--oh) * 0.291) var(--g1), calc(74.84vw + 20px) calc(var(--oh) * 0.291) var(--g1), calc(27.91vw + 4px) calc(var(--oh) * 0.673) var(--g2), calc(27.91vw + 8px) calc(var(--oh) * 0.673) var(--g2), calc(27.91vw + 12px) calc(var(--oh) * 0.673) var(--g2), calc(27.91vw + 16px) calc(var(--oh) * 0.673) var(--g2), calc(5.54vw + 4px) calc(var(--oh) * 0.435) var(--g2), calc(5.54vw + 8px) calc(var(--oh) * 0.435) var(--g2), calc(5.54vw + 12px) calc(var(--oh) * 0.435) var(--g2), calc(5.54vw + 16px) calc(var(--oh) * 0.435) var(--g2), calc(79.91vw + 4px) calc(var(--oh) * 0.570) var(--g2), calc(79.91vw + 8px) calc(var(--oh) * 0.570) var(--g2), calc(26.76vw + 4px) calc(var(--oh) * 0.427) var(--g2), calc(26.76vw + 8px) calc(var(--oh) * 0.427) var(--g2), calc(26.76vw + 12px) calc(var(--oh) * 0.427) var(--g2), calc(26.48vw + 4px) calc(var(--oh) * 0.499) var(--g2), calc(26.48vw + 8px) calc(var(--oh) * 0.499) var(--g2), calc(26.48vw + 12px) calc(var(--oh) * 0.499) var(--g2), calc(26.48vw + 16px) calc(var(--oh) * 0.499) var(--g2), calc(26.48vw + 20px) calc(var(--oh) * 0.499) var(--g2), calc(6.34vw + 4px) calc(var(--oh) * 0.251) var(--g1), calc(6.34vw + 8px) calc(var(--oh) * 0.251) var(--g1), calc(86.39vw + 4px) calc(var(--oh) * 0.434) var(--g2), calc(86.39vw + 8px) calc(var(--oh) * 0.434) var(--g2), calc(86.39vw + 12px) calc(var(--oh) * 0.434) var(--g2), calc(77.20vw + 4px) calc(var(--oh) * 0.055) var(--g1), calc(77.20vw + 8px) calc(var(--oh) * 0.055) var(--g1), calc(9.75vw + 4px) calc(var(--oh) * 0.630) var(--g2), calc(9.75vw + 8px) calc(var(--oh) * 0.630) var(--g2), calc(9.75vw + 12px) calc(var(--oh) * 0.630) var(--g2), calc(9.75vw + 16px) calc(var(--oh) * 0.630) var(--g2), calc(43.17vw + 4px) calc(var(--oh) * 0.153) var(--g1), calc(43.17vw + 8px) calc(var(--oh) * 0.153) var(--g1), calc(43.17vw + 12px) calc(var(--oh) * 0.153) var(--g1), calc(4.44vw + 4px) calc(var(--oh) * 0.218) var(--g1), calc(4.44vw + 8px) calc(var(--oh) * 0.218) var(--g1), calc(4.44vw + 12px) calc(var(--oh) * 0.218) var(--g1), calc(4.44vw + 16px) calc(var(--oh) * 0.218) var(--g1), calc(4.44vw + 20px) calc(var(--oh) * 0.218) var(--g1), calc(56.58vw + 4px) calc(var(--oh) * 0.415) var(--g2), calc(56.58vw + 8px) calc(var(--oh) * 0.415) var(--g2), calc(56.58vw + 12px) calc(var(--oh) * 0.415) var(--g2), calc(11.21vw + 4px) calc(var(--oh) * 0.167) var(--g1), calc(11.21vw + 8px) calc(var(--oh) * 0.167) var(--g1), calc(11.21vw + 12px) calc(var(--oh) * 0.167) var(--g1), calc(52.32vw + 4px) calc(var(--oh) * 0.666) var(--g2), calc(52.32vw + 8px) calc(var(--oh) * 0.666) var(--g2), calc(52.32vw + 12px) calc(var(--oh) * 0.666) var(--g2), calc(52.32vw + 16px) calc(var(--oh) * 0.666) var(--g2), calc(52.32vw + 20px) calc(var(--oh) * 0.666) var(--g2), calc(52.32vw + 24px) calc(var(--oh) * 0.666) var(--g2), calc(31.38vw + 4px) calc(var(--oh) * 0.266) var(--g1), calc(31.38vw + 8px) calc(var(--oh) * 0.266) var(--g1), calc(31.38vw + 12px) calc(var(--oh) * 0.266) var(--g1), calc(31.38vw + 16px) calc(var(--oh) * 0.266) var(--g1), calc(72.98vw + 4px) calc(var(--oh) * 0.196) var(--g1), calc(72.98vw + 8px) calc(var(--oh) * 0.196) var(--g1), calc(65.99vw + 4px) calc(var(--oh) * 0.239) var(--g1), calc(65.99vw + 8px) calc(var(--oh) * 0.239) var(--g1), calc(65.99vw + 12px) calc(var(--oh) * 0.239) var(--g1), calc(23.95vw + 4px) calc(var(--oh) * 0.052) var(--g1), calc(23.95vw + 8px) calc(var(--oh) * 0.052) var(--g1), calc(90.50vw + 4px) calc(var(--oh) * 0.542) var(--g2), calc(90.50vw + 8px) calc(var(--oh) * 0.542) var(--g2), calc(90.50vw + 12px) calc(var(--oh) * 0.542) var(--g2), calc(53.92vw + 4px) calc(var(--oh) * 0.046) var(--g1), calc(53.92vw + 8px) calc(var(--oh) * 0.046) var(--g1), calc(53.92vw + 12px) calc(var(--oh) * 0.046) var(--g1), calc(53.34vw + 4px) calc(var(--oh) * 0.448) var(--g2), calc(53.34vw + 8px) calc(var(--oh) * 0.448) var(--g2), calc(53.34vw + 12px) calc(var(--oh) * 0.448) var(--g2), calc(79.91vw + 4px) calc(var(--oh) * 0.095) var(--g1), calc(79.91vw + 8px) calc(var(--oh) * 0.095) var(--g1), calc(79.91vw + 12px) calc(var(--oh) * 0.095) var(--g1), calc(45.43vw + 4px) calc(var(--oh) * 0.469) var(--g2), calc(45.43vw + 8px) calc(var(--oh) * 0.469) var(--g2), calc(45.43vw + 12px) calc(var(--oh) * 0.469) var(--g2), calc(45.43vw + 16px) calc(var(--oh) * 0.469) var(--g2), calc(53.63vw + 4px) calc(var(--oh) * 0.166) var(--g1), calc(53.63vw + 8px) calc(var(--oh) * 0.166) var(--g1), calc(53.63vw + 12px) calc(var(--oh) * 0.166) var(--g1), calc(53.63vw + 16px) calc(var(--oh) * 0.166) var(--g1), calc(53.63vw + 20px) calc(var(--oh) * 0.166) var(--g1), calc(53.63vw + 24px) calc(var(--oh) * 0.166) var(--g1), calc(36.32vw + 4px) calc(var(--oh) * 0.260) var(--g1), calc(36.32vw + 8px) calc(var(--oh) * 0.260) var(--g1), calc(36.32vw + 12px) calc(var(--oh) * 0.260) var(--g1), calc(63.65vw + 4px) calc(var(--oh) * 0.208) var(--g1), calc(63.65vw + 8px) calc(var(--oh) * 0.208) var(--g1), calc(10.89vw + 4px) calc(var(--oh) * 0.360) var(--g1), calc(10.89vw + 8px) calc(var(--oh) * 0.360) var(--g1), calc(10.89vw + 12px) calc(var(--oh) * 0.360) var(--g1), calc(94.42vw + 4px) calc(var(--oh) * 0.478) var(--g2), calc(94.42vw + 8px) calc(var(--oh) * 0.478) var(--g2), calc(95.51vw + 4px) calc(var(--oh) * 0.597) var(--g2), calc(95.51vw + 8px) calc(var(--oh) * 0.597) var(--g2), calc(95.51vw + 12px) calc(var(--oh) * 0.597) var(--g2), calc(95.51vw + 16px) calc(var(--oh) * 0.597) var(--g2), calc(29.71vw + 4px) calc(var(--oh) * 0.398) var(--g2), calc(29.71vw + 8px) calc(var(--oh) * 0.398) var(--g2), calc(29.71vw + 12px) calc(var(--oh) * 0.398) var(--g2), calc(2.86vw + 4px) calc(var(--oh) * 0.371) var(--g2), calc(2.86vw + 8px) calc(var(--oh) * 0.371) var(--g2), calc(2.86vw + 12px) calc(var(--oh) * 0.371) var(--g2), calc(2.86vw + 16px) calc(var(--oh) * 0.371) var(--g2), calc(2.86vw + 20px) calc(var(--oh) * 0.371) var(--g2), calc(2.86vw + 24px) calc(var(--oh) * 0.371) var(--g2), calc(44.02vw + 4px) calc(var(--oh) * 0.532) var(--g2), calc(44.02vw + 8px) calc(var(--oh) * 0.532) var(--g2), calc(20.47vw + 4px) calc(var(--oh) * 0.606) var(--g2), calc(20.47vw + 8px) calc(var(--oh) * 0.606) var(--g2), calc(30.14vw + 4px) calc(var(--oh) * 0.073) var(--g1), calc(30.14vw + 8px) calc(var(--oh) * 0.073) var(--g1), calc(30.14vw + 12px) calc(var(--oh) * 0.073) var(--g1), calc(15.46vw + 4px) calc(var(--oh) * 0.503) var(--g2), calc(15.46vw + 8px) calc(var(--oh) * 0.503) var(--g2), calc(15.46vw + 12px) calc(var(--oh) * 0.503) var(--g2), calc(15.46vw + 16px) calc(var(--oh) * 0.503) var(--g2), calc(15.46vw + 20px) calc(var(--oh) * 0.503) var(--g2), calc(4.78vw + 4px) calc(var(--oh) * 0.064) var(--g1), calc(4.78vw + 8px) calc(var(--oh) * 0.064) var(--g1), calc(4.78vw + 12px) calc(var(--oh) * 0.064) var(--g1), calc(91.66vw + 4px) calc(var(--oh) * 0.264) var(--g1), calc(91.66vw + 8px) calc(var(--oh) * 0.264) var(--g1), calc(85.35vw + 4px) calc(var(--oh) * 0.669) var(--g2), calc(85.35vw + 8px) calc(var(--oh) * 0.669) var(--g2), calc(85.35vw + 12px) calc(var(--oh) * 0.669) var(--g2), calc(61.87vw + 4px) calc(var(--oh) * 0.165) var(--g1), calc(61.87vw + 8px) calc(var(--oh) * 0.165) var(--g1), calc(61.87vw + 12px) calc(var(--oh) * 0.165) var(--g1), calc(61.87vw + 16px) calc(var(--oh) * 0.165) var(--g1), calc(61.87vw + 20px) calc(var(--oh) * 0.165) var(--g1), calc(33.92vw + 4px) calc(var(--oh) * 0.317) var(--g1), calc(33.92vw + 8px) calc(var(--oh) * 0.317) var(--g1), calc(81.04vw + 4px) calc(var(--oh) * 0.048) var(--g1), calc(81.04vw + 8px) calc(var(--oh) * 0.048) var(--g1), calc(81.04vw + 12px) calc(var(--oh) * 0.048) var(--g1), calc(81.04vw + 16px) calc(var(--oh) * 0.048) var(--g1), calc(81.04vw + 20px) calc(var(--oh) * 0.048) var(--g1), calc(81.04vw + 24px) calc(var(--oh) * 0.048) var(--g1), calc(32.69vw + 4px) calc(var(--oh) * 0.489) var(--g2), calc(32.69vw + 8px) calc(var(--oh) * 0.489) var(--g2), calc(97.87vw + 4px) calc(var(--oh) * 0.033) var(--g1), calc(97.87vw + 8px) calc(var(--oh) * 0.033) var(--g1), calc(97.87vw + 12px) calc(var(--oh) * 0.033) var(--g1), calc(37.65vw + 4px) calc(var(--oh) * 0.169) var(--g1), calc(37.65vw + 8px) calc(var(--oh) * 0.169) var(--g1), calc(4.63vw + 4px) calc(var(--oh) * 0.064) var(--g1), calc(4.63vw + 8px) calc(var(--oh) * 0.064) var(--g1), calc(4.63vw + 12px) calc(var(--oh) * 0.064) var(--g1), calc(30.46vw + 4px) calc(var(--oh) * 0.407) var(--g2), calc(30.46vw + 8px) calc(var(--oh) * 0.407) var(--g2), calc(49.60vw + 4px) calc(var(--oh) * 0.285) var(--g1), calc(49.60vw + 8px) calc(var(--oh) * 0.285) var(--g1), calc(95.31vw + 4px) calc(var(--oh) * 0.471) var(--g2), calc(95.31vw + 8px) calc(var(--oh) * 0.471) var(--g2), calc(95.31vw + 12px) calc(var(--oh) * 0.471) var(--g2), calc(95.31vw + 16px) calc(var(--oh) * 0.471) var(--g2), calc(49.55vw + 4px) calc(var(--oh) * 0.257) var(--g1), calc(49.55vw + 8px) calc(var(--oh) * 0.257) var(--g1);
+}
+
+.sun-path::before {
+    box-shadow: -8px calc(var(--oh) * 0.020) var(--sun-core), -4px calc(var(--oh) * 0.020) var(--sun-core), 0px calc(var(--oh) * 0.020) var(--sun-core), 4px calc(var(--oh) * 0.020) var(--sun-core), 8px calc(var(--oh) * 0.020) var(--sun-core), -4px calc(var(--oh) * 0.068) var(--sun-core), 0px calc(var(--oh) * 0.068) var(--sun-core), 4px calc(var(--oh) * 0.068) var(--sun-core), 8px calc(var(--oh) * 0.068) var(--sun-core), -4px calc(var(--oh) * 0.111) var(--sun-core), 0px calc(var(--oh) * 0.111) var(--sun-core), 4px calc(var(--oh) * 0.111) var(--sun-core), 8px calc(var(--oh) * 0.111) var(--sun-core), 12px calc(var(--oh) * 0.111) var(--sun-core), 16px calc(var(--oh) * 0.111) var(--sun-core), -12px calc(var(--oh) * 0.157) var(--sun-core), -8px calc(var(--oh) * 0.157) var(--sun-core), -4px calc(var(--oh) * 0.157) var(--sun-core), 0px calc(var(--oh) * 0.157) var(--sun-core), 4px calc(var(--oh) * 0.157) var(--sun-core), -12px calc(var(--oh) * 0.198) var(--sun-core), -8px calc(var(--oh) * 0.198) var(--sun-core), -4px calc(var(--oh) * 0.198) var(--sun-core), 0px calc(var(--oh) * 0.198) var(--sun-core), 4px calc(var(--oh) * 0.198) var(--sun-core), 8px calc(var(--oh) * 0.198) var(--sun-core), 12px calc(var(--oh) * 0.198) var(--sun-core), -24px calc(var(--oh) * 0.255) var(--sun-core), -20px calc(var(--oh) * 0.255) var(--sun-core), -16px calc(var(--oh) * 0.255) var(--sun-core), -12px calc(var(--oh) * 0.255) var(--sun-core), -8px calc(var(--oh) * 0.255) var(--sun-core), -4px calc(var(--oh) * 0.255) var(--sun-core), -4px calc(var(--oh) * 0.304) var(--sun-core), 0px calc(var(--oh) * 0.304) var(--sun-core), 4px calc(var(--oh) * 0.304) var(--sun-core), 8px calc(var(--oh) * 0.304) var(--sun-core), 12px calc(var(--oh) * 0.304) var(--sun-core), 16px calc(var(--oh) * 0.304) var(--sun-core), 20px calc(var(--oh) * 0.304) var(--sun-core), 24px calc(var(--oh) * 0.304) var(--sun-core), 28px calc(var(--oh) * 0.304) var(--sun-core), -28px calc(var(--oh) * 0.350) var(--sun-core), -24px calc(var(--oh) * 0.350) var(--sun-core), -20px calc(var(--oh) * 0.350) var(--sun-core), -16px calc(var(--oh) * 0.350) var(--sun-core), -12px calc(var(--oh) * 0.350) var(--sun-core), -8px calc(var(--oh) * 0.350) var(--sun-core), -4px calc(var(--oh) * 0.350) var(--sun-core), 0px calc(var(--oh) * 0.350) var(--sun-core), 4px calc(var(--oh) * 0.350) var(--sun-core), -8px calc(var(--oh) * 0.400) var(--sun-core), -4px calc(var(--oh) * 0.400) var(--sun-core), 0px calc(var(--oh) * 0.400) var(--sun-core), 4px calc(var(--oh) * 0.400) var(--sun-core), 8px calc(var(--oh) * 0.400) var(--sun-core), 12px calc(var(--oh) * 0.400) var(--sun-core), 16px calc(var(--oh) * 0.400) var(--sun-core), 20px calc(var(--oh) * 0.400) var(--sun-core), 24px calc(var(--oh) * 0.400) var(--sun-core), 28px calc(var(--oh) * 0.400) var(--sun-core), -4px calc(var(--oh) * 0.445) var(--sun-core), 0px calc(var(--oh) * 0.445) var(--sun-core), 4px calc(var(--oh) * 0.445) var(--sun-core), 8px calc(var(--oh) * 0.445) var(--sun-core), 12px calc(var(--oh) * 0.445) var(--sun-core), 16px calc(var(--oh) * 0.445) var(--sun-core), 20px calc(var(--oh) * 0.445) var(--sun-core), 24px calc(var(--oh) * 0.445) var(--sun-core), 28px calc(var(--oh) * 0.445) var(--sun-core), -28px calc(var(--oh) * 0.481) var(--sun-core), -24px calc(var(--oh) * 0.481) var(--sun-core), -20px calc(var(--oh) * 0.481) var(--sun-core), -16px calc(var(--oh) * 0.481) var(--sun-core), -12px calc(var(--oh) * 0.481) var(--sun-core), -8px calc(var(--oh) * 0.481) var(--sun-core), -4px calc(var(--oh) * 0.481) var(--sun-core), 0px calc(var(--oh) * 0.481) var(--sun-core), 4px calc(var(--oh) * 0.481) var(--sun-core), -28px calc(var(--oh) * 0.540) var(--sun-core), -24px calc(var(--oh) * 0.540) var(--sun-core), -20px calc(var(--oh) * 0.540) var(--sun-core), -16px calc(var(--oh) * 0.540) var(--sun-core), -12px calc(var(--oh) * 0.540) var(--sun-core), -8px calc(var(--oh) * 0.540) var(--sun-core), -4px calc(var(--oh) * 0.540) var(--sun-core), 0px calc(var(--oh) * 0.540) var(--sun-core), 4px calc(var(--oh) * 0.540) var(--sun-core), 8px calc(var(--oh) * 0.540) var(--sun-core), 12px calc(var(--oh) * 0.540) var(--sun-core), 16px calc(var(--oh) * 0.540) var(--sun-core), -36px calc(var(--oh) * 0.580) var(--sun-core), -32px calc(var(--oh) * 0.580) var(--sun-core), -28px calc(var(--oh) * 0.580) var(--sun-core), -24px calc(var(--oh) * 0.580) var(--sun-core), -20px calc(var(--oh) * 0.580) var(--sun-core), -16px calc(var(--oh) * 0.580) var(--sun-core), -12px calc(var(--oh) * 0.580) var(--sun-core), -8px calc(var(--oh) * 0.580) var(--sun-core), -4px calc(var(--oh) * 0.580) var(--sun-core), 0px calc(var(--oh) * 0.580) var(--sun-core), 4px calc(var(--oh) * 0.580) var(--sun-core), 8px calc(var(--oh) * 0.580) var(--sun-core), 12px calc(var(--oh) * 0.580) var(--sun-core);
+}
+
+.sand-texture::before {
+    box-shadow: calc(51.39vw + 3px) calc(var(--sh) * 0.103) var(--k2), calc(88.95vw + 3px) calc(var(--sh) * 0.128) var(--k1), calc(88.95vw + 6px) calc(var(--sh) * 0.128 + 3px) var(--k1), calc(16.77vw + 3px) calc(var(--sh) * 0.157) var(--k1), calc(16.77vw + 6px) calc(var(--sh) * 0.157) var(--k1), calc(16.77vw + 6px) calc(var(--sh) * 0.157 + 3px) var(--k1), calc(33.58vw + 3px) calc(var(--sh) * 0.748) var(--k1), calc(33.58vw + 6px) calc(var(--sh) * 0.748 + 3px) var(--k1), calc(69.43vw + 3px) calc(var(--sh) * 0.233) var(--k3), calc(69.43vw + 6px) calc(var(--sh) * 0.233) var(--k3), calc(69.43vw + 6px) calc(var(--sh) * 0.233 + 3px) var(--k3), calc(27.04vw + 3px) calc(var(--sh) * 0.061) var(--k3), calc(27.04vw + 9px) calc(var(--sh) * 0.061) var(--k3), calc(35.77vw + 3px) calc(var(--sh) * 0.807) var(--k2), calc(35.77vw + 3px) calc(var(--sh) * 0.807 + 3px) var(--k2), calc(50.95vw + 3px) calc(var(--sh) * 0.737) var(--k1), calc(50.95vw + 6px) calc(var(--sh) * 0.737) var(--k1), calc(50.95vw + 6px) calc(var(--sh) * 0.737 + 3px) var(--k1), calc(20.54vw + 3px) calc(var(--sh) * 0.918) var(--k2), calc(20.54vw + 9px) calc(var(--sh) * 0.918) var(--k2), calc(50.83vw + 3px) calc(var(--sh) * 0.735) var(--k3), calc(50.83vw + 6px) calc(var(--sh) * 0.735) var(--k3), calc(50.83vw + 6px) calc(var(--sh) * 0.735 + 3px) var(--k3), calc(23.35vw + 3px) calc(var(--sh) * 0.577) var(--k1), calc(23.35vw + 9px) calc(var(--sh) * 0.577) var(--k1), calc(74.15vw + 6px) calc(var(--sh) * 0.980) var(--k3), calc(74.15vw + 3px) calc(var(--sh) * 0.980 + 3px) var(--k3), calc(74.15vw + 6px) calc(var(--sh) * 0.980 + 3px) var(--k3), calc(74.15vw + 9px) calc(var(--sh) * 0.980 + 3px) var(--k3), calc(36.56vw + 3px) calc(var(--sh) * 0.773) var(--k1), calc(36.56vw + 3px) calc(var(--sh) * 0.773 + 3px) var(--k1), calc(71.92vw + 6px) calc(var(--sh) * 0.269) var(--k3), calc(71.92vw + 3px) calc(var(--sh) * 0.269 + 3px) var(--k3), calc(71.92vw + 6px) calc(var(--sh) * 0.269 + 3px) var(--k3), calc(71.92vw + 9px) calc(var(--sh) * 0.269 + 3px) var(--k3), calc(38.34vw + 3px) calc(var(--sh) * 0.174) var(--k1), calc(38.34vw + 3px) calc(var(--sh) * 0.174 + 3px) var(--k1), calc(18.02vw + 3px) calc(var(--sh) * 0.130) var(--k3), calc(18.02vw + 6px) calc(var(--sh) * 0.130) var(--k3), calc(13.24vw + 3px) calc(var(--sh) * 0.727) var(--k1), calc(88.81vw + 6px) calc(var(--sh) * 0.670) var(--k1), calc(88.81vw + 3px) calc(var(--sh) * 0.670 + 3px) var(--k1), calc(88.81vw + 6px) calc(var(--sh) * 0.670 + 3px) var(--k1), calc(88.81vw + 9px) calc(var(--sh) * 0.670 + 3px) var(--k1), calc(52.66vw + 3px) calc(var(--sh) * 0.672) var(--k2), calc(52.66vw + 3px) calc(var(--sh) * 0.672 + 3px) var(--k2), calc(8.75vw + 3px) calc(var(--sh) * 0.623) var(--k3), calc(8.75vw + 6px) calc(var(--sh) * 0.623) var(--k3), calc(8.75vw + 6px) calc(var(--sh) * 0.623 + 3px) var(--k3), calc(91.97vw + 3px) calc(var(--sh) * 0.584) var(--k2), calc(91.97vw + 3px) calc(var(--sh) * 0.584 + 3px) var(--k2), calc(63.54vw + 3px) calc(var(--sh) * 0.605) var(--k1), calc(63.54vw + 9px) calc(var(--sh) * 0.605) var(--k1), calc(50.90vw + 6px) calc(var(--sh) * 0.095) var(--k3), calc(50.90vw + 3px) calc(var(--sh) * 0.095 + 3px) var(--k3), calc(50.90vw + 6px) calc(var(--sh) * 0.095 + 3px) var(--k3), calc(50.90vw + 9px) calc(var(--sh) * 0.095 + 3px) var(--k3), calc(16.24vw + 3px) calc(var(--sh) * 0.814) var(--k2), calc(51.88vw + 3px) calc(var(--sh) * 0.425) var(--k1), calc(51.88vw + 6px) calc(var(--sh) * 0.425) var(--k1), calc(58.45vw + 3px) calc(var(--sh) * 0.822) var(--k2), calc(58.45vw + 6px) calc(var(--sh) * 0.822) var(--k2), calc(68.90vw + 3px) calc(var(--sh) * 0.941) var(--k2), calc(68.90vw + 6px) calc(var(--sh) * 0.941) var(--k2), calc(68.90vw + 6px) calc(var(--sh) * 0.941 + 3px) var(--k2), calc(68.94vw + 3px) calc(var(--sh) * 0.159) var(--k2), calc(68.94vw + 3px) calc(var(--sh) * 0.159 + 3px) var(--k2), calc(81.98vw + 3px) calc(var(--sh) * 0.070) var(--k3), calc(83.81vw + 3px) calc(var(--sh) * 0.219) var(--k1), calc(83.81vw + 3px) calc(var(--sh) * 0.219 + 3px) var(--k1), calc(92.34vw + 3px) calc(var(--sh) * 0.973) var(--k1), calc(92.34vw + 6px) calc(var(--sh) * 0.973) var(--k1), calc(92.34vw + 6px) calc(var(--sh) * 0.973 + 3px) var(--k1), calc(80.99vw + 3px) calc(var(--sh) * 0.350) var(--k1), calc(80.99vw + 3px) calc(var(--sh) * 0.350 + 3px) var(--k1), calc(2.80vw + 3px) calc(var(--sh) * 0.646) var(--k1), calc(2.80vw + 3px) calc(var(--sh) * 0.646 + 3px) var(--k1), calc(95.30vw + 3px) calc(var(--sh) * 0.271) var(--k1), calc(95.30vw + 3px) calc(var(--sh) * 0.271 + 3px) var(--k1), calc(87.21vw + 3px) calc(var(--sh) * 0.846) var(--k1), calc(87.21vw + 9px) calc(var(--sh) * 0.846) var(--k1), calc(30.03vw + 3px) calc(var(--sh) * 0.309) var(--k3), calc(5.03vw + 3px) calc(var(--sh) * 0.339) var(--k2), calc(5.03vw + 6px) calc(var(--sh) * 0.339 + 3px) var(--k2), calc(96.93vw + 3px) calc(var(--sh) * 0.608) var(--k1), calc(96.93vw + 6px) calc(var(--sh) * 0.608 + 3px) var(--k1), calc(98.24vw + 3px) calc(var(--sh) * 0.140) var(--k3), calc(98.24vw + 6px) calc(var(--sh) * 0.140) var(--k3), calc(37.00vw + 6px) calc(var(--sh) * 0.251) var(--k2), calc(37.00vw + 3px) calc(var(--sh) * 0.251 + 3px) var(--k2), calc(37.00vw + 6px) calc(var(--sh) * 0.251 + 3px) var(--k2), calc(37.00vw + 9px) calc(var(--sh) * 0.251 + 3px) var(--k2), calc(12.99vw + 3px) calc(var(--sh) * 0.900) var(--k3), calc(43.87vw + 6px) calc(var(--sh) * 0.785) var(--k3), calc(43.87vw + 3px) calc(var(--sh) * 0.785 + 3px) var(--k3), calc(43.87vw + 6px) calc(var(--sh) * 0.785 + 3px) var(--k3), calc(43.87vw + 9px) calc(var(--sh) * 0.785 + 3px) var(--k3), calc(39.94vw + 3px) calc(var(--sh) * 0.631) var(--k3), calc(46.83vw + 6px) calc(var(--sh) * 0.315) var(--k3), calc(46.83vw + 3px) calc(var(--sh) * 0.315 + 3px) var(--k3), calc(46.83vw + 6px) calc(var(--sh) * 0.315 + 3px) var(--k3), calc(46.83vw + 9px) calc(var(--sh) * 0.315 + 3px) var(--k3), calc(71.45vw + 3px) calc(var(--sh) * 0.088) var(--k2), calc(49.98vw + 3px) calc(var(--sh) * 0.891) var(--k1), calc(49.98vw + 6px) calc(var(--sh) * 0.891) var(--k1), calc(49.98vw + 6px) calc(var(--sh) * 0.891 + 3px) var(--k1), calc(50.59vw + 3px) calc(var(--sh) * 0.195) var(--k1), calc(50.59vw + 6px) calc(var(--sh) * 0.195) var(--k1), calc(50.59vw + 6px) calc(var(--sh) * 0.195 + 3px) var(--k1), calc(62.80vw + 3px) calc(var(--sh) * 0.757) var(--k3), calc(62.80vw + 9px) calc(var(--sh) * 0.757) var(--k3), calc(86.38vw + 3px) calc(var(--sh) * 0.633) var(--k1), calc(86.38vw + 6px) calc(var(--sh) * 0.633) var(--k1), calc(71.87vw + 3px) calc(var(--sh) * 0.284) var(--k1), calc(71.87vw + 3px) calc(var(--sh) * 0.284 + 3px) var(--k1), calc(86.57vw + 3px) calc(var(--sh) * 0.819) var(--k1), calc(86.57vw + 6px) calc(var(--sh) * 0.819) var(--k1), calc(48.19vw + 3px) calc(var(--sh) * 0.439) var(--k1), calc(21.45vw + 3px) calc(var(--sh) * 0.203) var(--k1), calc(23.41vw + 6px) calc(var(--sh) * 0.491) var(--k1), calc(23.41vw + 3px) calc(var(--sh) * 0.491 + 3px) var(--k1), calc(23.41vw + 6px) calc(var(--sh) * 0.491 + 3px) var(--k1), calc(23.41vw + 9px) calc(var(--sh) * 0.491 + 3px) var(--k1), calc(97.68vw + 3px) calc(var(--sh) * 0.857) var(--k1), calc(97.68vw + 6px) calc(var(--sh) * 0.857) var(--k1), calc(85.39vw + 3px) calc(var(--sh) * 0.641) var(--k3), calc(85.39vw + 6px) calc(var(--sh) * 0.641) var(--k3), calc(17.46vw + 3px) calc(var(--sh) * 0.735) var(--k3), calc(17.46vw + 9px) calc(var(--sh) * 0.735) var(--k3), calc(8.96vw + 3px) calc(var(--sh) * 0.720) var(--k2), calc(8.96vw + 6px) calc(var(--sh) * 0.720) var(--k2), calc(8.96vw + 6px) calc(var(--sh) * 0.720 + 3px) var(--k2), calc(1.27vw + 3px) calc(var(--sh) * 0.107) var(--k1), calc(1.27vw + 6px) calc(var(--sh) * 0.107) var(--k1), calc(1.27vw + 6px) calc(var(--sh) * 0.107 + 3px) var(--k1), calc(85.62vw + 3px) calc(var(--sh) * 0.741) var(--k3), calc(85.62vw + 6px) calc(var(--sh) * 0.741) var(--k3), calc(26.65vw + 3px) calc(var(--sh) * 0.415) var(--k1), calc(26.65vw + 6px) calc(var(--sh) * 0.415 + 3px) var(--k1), calc(44.48vw + 3px) calc(var(--sh) * 0.847) var(--k2), calc(24.19vw + 3px) calc(var(--sh) * 0.495) var(--k1), calc(24.19vw + 6px) calc(var(--sh) * 0.495 + 3px) var(--k1), calc(26.43vw + 6px) calc(var(--sh) * 0.310) var(--k2), calc(26.43vw + 3px) calc(var(--sh) * 0.310 + 3px) var(--k2), calc(26.43vw + 6px) calc(var(--sh) * 0.310 + 3px) var(--k2), calc(26.43vw + 9px) calc(var(--sh) * 0.310 + 3px) var(--k2), calc(87.31vw + 3px) calc(var(--sh) * 0.538) var(--k1), calc(87.31vw + 6px) calc(var(--sh) * 0.538) var(--k1), calc(87.31vw + 6px) calc(var(--sh) * 0.538 + 3px) var(--k1), calc(9.53vw + 3px) calc(var(--sh) * 0.656) var(--k1), calc(63.21vw + 3px) calc(var(--sh) * 0.941) var(--k1), calc(63.21vw + 6px) calc(var(--sh) * 0.941) var(--k1), calc(49.13vw + 3px) calc(var(--sh) * 0.129) var(--k2), calc(49.13vw + 6px) calc(var(--sh) * 0.129) var(--k2), calc(49.13vw + 6px) calc(var(--sh) * 0.129 + 3px) var(--k2), calc(4.10vw + 3px) calc(var(--sh) * 0.561) var(--k2), calc(4.10vw + 6px) calc(var(--sh) * 0.561) var(--k2), calc(4.10vw + 6px) calc(var(--sh) * 0.561 + 3px) var(--k2), calc(10.32vw + 3px) calc(var(--sh) * 0.192) var(--k3), calc(10.32vw + 6px) calc(var(--sh) * 0.192) var(--k3), calc(3.91vw + 3px) calc(var(--sh) * 0.950) var(--k3), calc(39.83vw + 3px) calc(var(--sh) * 0.081) var(--k1), calc(39.83vw + 6px) calc(var(--sh) * 0.081) var(--k1), calc(96.67vw + 3px) calc(var(--sh) * 0.594) var(--k3), calc(96.67vw + 6px) calc(var(--sh) * 0.594) var(--k3), calc(96.67vw + 6px) calc(var(--sh) * 0.594 + 3px) var(--k3), calc(30.82vw + 3px) calc(var(--sh) * 0.075) var(--k1), calc(30.82vw + 9px) calc(var(--sh) * 0.075) var(--k1), calc(8.58vw + 3px) calc(var(--sh) * 0.854) var(--k2), calc(8.58vw + 9px) calc(var(--sh) * 0.854) var(--k2), calc(87.06vw + 3px) calc(var(--sh) * 0.590) var(--k1), calc(87.06vw + 3px) calc(var(--sh) * 0.590 + 3px) var(--k1), calc(78.34vw + 6px) calc(var(--sh) * 0.550) var(--k2), calc(78.34vw + 3px) calc(var(--sh) * 0.550 + 3px) var(--k2), calc(78.34vw + 6px) calc(var(--sh) * 0.550 + 3px) var(--k2), calc(78.34vw + 9px) calc(var(--sh) * 0.550 + 3px) var(--k2), calc(94.71vw + 3px) calc(var(--sh) * 0.612) var(--k3), calc(94.71vw + 6px) calc(var(--sh) * 0.612 + 3px) var(--k3), calc(38.29vw + 3px) calc(var(--sh) * 0.228) var(--k1), calc(38.29vw + 6px) calc(var(--sh) * 0.228 + 3px) var(--k1), calc(65.95vw + 3px) calc(var(--sh) * 0.247) var(--k3), calc(32.89vw + 6px) calc(var(--sh) * 0.436) var(--k1), calc(32.89vw + 3px) calc(var(--sh) * 0.436 + 3px) var(--k1), calc(32.89vw + 6px) calc(var(--sh) * 0.436 + 3px) var(--k1), calc(32.89vw + 9px) calc(var(--sh) * 0.436 + 3px) var(--k1), calc(70.16vw + 3px) calc(var(--sh) * 0.544) var(--k2), calc(70.16vw + 6px) calc(var(--sh) * 0.544 + 3px) var(--k2), calc(16.35vw + 6px) calc(var(--sh) * 0.805) var(--k1), calc(16.35vw + 3px) calc(var(--sh) * 0.805 + 3px) var(--k1), calc(16.35vw + 6px) calc(var(--sh) * 0.805 + 3px) var(--k1), calc(16.35vw + 9px) calc(var(--sh) * 0.805 + 3px) var(--k1), calc(90.48vw + 3px) calc(var(--sh) * 0.221) var(--k3), calc(90.48vw + 6px) calc(var(--sh) * 0.221) var(--k3), calc(90.48vw + 6px) calc(var(--sh) * 0.221 + 3px) var(--k3), calc(80.94vw + 3px) calc(var(--sh) * 0.153) var(--k1), calc(61.05vw + 3px) calc(var(--sh) * 0.426) var(--k3), calc(61.05vw + 9px) calc(var(--sh) * 0.426) var(--k3), calc(12.69vw + 3px) calc(var(--sh) * 0.522) var(--k1), calc(12.69vw + 6px) calc(var(--sh) * 0.522 + 3px) var(--k1), calc(22.10vw + 3px) calc(var(--sh) * 0.474) var(--k2), calc(22.10vw + 3px) calc(var(--sh) * 0.474 + 3px) var(--k2), calc(77.46vw + 6px) calc(var(--sh) * 0.125) var(--k1), calc(77.46vw + 3px) calc(var(--sh) * 0.125 + 3px) var(--k1), calc(77.46vw + 6px) calc(var(--sh) * 0.125 + 3px) var(--k1), calc(77.46vw + 9px) calc(var(--sh) * 0.125 + 3px) var(--k1), calc(66.30vw + 3px) calc(var(--sh) * 0.461) var(--k1), calc(66.30vw + 9px) calc(var(--sh) * 0.461) var(--k1), calc(54.13vw + 6px) calc(var(--sh) * 0.100) var(--k3), calc(54.13vw + 3px) calc(var(--sh) * 0.100 + 3px) var(--k3), calc(54.13vw + 6px) calc(var(--sh) * 0.100 + 3px) var(--k3), calc(54.13vw + 9px) calc(var(--sh) * 0.100 + 3px) var(--k3), calc(77.67vw + 6px) calc(var(--sh) * 0.811) var(--k2), calc(77.67vw + 3px) calc(var(--sh) * 0.811 + 3px) var(--k2), calc(77.67vw + 6px) calc(var(--sh) * 0.811 + 3px) var(--k2), calc(77.67vw + 9px) calc(var(--sh) * 0.811 + 3px) var(--k2), calc(54.35vw + 3px) calc(var(--sh) * 0.596) var(--k1), calc(32.92vw + 3px) calc(var(--sh) * 0.103) var(--k1), calc(32.92vw + 9px) calc(var(--sh) * 0.103) var(--k1), calc(39.68vw + 3px) calc(var(--sh) * 0.476) var(--k1), calc(1.50vw + 3px) calc(var(--sh) * 0.335) var(--k3), calc(1.50vw + 6px) calc(var(--sh) * 0.335) var(--k3), calc(39.37vw + 3px) calc(var(--sh) * 0.884) var(--k3), calc(14.46vw + 3px) calc(var(--sh) * 0.575) var(--k2), calc(14.46vw + 6px) calc(var(--sh) * 0.575) var(--k2), calc(14.46vw + 6px) calc(var(--sh) * 0.575 + 3px) var(--k2), calc(55.29vw + 3px) calc(var(--sh) * 0.064) var(--k1), calc(90.87vw + 3px) calc(var(--sh) * 0.183) var(--k1), calc(90.87vw + 3px) calc(var(--sh) * 0.183 + 3px) var(--k1), calc(22.86vw + 3px) calc(var(--sh) * 0.946) var(--k2), calc(22.86vw + 6px) calc(var(--sh) * 0.946 + 3px) var(--k2), calc(40.86vw + 3px) calc(var(--sh) * 0.417) var(--k1), calc(40.86vw + 6px) calc(var(--sh) * 0.417) var(--k1), calc(22.96vw + 3px) calc(var(--sh) * 0.530) var(--k1), calc(22.96vw + 3px) calc(var(--sh) * 0.530 + 3px) var(--k1), calc(23.82vw + 3px) calc(var(--sh) * 0.305) var(--k1), calc(17.40vw + 3px) calc(var(--sh) * 0.813) var(--k3), calc(17.40vw + 9px) calc(var(--sh) * 0.813) var(--k3), calc(69.65vw + 3px) calc(var(--sh) * 0.529) var(--k1), calc(77.96vw + 3px) calc(var(--sh) * 0.067) var(--k2), calc(77.96vw + 3px) calc(var(--sh) * 0.067 + 3px) var(--k2), calc(7.06vw + 3px) calc(var(--sh) * 0.350) var(--k1), calc(7.06vw + 6px) calc(var(--sh) * 0.350 + 3px) var(--k1), calc(73.18vw + 3px) calc(var(--sh) * 0.272) var(--k3), calc(73.18vw + 6px) calc(var(--sh) * 0.272) var(--k3), calc(95.17vw + 3px) calc(var(--sh) * 0.958) var(--k1), calc(95.17vw + 3px) calc(var(--sh) * 0.958 + 3px) var(--k1), calc(37.10vw + 3px) calc(var(--sh) * 0.592) var(--k1), calc(37.10vw + 9px) calc(var(--sh) * 0.592) var(--k1), calc(51.90vw + 3px) calc(var(--sh) * 0.286) var(--k2), calc(51.90vw + 6px) calc(var(--sh) * 0.286) var(--k2), calc(51.90vw + 6px) calc(var(--sh) * 0.286 + 3px) var(--k2), calc(65.82vw + 3px) calc(var(--sh) * 0.870) var(--k1), calc(65.82vw + 9px) calc(var(--sh) * 0.870) var(--k1), calc(41.99vw + 3px) calc(var(--sh) * 0.065) var(--k2), calc(41.99vw + 6px) calc(var(--sh) * 0.065) var(--k2), calc(41.99vw + 6px) calc(var(--sh) * 0.065 + 3px) var(--k2), calc(64.48vw + 3px) calc(var(--sh) * 0.713) var(--k3), calc(64.48vw + 6px) calc(var(--sh) * 0.713 + 3px) var(--k3), calc(74.21vw + 3px) calc(var(--sh) * 0.955) var(--k2), calc(74.21vw + 6px) calc(var(--sh) * 0.955) var(--k2), calc(38.04vw + 3px) calc(var(--sh) * 0.640) var(--k2), calc(55.86vw + 6px) calc(var(--sh) * 0.347) var(--k1), calc(55.86vw + 3px) calc(var(--sh) * 0.347 + 3px) var(--k1), calc(55.86vw + 6px) calc(var(--sh) * 0.347 + 3px) var(--k1), calc(55.86vw + 9px) calc(var(--sh) * 0.347 + 3px) var(--k1), calc(91.46vw + 3px) calc(var(--sh) * 0.695) var(--k2), calc(91.46vw + 6px) calc(var(--sh) * 0.695 + 3px) var(--k2), calc(38.63vw + 3px) calc(var(--sh) * 0.105) var(--k1), calc(38.63vw + 9px) calc(var(--sh) * 0.105) var(--k1), calc(51.98vw + 6px) calc(var(--sh) * 0.425) var(--k2), calc(51.98vw + 3px) calc(var(--sh) * 0.425 + 3px) var(--k2), calc(51.98vw + 6px) calc(var(--sh) * 0.425 + 3px) var(--k2), calc(51.98vw + 9px) calc(var(--sh) * 0.425 + 3px) var(--k2), calc(80.14vw + 3px) calc(var(--sh) * 0.269) var(--k2), calc(80.14vw + 6px) calc(var(--sh) * 0.269) var(--k2), calc(80.14vw + 6px) calc(var(--sh) * 0.269 + 3px) var(--k2), calc(21.88vw + 3px) calc(var(--sh) * 0.561) var(--k3), calc(66.70vw + 3px) calc(var(--sh) * 0.752) var(--k2), calc(66.70vw + 6px) calc(var(--sh) * 0.752) var(--k2), calc(66.70vw + 6px) calc(var(--sh) * 0.752 + 3px) var(--k2), calc(81.31vw + 3px) calc(var(--sh) * 0.537) var(--k3), calc(81.31vw + 6px) calc(var(--sh) * 0.537) var(--k3), calc(15.36vw + 3px) calc(var(--sh) * 0.184) var(--k3), calc(15.36vw + 9px) calc(var(--sh) * 0.184) var(--k3), calc(99.86vw + 3px) calc(var(--sh) * 0.147) var(--k1), calc(99.86vw + 3px) calc(var(--sh) * 0.147 + 3px) var(--k1), calc(7.41vw + 3px) calc(var(--sh) * 0.330) var(--k3), calc(7.41vw + 6px) calc(var(--sh) * 0.330) var(--k3), calc(7.41vw + 6px) calc(var(--sh) * 0.330 + 3px) var(--k3), calc(35.34vw + 3px) calc(var(--sh) * 0.325) var(--k1), calc(35.34vw + 6px) calc(var(--sh) * 0.325) var(--k1), calc(76.14vw + 3px) calc(var(--sh) * 0.123) var(--k3), calc(76.14vw + 3px) calc(var(--sh) * 0.123 + 3px) var(--k3), calc(75.36vw + 3px) calc(var(--sh) * 0.448) var(--k1), calc(84.67vw + 6px) calc(var(--sh) * 0.552) var(--k3), calc(84.67vw + 3px) calc(var(--sh) * 0.552 + 3px) var(--k3), calc(84.67vw + 6px) calc(var(--sh) * 0.552 + 3px) var(--k3), calc(84.67vw + 9px) calc(var(--sh) * 0.552 + 3px) var(--k3), calc(92.68vw + 3px) calc(var(--sh) * 0.558) var(--k2), calc(92.68vw + 6px) calc(var(--sh) * 0.558) var(--k2), calc(70.59vw + 3px) calc(var(--sh) * 0.284) var(--k3), calc(70.59vw + 6px) calc(var(--sh) * 0.284) var(--k3), calc(23.53vw + 3px) calc(var(--sh) * 0.097) var(--k3), calc(62.75vw + 6px) calc(var(--sh) * 0.561) var(--k1), calc(62.75vw + 3px) calc(var(--sh) * 0.561 + 3px) var(--k1), calc(62.75vw + 6px) calc(var(--sh) * 0.561 + 3px) var(--k1), calc(62.75vw + 9px) calc(var(--sh) * 0.561 + 3px) var(--k1), calc(66.41vw + 6px) calc(var(--sh) * 0.152) var(--k2), calc(66.41vw + 3px) calc(var(--sh) * 0.152 + 3px) var(--k2), calc(66.41vw + 6px) calc(var(--sh) * 0.152 + 3px) var(--k2), calc(66.41vw + 9px) calc(var(--sh) * 0.152 + 3px) var(--k2), calc(23.81vw + 3px) calc(var(--sh) * 0.536) var(--k2), calc(12.96vw + 3px) calc(var(--sh) * 0.935) var(--k1), calc(12.96vw + 3px) calc(var(--sh) * 0.935 + 3px) var(--k1), calc(8.63vw + 3px) calc(var(--sh) * 0.712) var(--k2), calc(8.63vw + 9px) calc(var(--sh) * 0.712) var(--k2), calc(80.45vw + 6px) calc(var(--sh) * 0.882) var(--k1), calc(80.45vw + 3px) calc(var(--sh) * 0.882 + 3px) var(--k1), calc(80.45vw + 6px) calc(var(--sh) * 0.882 + 3px) var(--k1), calc(80.45vw + 9px) calc(var(--sh) * 0.882 + 3px) var(--k1), calc(32.52vw + 3px) calc(var(--sh) * 0.245) var(--k3), calc(32.52vw + 6px) calc(var(--sh) * 0.245) var(--k3), calc(47.43vw + 3px) calc(var(--sh) * 0.287) var(--k1), calc(47.43vw + 6px) calc(var(--sh) * 0.287) var(--k1), calc(87.71vw + 3px) calc(var(--sh) * 0.886) var(--k1), calc(87.71vw + 9px) calc(var(--sh) * 0.886) var(--k1), calc(21.41vw + 6px) calc(var(--sh) * 0.145) var(--k1), calc(21.41vw + 3px) calc(var(--sh) * 0.145 + 3px) var(--k1), calc(21.41vw + 6px) calc(var(--sh) * 0.145 + 3px) var(--k1), calc(21.41vw + 9px) calc(var(--sh) * 0.145 + 3px) var(--k1), calc(4.09vw + 3px) calc(var(--sh) * 0.510) var(--k3), calc(4.09vw + 9px) calc(var(--sh) * 0.510) var(--k3), calc(85.45vw + 3px) calc(var(--sh) * 0.617) var(--k1), calc(85.45vw + 6px) calc(var(--sh) * 0.617) var(--k1), calc(85.45vw + 6px) calc(var(--sh) * 0.617 + 3px) var(--k1), calc(41.34vw + 3px) calc(var(--sh) * 0.948) var(--k1), calc(41.34vw + 9px) calc(var(--sh) * 0.948) var(--k1), calc(62.09vw + 3px) calc(var(--sh) * 0.099) var(--k2), calc(62.09vw + 6px) calc(var(--sh) * 0.099 + 3px) var(--k2), calc(64.17vw + 3px) calc(var(--sh) * 0.069) var(--k2), calc(64.17vw + 6px) calc(var(--sh) * 0.069 + 3px) var(--k2), calc(28.18vw + 3px) calc(var(--sh) * 0.820) var(--k3), calc(28.18vw + 6px) calc(var(--sh) * 0.820) var(--k3), calc(28.18vw + 6px) calc(var(--sh) * 0.820 + 3px) var(--k3), calc(94.90vw + 3px) calc(var(--sh) * 0.105) var(--k3), calc(94.90vw + 3px) calc(var(--sh) * 0.105 + 3px) var(--k3), calc(5.75vw + 3px) calc(var(--sh) * 0.130) var(--k2), calc(5.75vw + 6px) calc(var(--sh) * 0.130) var(--k2), calc(5.75vw + 6px) calc(var(--sh) * 0.130 + 3px) var(--k2), calc(68.05vw + 6px) calc(var(--sh) * 0.965) var(--k3), calc(68.05vw + 3px) calc(var(--sh) * 0.965 + 3px) var(--k3), calc(68.05vw + 6px) calc(var(--sh) * 0.965 + 3px) var(--k3), calc(68.05vw + 9px) calc(var(--sh) * 0.965 + 3px) var(--k3), calc(61.78vw + 6px) calc(var(--sh) * 0.823) var(--k1), calc(61.78vw + 3px) calc(var(--sh) * 0.823 + 3px) var(--k1), calc(61.78vw + 6px) calc(var(--sh) * 0.823 + 3px) var(--k1), calc(61.78vw + 9px) calc(var(--sh) * 0.823 + 3px) var(--k1), calc(8.02vw + 3px) calc(var(--sh) * 0.732) var(--k1), calc(8.02vw + 9px) calc(var(--sh) * 0.732) var(--k1), calc(68.98vw + 3px) calc(var(--sh) * 0.433) var(--k2), calc(68.98vw + 6px) calc(var(--sh) * 0.433 + 3px) var(--k2), calc(35.37vw + 3px) calc(var(--sh) * 0.384) var(--k2), calc(35.37vw + 6px) calc(var(--sh) * 0.384) var(--k2), calc(35.37vw + 6px) calc(var(--sh) * 0.384 + 3px) var(--k2), calc(56.51vw + 3px) calc(var(--sh) * 0.484) var(--k3), calc(56.51vw + 6px) calc(var(--sh) * 0.484 + 3px) var(--k3), calc(60.01vw + 3px) calc(var(--sh) * 0.955) var(--k1), calc(11.50vw + 3px) calc(var(--sh) * 0.917) var(--k3), calc(11.50vw + 9px) calc(var(--sh) * 0.917) var(--k3), calc(34.27vw + 3px) calc(var(--sh) * 0.474) var(--k1), calc(34.27vw + 6px) calc(var(--sh) * 0.474 + 3px) var(--k1), calc(46.16vw + 3px) calc(var(--sh) * 0.277) var(--k2), calc(19.72vw + 3px) calc(var(--sh) * 0.746) var(--k1), calc(19.72vw + 6px) calc(var(--sh) * 0.746) var(--k1), calc(19.72vw + 6px) calc(var(--sh) * 0.746 + 3px) var(--k1), calc(73.73vw + 3px) calc(var(--sh) * 0.562) var(--k1), calc(73.73vw + 3px) calc(var(--sh) * 0.562 + 3px) var(--k1), calc(26.09vw + 3px) calc(var(--sh) * 0.540) var(--k2), calc(26.09vw + 6px) calc(var(--sh) * 0.540) var(--k2), calc(10.83vw + 3px) calc(var(--sh) * 0.567) var(--k2), calc(10.83vw + 3px) calc(var(--sh) * 0.567 + 3px) var(--k2), calc(73.27vw + 6px) calc(var(--sh) * 0.194) var(--k2), calc(73.27vw + 3px) calc(var(--sh) * 0.194 + 3px) var(--k2), calc(73.27vw + 6px) calc(var(--sh) * 0.194 + 3px) var(--k2), calc(73.27vw + 9px) calc(var(--sh) * 0.194 + 3px) var(--k2), calc(66.60vw + 3px) calc(var(--sh) * 0.571) var(--k1), calc(66.60vw + 6px) calc(var(--sh) * 0.571) var(--k1), calc(60.88vw + 3px) calc(var(--sh) * 0.176) var(--k2), calc(60.88vw + 3px) calc(var(--sh) * 0.176 + 3px) var(--k2), calc(81.03vw + 3px) calc(var(--sh) * 0.466) var(--k1), calc(81.03vw + 6px) calc(var(--sh) * 0.466) var(--k1), calc(81.03vw + 6px) calc(var(--sh) * 0.466 + 3px) var(--k1), calc(29.14vw + 3px) calc(var(--sh) * 0.081) var(--k1), calc(29.14vw + 9px) calc(var(--sh) * 0.081) var(--k1), calc(43.88vw + 3px) calc(var(--sh) * 0.316) var(--k1), calc(43.88vw + 6px) calc(var(--sh) * 0.316) var(--k1), calc(63.83vw + 3px) calc(var(--sh) * 0.943) var(--k3), calc(63.83vw + 3px) calc(var(--sh) * 0.943 + 3px) var(--k3), calc(48.05vw + 3px) calc(var(--sh) * 0.606) var(--k1), calc(48.05vw + 6px) calc(var(--sh) * 0.606 + 3px) var(--k1), calc(44.01vw + 3px) calc(var(--sh) * 0.458) var(--k2), calc(44.01vw + 6px) calc(var(--sh) * 0.458) var(--k2), calc(44.01vw + 6px) calc(var(--sh) * 0.458 + 3px) var(--k2), calc(87.57vw + 3px) calc(var(--sh) * 0.133) var(--k2), calc(87.57vw + 6px) calc(var(--sh) * 0.133) var(--k2), calc(87.57vw + 6px) calc(var(--sh) * 0.133 + 3px) var(--k2), calc(18.06vw + 3px) calc(var(--sh) * 0.740) var(--k2), calc(18.06vw + 9px) calc(var(--sh) * 0.740) var(--k2), calc(82.47vw + 3px) calc(var(--sh) * 0.291) var(--k1), calc(66.34vw + 3px) calc(var(--sh) * 0.863) var(--k2), calc(66.34vw + 9px) calc(var(--sh) * 0.863) var(--k2), calc(91.96vw + 3px) calc(var(--sh) * 0.562) var(--k1), calc(91.96vw + 3px) calc(var(--sh) * 0.562 + 3px) var(--k1), calc(69.72vw + 3px) calc(var(--sh) * 0.827) var(--k1), calc(69.72vw + 6px) calc(var(--sh) * 0.827) var(--k1), calc(69.72vw + 6px) calc(var(--sh) * 0.827 + 3px) var(--k1), calc(3.35vw + 3px) calc(var(--sh) * 0.788) var(--k3), calc(76.45vw + 3px) calc(var(--sh) * 0.578) var(--k1), calc(76.45vw + 6px) calc(var(--sh) * 0.578) var(--k1), calc(76.45vw + 6px) calc(var(--sh) * 0.578 + 3px) var(--k1), calc(96.54vw + 3px) calc(var(--sh) * 0.821) var(--k3), calc(96.54vw + 9px) calc(var(--sh) * 0.821) var(--k3), calc(3.26vw + 3px) calc(var(--sh) * 0.263) var(--k1), calc(3.26vw + 6px) calc(var(--sh) * 0.263 + 3px) var(--k1), calc(8.70vw + 3px) calc(var(--sh) * 0.241) var(--k3), calc(8.70vw + 9px) calc(var(--sh) * 0.241) var(--k3), calc(26.94vw + 3px) calc(var(--sh) * 0.285) var(--k2), calc(26.94vw + 6px) calc(var(--sh) * 0.285) var(--k2), calc(26.94vw + 6px) calc(var(--sh) * 0.285 + 3px) var(--k2), calc(31.46vw + 3px) calc(var(--sh) * 0.463) var(--k3), calc(31.46vw + 9px) calc(var(--sh) * 0.463) var(--k3), calc(76.30vw + 3px) calc(var(--sh) * 0.739) var(--k2), calc(76.30vw + 6px) calc(var(--sh) * 0.739) var(--k2), calc(76.30vw + 6px) calc(var(--sh) * 0.739 + 3px) var(--k2);
+}
+
+.sand-texture::after {
+    box-shadow: calc(96.29vw + 3px) calc(var(--sh) * 0.542) var(--k5), calc(96.29vw + 6px) calc(var(--sh) * 0.542) var(--k5), calc(96.29vw + 3px) calc(var(--sh) * 0.542 + 3px) var(--k5), calc(96.29vw + 6px) calc(var(--sh) * 0.542 + 3px) var(--k5), calc(96.29vw + 9px) calc(var(--sh) * 0.542 + 3px) var(--k5), calc(20.25vw + 3px) calc(var(--sh) * 0.338) var(--k4), calc(20.25vw + 6px) calc(var(--sh) * 0.338) var(--k4), calc(20.25vw + 3px) calc(var(--sh) * 0.338 + 3px) var(--k4), calc(20.25vw + 6px) calc(var(--sh) * 0.338 + 3px) var(--k4), calc(20.25vw + 9px) calc(var(--sh) * 0.338 + 3px) var(--k4), calc(57.34vw + 3px) calc(var(--sh) * 0.750) var(--k4), calc(57.34vw + 6px) calc(var(--sh) * 0.750) var(--k4), calc(57.34vw + 3px) calc(var(--sh) * 0.750 + 3px) var(--k4), calc(57.34vw + 6px) calc(var(--sh) * 0.750 + 3px) var(--k4), calc(57.34vw + 9px) calc(var(--sh) * 0.750 + 3px) var(--k4), calc(39.62vw + 3px) calc(var(--sh) * 0.632) var(--k4), calc(39.62vw + 6px) calc(var(--sh) * 0.632) var(--k4), calc(39.62vw + 3px) calc(var(--sh) * 0.632 + 3px) var(--k4), calc(39.62vw + 6px) calc(var(--sh) * 0.632 + 3px) var(--k4), calc(39.62vw + 9px) calc(var(--sh) * 0.632 + 3px) var(--k4), calc(43.31vw + 3px) calc(var(--sh) * 0.250) var(--k4), calc(43.31vw + 6px) calc(var(--sh) * 0.250) var(--k4), calc(43.31vw + 3px) calc(var(--sh) * 0.250 + 3px) var(--k4), calc(43.31vw + 6px) calc(var(--sh) * 0.250 + 3px) var(--k4), calc(43.31vw + 9px) calc(var(--sh) * 0.250 + 3px) var(--k4), calc(39.60vw + 3px) calc(var(--sh) * 0.340) var(--k4), calc(39.60vw + 6px) calc(var(--sh) * 0.340) var(--k4), calc(39.60vw + 3px) calc(var(--sh) * 0.340 + 3px) var(--k4), calc(39.60vw + 6px) calc(var(--sh) * 0.340 + 3px) var(--k4), calc(39.60vw + 9px) calc(var(--sh) * 0.340 + 3px) var(--k4), calc(16.23vw + 3px) calc(var(--sh) * 0.569) var(--k5), calc(16.23vw + 6px) calc(var(--sh) * 0.569) var(--k5), calc(16.23vw + 3px) calc(var(--sh) * 0.569 + 3px) var(--k5), calc(16.23vw + 6px) calc(var(--sh) * 0.569 + 3px) var(--k5), calc(16.23vw + 9px) calc(var(--sh) * 0.569 + 3px) var(--k5), calc(82.63vw + 3px) calc(var(--sh) * 0.777) var(--k4), calc(82.63vw + 6px) calc(var(--sh) * 0.777) var(--k4), calc(82.63vw + 3px) calc(var(--sh) * 0.777 + 3px) var(--k4), calc(82.63vw + 6px) calc(var(--sh) * 0.777 + 3px) var(--k4), calc(82.63vw + 9px) calc(var(--sh) * 0.777 + 3px) var(--k4), calc(47.97vw + 3px) calc(var(--sh) * 0.326) var(--k4), calc(47.97vw + 6px) calc(var(--sh) * 0.326) var(--k4), calc(47.97vw + 3px) calc(var(--sh) * 0.326 + 3px) var(--k4), calc(47.97vw + 6px) calc(var(--sh) * 0.326 + 3px) var(--k4), calc(47.97vw + 9px) calc(var(--sh) * 0.326 + 3px) var(--k4), calc(68.16vw + 3px) calc(var(--sh) * 0.894) var(--k5), calc(68.16vw + 6px) calc(var(--sh) * 0.894) var(--k5), calc(68.16vw + 3px) calc(var(--sh) * 0.894 + 3px) var(--k5), calc(68.16vw + 6px) calc(var(--sh) * 0.894 + 3px) var(--k5), calc(68.16vw + 9px) calc(var(--sh) * 0.894 + 3px) var(--k5), calc(42.55vw + 3px) calc(var(--sh) * 0.871) var(--k4), calc(42.55vw + 6px) calc(var(--sh) * 0.871) var(--k4), calc(42.55vw + 3px) calc(var(--sh) * 0.871 + 3px) var(--k4), calc(42.55vw + 6px) calc(var(--sh) * 0.871 + 3px) var(--k4), calc(42.55vw + 9px) calc(var(--sh) * 0.871 + 3px) var(--k4), calc(85.65vw + 3px) calc(var(--sh) * 0.292) var(--k4), calc(85.65vw + 6px) calc(var(--sh) * 0.292) var(--k4), calc(85.65vw + 3px) calc(var(--sh) * 0.292 + 3px) var(--k4), calc(85.65vw + 6px) calc(var(--sh) * 0.292 + 3px) var(--k4), calc(85.65vw + 9px) calc(var(--sh) * 0.292 + 3px) var(--k4), calc(45.12vw + 3px) calc(var(--sh) * 0.934) var(--k4), calc(45.12vw + 6px) calc(var(--sh) * 0.934) var(--k4), calc(45.12vw + 3px) calc(var(--sh) * 0.934 + 3px) var(--k4), calc(45.12vw + 6px) calc(var(--sh) * 0.934 + 3px) var(--k4), calc(45.12vw + 9px) calc(var(--sh) * 0.934 + 3px) var(--k4), calc(47.85vw + 3px) calc(var(--sh) * 0.481) var(--k5), calc(47.85vw + 6px) calc(var(--sh) * 0.481) var(--k5), calc(47.85vw + 3px) calc(var(--sh) * 0.481 + 3px) var(--k5), calc(47.85vw + 6px) calc(var(--sh) * 0.481 + 3px) var(--k5), calc(47.85vw + 9px) calc(var(--sh) * 0.481 + 3px) var(--k5), calc(13.28vw + 3px) calc(var(--sh) * 0.880) var(--k4), calc(13.28vw + 6px) calc(var(--sh) * 0.880) var(--k4), calc(13.28vw + 3px) calc(var(--sh) * 0.880 + 3px) var(--k4), calc(13.28vw + 6px) calc(var(--sh) * 0.880 + 3px) var(--k4), calc(13.28vw + 9px) calc(var(--sh) * 0.880 + 3px) var(--k4), calc(3.44vw + 3px) calc(var(--sh) * 0.242) var(--k4), calc(3.44vw + 6px) calc(var(--sh) * 0.242) var(--k4), calc(3.44vw + 3px) calc(var(--sh) * 0.242 + 3px) var(--k4), calc(3.44vw + 6px) calc(var(--sh) * 0.242 + 3px) var(--k4), calc(3.44vw + 9px) calc(var(--sh) * 0.242 + 3px) var(--k4), calc(90.18vw + 3px) calc(var(--sh) * 0.889) var(--k5), calc(90.18vw + 6px) calc(var(--sh) * 0.889) var(--k5), calc(90.18vw + 3px) calc(var(--sh) * 0.889 + 3px) var(--k5), calc(90.18vw + 6px) calc(var(--sh) * 0.889 + 3px) var(--k5), calc(90.18vw + 9px) calc(var(--sh) * 0.889 + 3px) var(--k5), calc(79.11vw + 3px) calc(var(--sh) * 0.525) var(--k4), calc(79.11vw + 6px) calc(var(--sh) * 0.525) var(--k4), calc(79.11vw + 3px) calc(var(--sh) * 0.525 + 3px) var(--k4), calc(79.11vw + 6px) calc(var(--sh) * 0.525 + 3px) var(--k4), calc(79.11vw + 9px) calc(var(--sh) * 0.525 + 3px) var(--k4), calc(15.46vw + 3px) calc(var(--sh) * 0.703) var(--k4), calc(15.46vw + 6px) calc(var(--sh) * 0.703) var(--k4), calc(15.46vw + 3px) calc(var(--sh) * 0.703 + 3px) var(--k4), calc(15.46vw + 6px) calc(var(--sh) * 0.703 + 3px) var(--k4), calc(15.46vw + 9px) calc(var(--sh) * 0.703 + 3px) var(--k4), calc(72.90vw + 3px) calc(var(--sh) * 0.954) var(--k5), calc(72.90vw + 6px) calc(var(--sh) * 0.954) var(--k5), calc(72.90vw + 3px) calc(var(--sh) * 0.954 + 3px) var(--k5), calc(72.90vw + 6px) calc(var(--sh) * 0.954 + 3px) var(--k5), calc(72.90vw + 9px) calc(var(--sh) * 0.954 + 3px) var(--k5), calc(23.70vw + 3px) calc(var(--sh) * 0.420) var(--k4), calc(23.70vw + 6px) calc(var(--sh) * 0.420) var(--k4), calc(23.70vw + 3px) calc(var(--sh) * 0.420 + 3px) var(--k4), calc(23.70vw + 6px) calc(var(--sh) * 0.420 + 3px) var(--k4), calc(23.70vw + 9px) calc(var(--sh) * 0.420 + 3px) var(--k4), calc(33.42vw + 3px) calc(var(--sh) * 0.222) var(--k5), calc(33.42vw + 6px) calc(var(--sh) * 0.222) var(--k5), calc(33.42vw + 3px) calc(var(--sh) * 0.222 + 3px) var(--k5), calc(33.42vw + 6px) calc(var(--sh) * 0.222 + 3px) var(--k5), calc(33.42vw + 9px) calc(var(--sh) * 0.222 + 3px) var(--k5), calc(2.75vw + 3px) calc(var(--sh) * 0.798) var(--k5), calc(2.75vw + 6px) calc(var(--sh) * 0.798) var(--k5), calc(2.75vw + 3px) calc(var(--sh) * 0.798 + 3px) var(--k5), calc(2.75vw + 6px) calc(var(--sh) * 0.798 + 3px) var(--k5), calc(2.75vw + 9px) calc(var(--sh) * 0.798 + 3px) var(--k5), calc(1.37vw + 3px) calc(var(--sh) * 0.778) var(--k5), calc(1.37vw + 6px) calc(var(--sh) * 0.778) var(--k5), calc(1.37vw + 3px) calc(var(--sh) * 0.778 + 3px) var(--k5), calc(1.37vw + 6px) calc(var(--sh) * 0.778 + 3px) var(--k5), calc(1.37vw + 9px) calc(var(--sh) * 0.778 + 3px) var(--k5), calc(30.13vw + 3px) calc(var(--sh) * 0.690) var(--k5), calc(30.13vw + 6px) calc(var(--sh) * 0.690) var(--k5), calc(30.13vw + 3px) calc(var(--sh) * 0.690 + 3px) var(--k5), calc(30.13vw + 6px) calc(var(--sh) * 0.690 + 3px) var(--k5), calc(30.13vw + 9px) calc(var(--sh) * 0.690 + 3px) var(--k5), calc(97.64vw + 3px) calc(var(--sh) * 0.543) var(--k4), calc(97.64vw + 6px) calc(var(--sh) * 0.543) var(--k4), calc(97.64vw + 3px) calc(var(--sh) * 0.543 + 3px) var(--k4), calc(97.64vw + 6px) calc(var(--sh) * 0.543 + 3px) var(--k4), calc(97.64vw + 9px) calc(var(--sh) * 0.543 + 3px) var(--k4);
+}
+
+.hero::after {
+    box-shadow: 56.01vw 4.55vh 0 0 #fff6cf, 33.47vw 5.36vh 0 1px #dfe8ff, 19.26vw 32.44vh 0 1px #dfe8ff, 27.41vw 6.45vh 0 0 #ffffff, 26.70vw 36.54vh 0 0 #fff6cf, 4.72vw 27.77vh 0 1px #ffffff, 36.51vw 4.01vh 0 1px #ffffff, 44.79vw 9.23vh 0 0 #ffffff, 17.15vw 15.45vh 0 1px #fff6cf, 59.32vw 8.99vh 0 0 #ffffff, 43.15vw 19.76vh 0 1px #fff6cf, 94.71vw 26.77vh 0 1px #fff6cf, 98.86vw 37.32vh 0 0 #dfe8ff, 41.01vw 32.01vh 0 0 #ffffff, 42.28vw 27.84vh 0 0 #ffffff, 36.60vw 31.66vh 0 1px #dfe8ff, 38.82vw 35.86vh 0 0 #ffffff, 37.19vw 1.45vh 0 0 #fff6cf, 51.23vw 20.81vh 0 0 #fff6cf, 42.39vw 34.60vh 0 0 #fff6cf, 77.62vw 35.82vh 0 0 #dfe8ff, 4.54vw 14.10vh 0 0 #ffffff, 56.19vw 24.41vh 0 0 #dfe8ff, 9.71vw 18.83vh 0 0 #ffffff, 90.51vw 38.69vh 0 0 #ffffff, 12.48vw 5.87vh 0 0 #fff6cf, 70.13vw 35.25vh 0 0 #ffffff, 61.90vw 20.89vh 0 0 #fff6cf, 23.43vw 17.29vh 0 0 #fff6cf, 27.12vw 32.62vh 0 0 #ffffff, 21.54vw 21.13vh 0 0 #fff6cf, 3.43vw 27.21vh 0 0 #dfe8ff, 47.05vw 5.41vh 0 0 #dfe8ff, 31.49vw 17.65vh 0 0 #ffffff, 47.22vw 22.88vh 0 1px #ffffff, 74.22vw 8.09vh 0 0 #fff6cf, 65.57vw 7.52vh 0 0 #ffffff, 79.69vw 6.01vh 0 0 #dfe8ff, 22.48vw 4.49vh 0 0 #ffffff, 53.39vw 21.66vh 0 0 #fff6cf, 97.88vw 9.47vh 0 0 #dfe8ff, 1.60vw 24.66vh 0 1px #ffffff, 6.04vw 34.40vh 0 0 #fff6cf, 2.90vw 4.10vh 0 0 #ffffff, 51.80vw 24.64vh 0 0 #fff6cf, 13.88vw 24.93vh 0 0 #dfe8ff;
 }
