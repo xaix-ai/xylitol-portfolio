@@ -1,31 +1,42 @@
+from django.db.models import F, Prefetch, Q
 from django.shortcuts import render
-from django.db.models import Prefetch
 
 from .models import (
-    UserProfile,
-    Project,
-    ProjectMedia,
-    Skill,
-    SocialLink,
     Achievement,
     Certificate,
     EducationalBackground,
     Experience,
+    Project,
+    ProjectMedia,
+    Skill,
+    SocialLink,
+    User,
+    UserProfile,
 )
+
+
+def get_portfolio_owner():
+    """
+    The site shows ONE person: the user linked to the first profile.
+    If no profile has been made yet, fall back to the first portfolio user,
+    so projects, skills and social links still appear.
+    """
+    profile = (
+        UserProfile.objects
+        .select_related("user")
+        .order_by("profile_id")
+        .first()
+    )
+    if profile:
+        return profile, profile.user
+
+    return None, User.objects.order_by("user_id").first()
 
 
 def home(request):
 
-    # PROFILE
-    profile = UserProfile.objects.select_related("user").first()
+    profile, user = get_portfolio_owner()
 
-    if profile:
-        user = profile.user
-    else:
-        user = None
-
-
-    # PROJECTS
     if user:
         projects = (
             Project.objects
@@ -33,82 +44,57 @@ def home(request):
             .prefetch_related(
                 Prefetch(
                     "projectmedia_set",
-                    queryset=ProjectMedia.objects.order_by("display_order")
+                    queryset=ProjectMedia.objects.order_by(
+                        F("display_order").asc(nulls_last=True), "media_id"
+                    ),
                 )
             )
-            .order_by("-created_at")
+            .order_by(F("created_at").desc(nulls_last=True), "-project_id")
         )
-    else:
-        projects = Project.objects.none()
 
+        skills = Skill.objects.filter(user=user).order_by("category", "skill_name")
 
-    # SKILLS
-    if user:
-        skills = (
-            Skill.objects
-            .filter(user=user)
-            .order_by("category", "skill_name")
-        )
-    else:
-        skills = Skill.objects.none()
-
-
-    # EXPERIENCE
-    if user:
         experiences = (
             Experience.objects
             .filter(user=user)
-            .order_by("-start_date")
+            .order_by(F("start_date").desc(nulls_last=True))
         )
-    else:
-        experiences = Experience.objects.none()
 
-
-    # EDUCATION
-    if user:
         education = (
             EducationalBackground.objects
             .filter(user=user)
-            .order_by("-end_date", "-start_date")
+            .order_by(F("end_date").desc(nulls_first=True), F("start_date").desc(nulls_last=True))
         )
-    else:
-        education = EducationalBackground.objects.none()
 
-
-    # CERTIFICATES
-    if user:
         certificates = (
             Certificate.objects
             .filter(user=user)
-            .order_by("-issue_date")
+            .order_by(F("issue_date").desc(nulls_last=True))
         )
-    else:
-        certificates = Certificate.objects.none()
 
-
-    # ACHIEVEMENTS
-    if user:
         achievements = (
             Achievement.objects
             .filter(user=user)
-            .order_by("-achievement_date")
+            .order_by(F("achievement_date").desc(nulls_last=True))
         )
-    else:
-        achievements = Achievement.objects.none()
 
-
-    # SOCIAL LINKS
-    if user:
+        # A link counts as visible unless it was explicitly unticked
+        # (rows added outside the admin can have an empty value).
         social_links = (
             SocialLink.objects
-            .filter(user=user, is_visible=True)
-            .order_by("display_order")
+            .filter(user=user)
+            .filter(Q(is_visible=True) | Q(is_visible__isnull=True))
+            .order_by(F("display_order").asc(nulls_last=True), "social_id")
         )
     else:
+        projects = Project.objects.none()
+        skills = Skill.objects.none()
+        experiences = Experience.objects.none()
+        education = EducationalBackground.objects.none()
+        certificates = Certificate.objects.none()
+        achievements = Achievement.objects.none()
         social_links = SocialLink.objects.none()
 
-
-    # CONTACT INFORMATION
     contact = {
         "email": user.email if user else "",
         "phone": profile.phone if profile else "",
@@ -116,8 +102,6 @@ def home(request):
         "social_links": social_links,
     }
 
-
-    # CONTEXT
     context = {
         "profile": profile,
         "projects": projects,
@@ -128,6 +112,5 @@ def home(request):
         "achievements": achievements,
         "contact": contact,
     }
-
 
     return render(request, "portfolio/home.html", context)

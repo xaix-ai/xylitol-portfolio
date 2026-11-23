@@ -802,5 +802,331 @@
         }
     }
 
+    /* 8. PROJECT SHOWCASE + LIGHTBOX
+       Every project card has a little browser window ([data-showcase]) that
+       shows the project's interface: the screenshots / screen recordings
+       saved in Admin -> Projects -> Project media.
+       - arrows, dots, swipe and the arrow keys change the screenshot
+       - it slides by itself every few seconds until the visitor touches it
+       - clicking the screen opens the full-screen viewer (<dialog id="lightbox">)
+       Certificate and achievement pictures ([data-lightbox-single]) open
+       in the same viewer. */
+
+    const AUTOPLAY_MS = 4500;   // time per screenshot while it plays by itself
+    const SWIPE_MIN = 40;       // px a finger must move to count as a swipe
+
+    const lightbox = document.getElementById("lightbox");
+    const lbStage = document.getElementById("lightbox-stage");
+    const lbTitle = document.getElementById("lightbox-title");
+    const lbCount = document.getElementById("lightbox-count");
+    const lbCaption = document.getElementById("lightbox-caption");
+    const lbPrev = document.getElementById("lightbox-prev");
+    const lbNext = document.getElementById("lightbox-next");
+    const lbClose = document.getElementById("lightbox-close");
+
+    const showcases = [];
+
+    function markShape(media, holder) {
+        const check = () => {
+            const w = media.naturalWidth || media.videoWidth;
+            const h = media.naturalHeight || media.videoHeight;
+            if (w && h) holder.classList.toggle("is-portrait", h > w * 1.1);
+        };
+        if (media.tagName === "VIDEO") {
+            media.addEventListener("loadedmetadata", check);
+            if (media.readyState >= 1) check();
+        } else {
+            if (media.complete) check();
+            media.addEventListener("load", check);
+        }
+        media.addEventListener("error", () => holder.classList.add("is-broken"));
+    }
+
+    document.querySelectorAll("[data-showcase]").forEach((root) => {
+        const slides = Array.from(root.querySelectorAll("[data-slide]"));
+        if (!slides.length) return;
+
+        const screen = root.querySelector("[data-showcase-screen]");
+        const dots = Array.from(root.querySelectorAll("[data-showcase-dot]"));
+        const count = root.querySelector("[data-showcase-count]");
+        const caption = root.querySelector("[data-showcase-caption]");
+
+        const sc = {
+            root,
+            slides,
+            index: 0,
+            visible: false,
+            hovering: false,
+            touched: false, // stops the auto-play for good once the visitor takes over
+            lastMove: performance.now()
+        };
+
+        slides.forEach((slide) => {
+            const media = slide.querySelector("img, video");
+            if (media) markShape(media, slide);
+        });
+
+        function syncVideos() {
+            slides.forEach((slide, k) => {
+                const video = slide.querySelector("video");
+                if (!video) return;
+                if (k === sc.index && sc.visible && !prefersReducedMotion.matches && !(lightbox && lightbox.open)) {
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+            });
+        }
+
+        sc.show = function (target, direction = 1) {
+            const n = slides.length;
+            const next = ((target % n) + n) % n;
+            if (next === sc.index) return;
+
+            const previous = slides[sc.index];
+            const incoming = slides[next];
+
+            previous.style.setProperty("--enter", (-24 * direction) + "px");
+            incoming.style.setProperty("--enter", (24 * direction) + "px");
+            void incoming.offsetWidth; // start the incoming slide from the right side
+
+            previous.classList.remove("is-active");
+            previous.setAttribute("aria-hidden", "true");
+            incoming.classList.add("is-active");
+            incoming.removeAttribute("aria-hidden");
+
+            dots.forEach((dot, k) => {
+                dot.classList.toggle("is-active", k === next);
+                if (k === next) dot.setAttribute("aria-current", "true");
+                else dot.removeAttribute("aria-current");
+            });
+
+            if (count) count.textContent = (next + 1) + " / " + n;
+            if (caption) caption.textContent = incoming.dataset.caption || "";
+
+            sc.index = next;
+            sc.lastMove = performance.now();
+            syncVideos();
+        };
+
+        sc.syncVideos = syncVideos;
+
+        const takeOver = () => { sc.touched = true; };
+
+        root.querySelector("[data-showcase-prev]")?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            takeOver();
+            sc.show(sc.index - 1, -1);
+        });
+
+        root.querySelector("[data-showcase-next]")?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            takeOver();
+            sc.show(sc.index + 1, 1);
+        });
+
+        dots.forEach((dot) => {
+            dot.addEventListener("click", () => {
+                takeOver();
+                const target = Number(dot.dataset.showcaseDot);
+                sc.show(target, target < sc.index ? -1 : 1);
+            });
+        });
+
+        root.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                takeOver();
+                sc.show(sc.index - 1, -1);
+            } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                takeOver();
+                sc.show(sc.index + 1, 1);
+            }
+        });
+
+        root.addEventListener("pointerenter", () => { sc.hovering = true; });
+        root.addEventListener("pointerleave", () => { sc.hovering = false; });
+
+        // swipe on phones; a short tap opens the full-screen viewer
+        let startX = 0;
+        let startY = 0;
+        let swiped = false;
+
+        screen.addEventListener("pointerdown", (event) => {
+            startX = event.clientX;
+            startY = event.clientY;
+            swiped = false;
+        });
+
+        screen.addEventListener("pointerup", (event) => {
+            const dx = event.clientX - startX;
+            const dy = event.clientY - startY;
+            if (Math.abs(dx) > SWIPE_MIN && Math.abs(dx) > Math.abs(dy) && slides.length > 1) {
+                swiped = true;
+                takeOver();
+                sc.show(sc.index + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+            }
+        });
+
+        screen.addEventListener("click", (event) => {
+            if (swiped) { swiped = false; return; }
+            if (event.target.closest(".showcase-arrow")) return;
+            takeOver();
+            openLightbox(
+                slides.map((slide) => ({
+                    kind: slide.dataset.kind,
+                    src: slide.dataset.src,
+                    caption: slide.dataset.caption || ""
+                })),
+                sc.index,
+                root.dataset.title || "",
+                sc
+            );
+        });
+
+        showcases.push(sc);
+    });
+
+    // play videos / auto-advance only while the card is actually on screen
+    if (showcases.length && "IntersectionObserver" in window) {
+        const watcher = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                const sc = showcases.find((item) => item.root === entry.target);
+                if (!sc) return;
+                sc.visible = entry.isIntersecting && entry.intersectionRatio >= 0.5;
+                if (sc.visible) sc.lastMove = performance.now();
+                sc.syncVideos();
+            });
+        }, { threshold: [0, 0.5] });
+
+        showcases.forEach((sc) => watcher.observe(sc.root));
+    }
+
+    if (showcases.some((sc) => sc.slides.length > 1)) {
+        setInterval(() => {
+            if (document.hidden || prefersReducedMotion.matches || (lightbox && lightbox.open)) return;
+            const now = performance.now();
+            showcases.forEach((sc) => {
+                if (sc.touched || sc.hovering || !sc.visible || sc.slides.length < 2) return;
+                if (sc.root.contains(document.activeElement)) return;
+                // let a screen recording finish a loop before moving on
+                const active = sc.slides[sc.index];
+                const wait = active.dataset.kind === "video" ? AUTOPLAY_MS * 2 : AUTOPLAY_MS;
+                if (now - sc.lastMove >= wait) sc.show(sc.index + 1, 1);
+            });
+        }, 500);
+    }
+
+
+    /* full-screen viewer */
+
+    const lb = { items: [], index: 0, owner: null };
+    let lbStartX = 0;
+    let lbSwiped = false;
+
+    function renderLightbox() {
+        if (!lbStage) return;
+        const item = lb.items[lb.index];
+        lbStage.textContent = "";
+
+        let media;
+        if (item.kind === "video") {
+            media = document.createElement("video");
+            media.src = item.src;
+            media.controls = true;
+            media.loop = true;
+            media.muted = true;
+            media.playsInline = true;
+            if (!prefersReducedMotion.matches) media.autoplay = true;
+        } else {
+            media = document.createElement("img");
+            media.src = item.src;
+            media.alt = item.caption || lbTitle.textContent || "Preview";
+        }
+        lbStage.appendChild(media);
+
+        if (lbCaption) lbCaption.textContent = item.caption || "";
+        if (lbCount) lbCount.textContent = (lb.index + 1) + " / " + lb.items.length;
+    }
+
+    function stepLightbox(direction) {
+        if (lb.items.length < 2) return;
+        lb.index = (lb.index + direction + lb.items.length) % lb.items.length;
+        renderLightbox();
+    }
+
+    function openLightbox(items, index, title, owner) {
+        if (!lightbox || typeof lightbox.showModal !== "function" || !items.length) return;
+        lb.items = items;
+        lb.index = index;
+        lb.owner = owner || null;
+        if (lbTitle) lbTitle.textContent = title;
+        lightbox.classList.toggle("is-single", items.length < 2);
+        renderLightbox();
+        lightbox.showModal();
+        showcases.forEach((sc) => sc.syncVideos());
+    }
+
+    if (lightbox) {
+        lbPrev?.addEventListener("click", () => stepLightbox(-1));
+        lbNext?.addEventListener("click", () => stepLightbox(1));
+        lbClose?.addEventListener("click", () => lightbox.close());
+
+        // click on the dark area (not on the picture or buttons) closes it
+        lightbox.addEventListener("click", (event) => {
+            if (lbSwiped) { lbSwiped = false; return; }
+            if (event.target === lightbox || event.target.classList.contains("lightbox-inner") || event.target === lbStage) {
+                lightbox.close();
+            }
+        });
+
+        lightbox.addEventListener("close", () => {
+            if (lbStage) lbStage.textContent = ""; // stops any video
+            // leave the card on the screenshot they were looking at
+            if (lb.owner && lb.owner.index !== lb.index) {
+                lb.owner.show(lb.index, lb.index < lb.owner.index ? -1 : 1);
+            }
+            showcases.forEach((sc) => sc.syncVideos());
+        });
+
+        // while the viewer is open, keys belong to it (Esc must not close the panel too)
+        window.addEventListener("keydown", (event) => {
+            if (!lightbox.open) return;
+            event.stopPropagation();
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                stepLightbox(-1);
+            } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                stepLightbox(1);
+            }
+        }, true);
+
+        // swipe inside the viewer
+        lbStage?.addEventListener("pointerdown", (event) => {
+            lbStartX = event.clientX;
+            lbSwiped = false;
+        });
+        lbStage?.addEventListener("pointerup", (event) => {
+            const dx = event.clientX - lbStartX;
+            if (Math.abs(dx) > SWIPE_MIN) {
+                lbSwiped = true;
+                stepLightbox(dx < 0 ? 1 : -1);
+            }
+        });
+    }
+
+    document.querySelectorAll("[data-lightbox-single]").forEach((button) => {
+        button.addEventListener("click", () => {
+            openLightbox(
+                [{ kind: "image", src: button.dataset.src, caption: "" }],
+                0,
+                button.dataset.caption || "",
+                null
+            );
+        });
+    });
+
 
 })();

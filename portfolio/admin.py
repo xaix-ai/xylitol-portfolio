@@ -1,6 +1,9 @@
 from django import forms
 from django.contrib import admin
 from django.utils import timezone
+from django.utils.html import format_html
+
+from .templatetags.portfolio_extras import is_image, media_kind, media_src
 
 from .models import (
     Achievement,
@@ -38,6 +41,31 @@ class CreatedAtMixin:
         super().save_model(request, obj, form, change)
 
 
+IMAGE_HELP = (
+    "Type a file name from portfolio/static/portfolio/images/ "
+    "(e.g. <b>{folder}/my-picture.png</b>), or paste a full https:// image link "
+    "or a Google Drive share link (shared as 'Anyone with the link')."
+)
+
+
+def preview(value, kind="image", height=90):
+    """Small thumbnail shown inside the admin."""
+    if not value:
+        return "—"
+    src = media_src(value)
+    if kind == "video":
+        return format_html(
+            '<video src="{}" style="height:{}px;border-radius:6px;background:#eee" muted></video>',
+            src, height,
+        )
+    return format_html(
+        '<a href="{0}" target="_blank" rel="noopener">'
+        '<img src="{0}" style="height:{1}px;max-width:220px;object-fit:cover;'
+        'border-radius:6px;background:#eee" alt=""></a>',
+        src, height,
+    )
+
+
 # account
 
 @admin.register(User)
@@ -47,10 +75,34 @@ class PortfolioUserAdmin(admin.ModelAdmin):
     readonly_fields = ("password_hash", "created_at", "updated_at")
 
 
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
+        widgets = {
+            "profile_image": forms.TextInput(attrs={"size": 70}),
+        }
+        help_texts = {
+            "profile_image": IMAGE_HELP.format(folder="profile"),
+            "bio": "Shown in About. 2–4 sentences about who you are and what you like working on.",
+            "user": "Pick the portfolio user whose projects, skills and links should appear on the site.",
+        }
+
+
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ("first_name", "last_name", "user", "location", "phone")
+    form = UserProfileForm
+    list_display = ("first_name", "last_name", "user", "location", "phone", "photo")
     search_fields = ("first_name", "last_name", "bio")
+    readonly_fields = ("photo_preview",)
+
+    @admin.display(description="Photo")
+    def photo(self, obj):
+        return preview(obj.profile_image, height=40)
+
+    @admin.display(description="Photo preview")
+    def photo_preview(self, obj):
+        return preview(obj.profile_image, height=140)
 
 
 class SocialLinkForm(forms.ModelForm):
@@ -80,24 +132,105 @@ class SocialLinkAdmin(CreatedAtMixin, admin.ModelAdmin):
 
 # projects
 
+MEDIA_TYPES = (
+    ("image", "Screenshot / image"),
+    ("video", "Screen recording (mp4 / webm)"),
+)
+
+
+class ProjectMediaForm(forms.ModelForm):
+    media_type = forms.ChoiceField(choices=MEDIA_TYPES, initial="image")
+
+    class Meta:
+        model = ProjectMedia
+        fields = "__all__"
+        widgets = {
+            "media_url": forms.TextInput(attrs={"size": 50}),
+            "caption": forms.TextInput(attrs={"size": 40}),
+        }
+        help_texts = {
+            "media_url": IMAGE_HELP.format(folder="projects"),
+            "caption": "Optional. Shown under the screenshot, e.g. \"Dashboard home page\".",
+            "display_order": "1 shows first.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # older rows may say "Image" / "screenshot": map them onto the dropdown
+        current = (self.initial.get("media_type") or "").lower()
+        self.initial["media_type"] = "video" if "video" in current else "image"
+
+
 class ProjectMediaInline(admin.TabularInline):
     model = ProjectMedia
+    form = ProjectMediaForm
     extra = 1
-    fields = ("media_type", "media_url", "caption", "display_order")
+    fields = ("thumbnail", "media_type", "media_url", "caption", "display_order")
+    readonly_fields = ("thumbnail",)
+    ordering = ("display_order",)
+    verbose_name = "Screenshot / recording"
+    verbose_name_plural = "Project interface (screenshots shown in the browser window on the site)"
+
+    @admin.display(description="Preview")
+    def thumbnail(self, obj):
+        if not obj or not obj.media_url:
+            return "—"
+        return preview(obj.media_url, kind=media_kind(obj), height=60)
+
+
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = "__all__"
+        widgets = {
+            "project_url": forms.TextInput(attrs={"size": 70}),
+            "technologies": forms.TextInput(attrs={"size": 70}),
+        }
+        help_texts = {
+            "category": "Short label, e.g. Dashboard, Data Cleaning, Web App.",
+            "description": "2–3 sentences: the problem, what you built, and the result.",
+            "technologies": "Comma-separated, e.g. Python, Pandas, SQL, Power BI.",
+            "project_url": "Live site, GitHub repo, or published dashboard (starts with https://). "
+                           "Its address is shown in the little browser bar.",
+        }
 
 
 @admin.register(Project)
 class ProjectAdmin(CreatedAtMixin, admin.ModelAdmin):
-    list_display = ("title", "category", "technologies", "created_at")
+    form = ProjectForm
+    list_display = ("title", "cover", "category", "technologies", "created_at")
     list_filter = ("category",)
     search_fields = ("title", "description", "technologies")
     inlines = (ProjectMediaInline,)
     exclude = ("created_at",)
 
+    @admin.display(description="Cover")
+    def cover(self, obj):
+        first = obj.projectmedia_set.order_by("display_order").first()
+        if not first:
+            return "—"
+        return preview(first.media_url, kind=media_kind(first), height=40)
+
+    def save_formset(self, request, form, formset, change):
+        # stamp new screenshots with the upload time
+        for media in formset.save(commit=False):
+            if not media.uploaded_at:
+                media.uploaded_at = timezone.now()
+            media.save()
+        for media in formset.deleted_objects:
+            media.delete()
+        formset.save_m2m()
+
 
 @admin.register(ProjectMedia)
 class ProjectMediaAdmin(admin.ModelAdmin):
-    list_display = ("project", "media_type", "caption", "display_order")
+    form = ProjectMediaForm
+    list_display = ("project", "thumbnail", "media_type", "caption", "display_order")
+
+    @admin.display(description="Preview")
+    def thumbnail(self, obj):
+        return preview(obj.media_url, kind=media_kind(obj), height=40)
+
     list_filter = ("media_type",)
     ordering = ("project", "display_order")
 
@@ -129,19 +262,60 @@ class EducationalBackgroundAdmin(admin.ModelAdmin):
     ordering = ("-start_date",)
 
 
+class CertificateForm(forms.ModelForm):
+    class Meta:
+        model = Certificate
+        fields = "__all__"
+        widgets = {"certificate_url": forms.TextInput(attrs={"size": 70})}
+        help_texts = {
+            "certificate_url": "A picture of the certificate shows a preview on the site: "
+                               + IMAGE_HELP.format(folder="certificates")
+                               + " Any other link (e.g. a Coursera verify page or PDF) shows a "
+                                 "'View Certificate' button only.",
+        }
+
+
 @admin.register(Certificate)
 class CertificateAdmin(admin.ModelAdmin):
-    list_display = ("certificate_name", "issuing_organization", "issue_date")
+    form = CertificateForm
+    list_display = ("certificate_name", "thumbnail", "issuing_organization", "issue_date")
     search_fields = ("certificate_name", "issuing_organization")
     ordering = ("-issue_date",)
+    readonly_fields = ("certificate_preview",)
+
+    @admin.display(description="Preview")
+    def thumbnail(self, obj):
+        return preview(obj.certificate_url, height=40) if is_image(obj.certificate_url) else "—"
+
+    @admin.display(description="Preview")
+    def certificate_preview(self, obj):
+        return preview(obj.certificate_url, height=160) if is_image(obj.certificate_url) else "—"
+
+
+class AchievementForm(forms.ModelForm):
+    class Meta:
+        model = Achievement
+        fields = "__all__"
+        widgets = {"image_url": forms.TextInput(attrs={"size": 70})}
+        help_texts = {"image_url": "Optional photo. " + IMAGE_HELP.format(folder="achievements")}
 
 
 @admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
-    list_display = ("title", "organization", "category", "achievement_date")
+    form = AchievementForm
+    list_display = ("title", "thumbnail", "organization", "category", "achievement_date")
     list_filter = ("category",)
     search_fields = ("title", "organization")
     ordering = ("-achievement_date",)
+    readonly_fields = ("photo_preview",)
+
+    @admin.display(description="Photo")
+    def thumbnail(self, obj):
+        return preview(obj.image_url, height=40)
+
+    @admin.display(description="Photo preview")
+    def photo_preview(self, obj):
+        return preview(obj.image_url, height=160)
 
 
 # inbox & stats (read-only)

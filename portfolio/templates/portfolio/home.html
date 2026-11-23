@@ -1,4 +1,4 @@
-{% load static %}
+{% load static portfolio_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -115,6 +115,18 @@
         <circle cx="18" cy="8" r="2"/>
         <path d="M6 7v10"/>
         <path d="M18 10c0 4-6 3-11.5 7"/>
+    </symbol>
+
+    <symbol id="icon-expand" viewBox="0 0 24 24">
+        <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+    </symbol>
+
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24">
+        <path d="m15 5-7 7 7 7"/>
+    </symbol>
+
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24">
+        <path d="m9 5 7 7-7 7"/>
     </symbol>
 
     <symbol id="icon-link" viewBox="0 0 24 24">
@@ -389,16 +401,17 @@
                         {% if profile and profile.profile_image %}
                             <div class="profile-frame">
                                 <img
-                                    src="{{ profile.profile_image.url }}"
-                                    alt="Profile photo of Xynex Kim"
-                                    class="profile-image">
+                                    src="{{ profile.profile_image|media_src }}"
+                                    alt="Profile photo of {{ profile.first_name|default:'Xynex Kim' }}"
+                                    class="profile-image"
+                                    onerror="this.closest('.profile-frame').classList.add('is-broken')">
                             </div>
                         {% endif %}
 
                         <div class="about-body">
 
                             <p class="card-eyebrow">Hi there, I'm</p>
-                            <h3 class="about-name">Xynex Kim</h3>
+                            <h3 class="about-name">{% if profile and profile.first_name %}{{ profile.first_name }} {{ profile.last_name }}{% else %}Xynex Kim{% endif %}</h3>
                             <p class="about-role">Aspiring Data Analyst</p>
 
                             {% if profile and profile.bio %}
@@ -557,22 +570,94 @@
 
                                 <article class="glass-card is-hoverable project-card">
 
-                                    <!-- Project Media -->
-                                    <div class="project-gallery">
-                                        {% for media in project.projectmedia_set.all %}
-                                            {% if media.media_type == "image" %}
-                                                <figure class="project-media">
-                                                    <img
-                                                        src="{{ media.media_url }}"
-                                                        alt="{{ media.caption|default:project.title }}"
-                                                        loading="lazy">
-                                                    {% if media.caption %}
-                                                        <figcaption>{{ media.caption }}</figcaption>
-                                                    {% endif %}
-                                                </figure>
-                                            {% endif %}
-                                        {% endfor %}
+                                    <!-- Project interface showcase: a little browser window with
+                                         the project's screenshots / screen recordings (script.js §8) -->
+                                    {% with medias=project.projectmedia_set.all %}
+                                    <div class="project-showcase{% if not medias %} is-empty{% endif %}"
+                                         data-showcase
+                                         data-title="{{ project.title }}"
+                                         aria-roledescription="carousel"
+                                         aria-label="{{ project.title }} preview">
+
+                                        <div class="browser-frame">
+
+                                            <div class="browser-bar" aria-hidden="true">
+                                                <span class="browser-dots"><i></i><i></i><i></i></span>
+                                                <span class="browser-url">{% if project.project_url %}{{ project.project_url|pretty_url }}{% else %}{{ project.title|lower }}{% endif %}</span>
+                                                {% if medias|length > 1 %}
+                                                    <span class="browser-count" data-showcase-count>1 / {{ medias|length }}</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="browser-screen" data-showcase-screen>
+
+                                                {% for media in medias %}
+                                                    <figure
+                                                        class="showcase-slide{% if forloop.first %} is-active{% endif %}"
+                                                        data-slide
+                                                        data-kind="{{ media|media_kind }}"
+                                                        data-src="{{ media.media_url|media_src }}"
+                                                        data-caption="{{ media.caption|default:'' }}"
+                                                        aria-roledescription="slide"
+                                                        aria-label="{{ forloop.counter }} of {{ medias|length }}"
+                                                        {% if not forloop.first %}aria-hidden="true"{% endif %}>
+                                                        {% if media|media_kind == "video" %}
+                                                            <video
+                                                                src="{{ media.media_url|media_src }}"
+                                                                muted loop playsinline
+                                                                preload="metadata"
+                                                                aria-label="{{ media.caption|default:project.title }}"></video>
+                                                        {% else %}
+                                                            <img
+                                                                src="{{ media.media_url|media_src }}"
+                                                                alt="{{ media.caption|default:project.title }}"
+                                                                {% if not forloop.first %}loading="lazy"{% endif %}>
+                                                        {% endif %}
+                                                    </figure>
+                                                {% empty %}
+                                                    <div class="showcase-placeholder">
+                                                        <span class="placeholder-pixels" aria-hidden="true"></span>
+                                                        <span class="placeholder-text">Preview coming soon</span>
+                                                    </div>
+                                                {% endfor %}
+
+                                                {% if medias %}
+                                                    <button type="button" class="showcase-expand" data-showcase-expand aria-label="View {{ project.title }} full screen">
+                                                        <svg><use href="#icon-expand"></use></svg>
+                                                    </button>
+                                                {% endif %}
+
+                                                {% if medias|length > 1 %}
+                                                    <button type="button" class="showcase-arrow is-prev" data-showcase-prev aria-label="Previous screenshot">
+                                                        <svg><use href="#icon-chevron-left"></use></svg>
+                                                    </button>
+                                                    <button type="button" class="showcase-arrow is-next" data-showcase-next aria-label="Next screenshot">
+                                                        <svg><use href="#icon-chevron-right"></use></svg>
+                                                    </button>
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                        {% if medias|length > 1 %}
+                                            <div class="showcase-dots">
+                                                {% for media in medias %}
+                                                    <button type="button"
+                                                        class="showcase-dot{% if forloop.first %} is-active{% endif %}"
+                                                        data-showcase-dot="{{ forloop.counter0 }}"
+                                                        aria-label="Show screenshot {{ forloop.counter }}"
+                                                        {% if forloop.first %}aria-current="true"{% endif %}></button>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+
+                                        {% if medias %}
+                                            <p class="showcase-caption" data-showcase-caption aria-live="polite">{{ medias.0.caption|default:'' }}</p>
+                                        {% endif %}
+
                                     </div>
+                                    {% endwith %}
 
                                     <div class="project-body">
 
@@ -696,9 +781,21 @@
                                     <p class="card-description">{{ item.description }}</p>
                                 {% endif %}
 
+                                {% if item.certificate_url|is_image %}
+                                    <button type="button" class="certificate-preview" data-lightbox-single
+                                        data-src="{{ item.certificate_url|media_src }}"
+                                        data-caption="{{ item.certificate_name }}"
+                                        aria-label="View {{ item.certificate_name }} larger">
+                                        <img src="{{ item.certificate_url|media_src }}"
+                                             alt="{{ item.certificate_name }} certificate"
+                                             loading="lazy"
+                                             onerror="this.closest('.certificate-preview').remove()">
+                                    </button>
+                                {% endif %}
+
                                 {% if item.certificate_url %}
                                     <a
-                                        href="{{ item.certificate_url }}"
+                                        href="{{ item.certificate_url|media_src }}"
                                         class="text-link certificate-link"
                                         target="_blank"
                                         rel="noopener noreferrer">
@@ -753,11 +850,17 @@
                                 {% endif %}
 
                                 {% if item.image_url %}
-                                    <img
-                                        src="{{ item.image_url }}"
-                                        alt="{{ item.title }}"
-                                        class="achievement-image"
-                                        loading="lazy">
+                                    <button type="button" class="achievement-photo" data-lightbox-single
+                                        data-src="{{ item.image_url|media_src }}"
+                                        data-caption="{{ item.title }}"
+                                        aria-label="View {{ item.title }} photo larger">
+                                        <img
+                                            src="{{ item.image_url|media_src }}"
+                                            alt="{{ item.title }}"
+                                            class="achievement-image"
+                                            loading="lazy"
+                                            onerror="this.closest('.achievement-photo').remove()">
+                                    </button>
                                 {% endif %}
 
                             </div>
@@ -871,6 +974,29 @@
 
 
 </main>
+
+
+<!-- LIGHTBOX: full-screen view for project screenshots, certificates and photos -->
+
+<dialog class="lightbox" id="lightbox" aria-label="Image viewer">
+    <div class="lightbox-inner">
+        <div class="lightbox-top">
+            <p class="lightbox-title" id="lightbox-title"></p>
+            <span class="lightbox-count" id="lightbox-count"></span>
+            <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close viewer">
+                <svg><use href="#icon-close"></use></svg>
+            </button>
+        </div>
+        <div class="lightbox-stage" id="lightbox-stage"></div>
+        <p class="lightbox-caption" id="lightbox-caption"></p>
+        <button type="button" class="lightbox-arrow is-prev" id="lightbox-prev" aria-label="Previous">
+            <svg><use href="#icon-chevron-left"></use></svg>
+        </button>
+        <button type="button" class="lightbox-arrow is-next" id="lightbox-next" aria-label="Next">
+            <svg><use href="#icon-chevron-right"></use></svg>
+        </button>
+    </div>
+</dialog>
 
 
 <!-- JAVASCRIPT -->
