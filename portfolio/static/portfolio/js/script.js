@@ -836,7 +836,11 @@
             media.addEventListener("loadedmetadata", check);
             if (media.readyState >= 1) check();
         } else {
-            if (media.complete) check();
+            if (media.complete) {
+                // already finished before this script ran: 0 width means it failed
+                if (media.naturalWidth === 0) holder.classList.add("is-broken");
+                else check();
+            }
             media.addEventListener("load", check);
         }
         media.addEventListener("error", () => holder.classList.add("is-broken"));
