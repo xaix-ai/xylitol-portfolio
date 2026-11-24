@@ -415,7 +415,7 @@
                             <p class="about-role">Aspiring Data Analyst</p>
 
                             {% if profile and profile.bio %}
-                                <p class="about-description">{{ profile.bio }}</p>
+                                <div class="about-description rich-text">{{ profile.bio|rich_text }}</div>
                             {% else %}
                                 <p class="about-description">
                                     I enjoy working with data, solving puzzles,
@@ -476,7 +476,7 @@
                                             {% endif %}
 
                                             {% if item.description %}
-                                                <p class="card-description">{{ item.description }}</p>
+                                                <div class="card-description rich-text">{{ item.description|rich_text }}</div>
                                             {% endif %}
 
                                         </div>
@@ -536,7 +536,7 @@
                                             </div>
 
                                             {% if item.description %}
-                                                <p class="card-description">{{ item.description }}</p>
+                                                <div class="card-description rich-text">{{ item.description|rich_text }}</div>
                                             {% endif %}
 
                                         </div>
@@ -667,7 +667,7 @@
 
                                         <h3>{{ project.title }}</h3>
 
-                                        <p class="card-description">{{ project.description }}</p>
+                                        <div class="card-description rich-text">{{ project.description|rich_text }}</div>
 
                                         {% if project.technologies %}
                                             <div class="project-technologies">
@@ -733,7 +733,7 @@
                                         </div>
 
                                         {% if skill.description %}
-                                            <p class="skill-description">{{ skill.description }}</p>
+                                            <div class="skill-description rich-text">{{ skill.description|rich_text }}</div>
                                         {% endif %}
 
                                     </div>
@@ -778,7 +778,7 @@
                                 {% endif %}
 
                                 {% if item.description %}
-                                    <p class="card-description">{{ item.description }}</p>
+                                    <div class="card-description rich-text">{{ item.description|rich_text }}</div>
                                 {% endif %}
 
                                 {% if item.certificate_url|is_image %}
@@ -846,7 +846,7 @@
                                 {% endif %}
 
                                 {% if item.description %}
-                                    <p class="card-description">{{ item.description }}</p>
+                                    <div class="card-description rich-text">{{ item.description|rich_text }}</div>
                                 {% endif %}
 
                                 {% if item.image_url %}

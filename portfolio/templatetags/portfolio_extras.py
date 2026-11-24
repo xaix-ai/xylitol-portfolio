@@ -15,6 +15,8 @@ import re
 
 from django import template
 from django.templatetags.static import static
+from django.utils.html import conditional_escape
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -93,3 +95,49 @@ def pretty_url(value):
     value = re.sub(r"^https?://", "", value)
     value = value.removeprefix("www.")
     return value.rstrip("/")
+
+
+_BULLET = re.compile(r"^(?:[-*•●▪◦]|\d+[.)])\s+(.*)$")
+
+
+@register.filter(needs_autoescape=True)
+def rich_text(value, autoescape=True):
+    """
+    Lets descriptions typed in the admin keep their shape:
+      - lines starting with -, *, • or "1." become a bullet list
+      - an empty line starts a new paragraph
+      - other line breaks are kept
+    """
+    escape = conditional_escape if autoescape else (lambda text: text)
+    html, items, paragraph = [], [], []
+
+    def flush_items():
+        if items:
+            html.append(
+                '<ul class="card-bullets">'
+                + "".join(f"<li>{escape(item)}</li>" for item in items)
+                + "</ul>"
+            )
+            items.clear()
+
+    def flush_paragraph():
+        if paragraph:
+            html.append("<p>" + "<br>".join(escape(line) for line in paragraph) + "</p>")
+            paragraph.clear()
+
+    for raw in (value or "").splitlines():
+        line = raw.strip()
+        bullet = _BULLET.match(line)
+        if bullet:
+            flush_paragraph()
+            items.append(bullet.group(1))
+        elif not line:
+            flush_items()
+            flush_paragraph()
+        else:
+            flush_items()
+            paragraph.append(line)
+
+    flush_items()
+    flush_paragraph()
+    return mark_safe("".join(html))

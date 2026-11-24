@@ -2901,3 +2901,42 @@ a.contact-card:hover .contact-value {
         animation: none;
     }
 }
+
+
+/* 20. DESCRIPTIONS WITH BULLETS
+   Text typed in the admin: "- item" lines become a pixel bullet list,
+   an empty line starts a new paragraph (portfolio_extras.rich_text). */
+
+.rich-text > * + * {
+    margin-top: 8px;
+}
+
+.card-bullets {
+    display: grid;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.card-bullets li {
+    position: relative;
+    padding-left: 18px;
+}
+
+.card-bullets li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.62em;
+    width: 6px;
+    height: 6px;
+    background: #f08db4;
+    box-shadow: 2px 2px 0 rgba(240, 141, 180, 0.35);
+}
+
+.about-card.no-photo .card-bullets,
+.about-body .card-bullets {
+    text-align: left;
+}
+
