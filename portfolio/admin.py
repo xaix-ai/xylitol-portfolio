@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .templatetags.portfolio_extras import is_image, media_kind, media_src
 
@@ -85,6 +86,7 @@ class UserProfileForm(forms.ModelForm):
         help_texts = {
             "profile_image": IMAGE_HELP.format(folder="profile"),
             "bio": "Shown in About. 2–4 sentences about who you are and what you like working on.",
+            "phone": "Private: kept here for you only, never shown on the site.",
             "user": "Pick the portfolio user whose projects, skills and links should appear on the site.",
         }
 
@@ -178,31 +180,84 @@ class ProjectMediaInline(admin.TabularInline):
         return preview(obj.media_url, kind=media_kind(obj), height=60)
 
 
+PROJECT_CATEGORIES = (
+    "Web Development",
+    "Database Management",
+    "Data Analysis",
+    "Data Visualization",
+    "Data Cleaning",
+    "Machine Learning",
+    "Mobile App",
+    "UI/UX Design",
+    "Automation",
+)
+
+
+SKILL_CATEGORIES = (
+    "Web Development",
+    "Database Management",
+    "Data Analysis",
+    "Data Visualization",
+    "Programming Languages",
+    "Tools & Software",
+    "Machine Learning",
+    "UI/UX Design",
+    "Version Control",
+    "Cloud & Deployment",
+)
+
+
+class CategoryInput(forms.TextInput):
+    """A text box with suggestions: pick one, or type your own."""
+
+    def __init__(self, options, attrs=None):
+        super().__init__(attrs)
+        self.options = options
+
+    def render(self, name, value, attrs=None, renderer=None):
+        list_id = f"{name}-suggestions"
+        attrs = {**(attrs or {}), "list": list_id, "autocomplete": "off"}
+        box = super().render(name, value, attrs, renderer)
+        options = "".join(format_html('<option value="{}">', option) for option in self.options)
+        return format_html('{}<datalist id="{}">{}</datalist>', box, list_id, mark_safe(options))
+
+
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = "__all__"
         widgets = {
+            "category": CategoryInput(PROJECT_CATEGORIES, attrs={"size": 40}),
             "project_url": forms.TextInput(attrs={"size": 70}),
+            "github_url": forms.TextInput(attrs={"size": 70}),
             "technologies": forms.TextInput(attrs={"size": 70}),
         }
         help_texts = {
-            "category": "Short label, e.g. Dashboard, Data Cleaning, Web App.",
-            "description": "2–3 sentences: the problem, what you built, and the result.",
-            "technologies": "Comma-separated, e.g. Python, Pandas, SQL, Power BI.",
-            "project_url": "Live site, GitHub repo, or published dashboard (starts with https://). "
-                           "Its address is shown in the little browser bar.",
+            "category": "What kind of project: click the box to pick (Web Development, "
+                        "Database Management, Data Analysis...) or type your own. "
+                        "Visitors can filter projects by this.",
+            "description": "2–3 sentences: the problem, what you built, and the result. "
+                           "Lines starting with - become bullets.",
+            "technologies": "Comma-separated, e.g. Python, Pandas, SQL, Power BI. Each one becomes a chip.",
+            "project_url": "Optional. The live website or published dashboard (https://...). "
+                           "Shows a 'Live Demo' button.",
+            "github_url": "Optional. This project's GitHub repository, "
+                          "e.g. https://github.com/xaix-ai/sales-dashboard. Shows a 'Code' button.",
         }
 
 
 @admin.register(Project)
 class ProjectAdmin(CreatedAtMixin, admin.ModelAdmin):
     form = ProjectForm
-    list_display = ("title", "cover", "category", "technologies", "created_at")
+    list_display = ("title", "cover", "category", "technologies", "has_github", "created_at")
     list_filter = ("category",)
     search_fields = ("title", "description", "technologies")
     inlines = (ProjectMediaInline,)
     exclude = ("created_at",)
+
+    @admin.display(description="GitHub", boolean=True)
+    def has_github(self, obj):
+        return bool(obj.github_url)
 
     @admin.display(description="Cover")
     def cover(self, obj):
@@ -237,14 +292,40 @@ class ProjectMediaAdmin(admin.ModelAdmin):
 
 # skills & history
 
+class SkillForm(forms.ModelForm):
+    class Meta:
+        model = Skill
+        fields = "__all__"
+        widgets = {
+            "skill_type": forms.RadioSelect,
+            "category": CategoryInput(SKILL_CATEGORIES, attrs={"size": 40}),
+        }
+        help_texts = {
+            "skill_type": "Technical = tools and know-how (SQL, Excel, Python). "
+                          "Soft = people skills (Communication, Teamwork).",
+            "category": "Technical only: what the skill is for. Click the box to pick "
+                        "(Web Development, Database Management, Data Analysis...) or type your own. "
+                        "Skills with the same category are grouped together. Leave empty for soft skills.",
+            "proficiency_level": "Technical only, e.g. Beginner, Intermediate, Advanced. "
+                                 "Leave empty for soft skills.",
+            "description": "Optional. One short line, or bullets starting with - ",
+        }
+
+
 @admin.register(Skill)
 class SkillAdmin(CreatedAtMixin, admin.ModelAdmin):
-    list_display = ("skill_name", "category", "proficiency_level", "is_featured")
+    form = SkillForm
+    list_display = ("skill_name", "skill_type", "category", "proficiency_level", "is_featured")
     list_editable = ("proficiency_level", "is_featured")
-    list_filter = ("category", "proficiency_level", "is_featured")
+    list_filter = ("skill_type", "category", "proficiency_level", "is_featured")
+    fieldsets = (
+        (None, {"fields": ("user", "skill_type", "skill_name", "description")}),
+        ("Technical skill details (leave empty for soft skills)", {
+            "fields": ("category", "proficiency_level", "is_featured"),
+        }),
+    )
     search_fields = ("skill_name", "description")
-    ordering = ("category", "skill_name")
-    exclude = ("created_at",)
+    ordering = ("skill_type", "category", "skill_name")
 
 
 @admin.register(Experience)
@@ -255,8 +336,43 @@ class ExperienceAdmin(admin.ModelAdmin):
     ordering = ("-start_date",)
 
 
+class EducationalBackgroundForm(forms.ModelForm):
+    class Meta:
+        model = EducationalBackground
+        fields = "__all__"
+        labels = {"field_of_study": "Field of study / Strand"}
+        widgets = {
+            "start_date": forms.TextInput(attrs={"size": 10, "placeholder": "2022"}),
+            "end_date": forms.TextInput(attrs={"size": 10, "placeholder": "2026 or Present"}),
+        }
+        help_texts = {
+            "degree": "College and up only, e.g. BS Information Technology. "
+                      "Leave EMPTY for Junior / Senior High School: the school name becomes the title.",
+            "field_of_study": "Optional. For senior high, the strand, e.g. STEM.",
+            "start_date": "Year only, e.g. 2022.",
+            "end_date": "Year only, e.g. 2026. Type Present if you're still studying there.",
+        }
+
+    def _clean_year(self, field):
+        value = (self.cleaned_data.get(field) or "").strip()
+        if not value:
+            return None
+        if value.lower() in ("present", "current", "now"):
+            return "Present"
+        if not (value.isdigit() and len(value) == 4):
+            raise forms.ValidationError("Type a 4-digit year like 2024, or Present.")
+        return value
+
+    def clean_start_date(self):
+        return self._clean_year("start_date")
+
+    def clean_end_date(self):
+        return self._clean_year("end_date")
+
+
 @admin.register(EducationalBackground)
 class EducationalBackgroundAdmin(admin.ModelAdmin):
+    form = EducationalBackgroundForm
     list_display = ("degree", "field_of_study", "institution", "start_date", "end_date")
     search_fields = ("degree", "institution", "field_of_study")
     ordering = ("-start_date",)

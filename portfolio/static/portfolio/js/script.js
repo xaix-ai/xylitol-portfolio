@@ -1132,5 +1132,34 @@
         });
     });
 
+    /* 9. PROJECT FILTERS
+       Buttons above the projects (All / Web Development / Database Management...)
+       show only the projects of that type. They appear when there are 2+ types. */
+
+    const filterButtons = Array.from(document.querySelectorAll(".project-filter"));
+    const projectCards = Array.from(document.querySelectorAll(".project-card[data-category]"));
+    const filterEmpty = document.querySelector("[data-filter-empty]");
+
+    filterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const wanted = button.dataset.filter;
+
+            filterButtons.forEach((other) => {
+                const active = other === button;
+                other.classList.toggle("is-active", active);
+                other.setAttribute("aria-pressed", active ? "true" : "false");
+            });
+
+            let shown = 0;
+            projectCards.forEach((card) => {
+                const match = wanted === "all" || card.dataset.category === wanted;
+                card.classList.toggle("is-filtered-out", !match);
+                if (match) shown += 1;
+            });
+
+            if (filterEmpty) filterEmpty.hidden = shown > 0;
+        });
+    });
+
 
 })();

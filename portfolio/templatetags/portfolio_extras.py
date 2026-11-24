@@ -141,3 +141,46 @@ def rich_text(value, autoescape=True):
     flush_items()
     flush_paragraph()
     return mark_safe("".join(html))
+
+
+
+@register.filter
+def split_tags(value):
+    """"Python, SQL, Power BI" -> ["Python", "SQL", "Power BI"]"""
+    parts = re.split(r"[,\n;]", value or "")
+    return [part.strip() for part in parts if part.strip()]
+
+
+@register.filter
+def category_icon(value):
+    """Pick an icon for a project or skill category."""
+    text = (value or "").lower()
+    if any(word in text for word in ("version", "git")):
+        return "icon-github"
+    if any(word in text for word in ("cloud", "deploy", "devops", "hosting")):
+        return "icon-cloud"
+    if any(word in text for word in ("tool", "software", "office")):
+        return "icon-gear"
+    if any(word in text for word in ("programming", "language", "coding")):
+        return "icon-code"
+    if any(word in text for word in ("database", "sql", "db ")) or text == "db":
+        return "icon-database"
+    if any(word in text for word in ("web", "site", "front", "back", "full")):
+        return "icon-code"
+    if any(word in text for word in ("mobile", "app", "android", "ios")):
+        return "icon-phone"
+    if any(word in text for word in ("design", "ui", "ux")):
+        return "icon-palette"
+    if any(word in text for word in ("machine", "ml", "ai", "model")):
+        return "icon-spark"
+    if any(word in text for word in ("data", "analy", "dashboard", "visual", "report", "clean")):
+        return "icon-chart"
+    if "autom" in text or "script" in text:
+        return "icon-gear"
+    return "icon-folder"
+
+
+@register.filter
+def slug_key(value):
+    """Category -> safe key for filtering, e.g. 'Web Development' -> 'web-development'."""
+    return re.sub(r"[^a-z0-9]+", "-", (value or "other").lower()).strip("-") or "other"

@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- tab icon: the pixel X -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'portfolio/images/logo-x.svg' %}">
+
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'portfolio/css/style.css' %}">
 </head>
@@ -117,6 +120,37 @@
         <path d="M18 10c0 4-6 3-11.5 7"/>
     </symbol>
 
+    <symbol id="icon-heart" viewBox="0 0 24 24">
+        <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>
+    </symbol>
+
+    <symbol id="icon-database" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/>
+        <path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/>
+    </symbol>
+
+    <symbol id="icon-chart" viewBox="0 0 24 24">
+        <path d="M4 20h16M7 16v-5M12 16V6M17 16v-8"/>
+    </symbol>
+
+    <symbol id="icon-palette" viewBox="0 0 24 24">
+        <path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.8 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/>
+        <circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>
+    </symbol>
+
+    <symbol id="icon-spark" viewBox="0 0 24 24">
+        <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>
+    </symbol>
+
+    <symbol id="icon-gear" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>
+    </symbol>
+
+    <symbol id="icon-cloud" viewBox="0 0 24 24">
+        <path d="M7 18h10a4 4 0 0 0 .6-8A5.5 5.5 0 0 0 7 9.5 4.3 4.3 0 0 0 7 18z"/>
+    </symbol>
+
     <symbol id="icon-expand" viewBox="0 0 24 24">
         <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
     </symbol>
@@ -162,7 +196,7 @@
     <nav class="navbar glass-navbar" aria-label="Main navigation">
 
         <a href="#home" class="logo" data-home>
-            xynexkyym
+            <span class="logo-text">xynexkyym</span>
         </a>
 
         <ul class="nav-links">
@@ -460,18 +494,24 @@
 
                                         <div class="card-main">
 
-                                            <h3>{{ item.degree }}</h3>
-
-                                            {% if item.field_of_study %}
-                                                <p class="card-subtitle">{{ item.field_of_study }}</p>
+                                            {% if item.degree %}
+                                                {# college and up: degree first, then school #}
+                                                <h3>{{ item.degree }}</h3>
+                                                {% if item.field_of_study %}
+                                                    <p class="card-subtitle">{{ item.field_of_study }}</p>
+                                                {% endif %}
+                                                <p class="card-organization">{{ item.institution }}</p>
+                                            {% else %}
+                                                {# junior / senior high school: no degree, school name is the title #}
+                                                <h3>{{ item.institution }}</h3>
+                                                {% if item.field_of_study %}
+                                                    <p class="card-subtitle">{{ item.field_of_study }}</p>
+                                                {% endif %}
                                             {% endif %}
-
-                                            <p class="card-organization">{{ item.institution }}</p>
 
                                             {% if item.start_date or item.end_date %}
                                                 <p class="card-date">
-                                                    {% if item.start_date %}{{ item.start_date|date:"Y" }}{% endif %}
-                                                    {% if item.end_date %}– {{ item.end_date|date:"Y" }}{% endif %}
+                                                    {% if item.start_date and item.end_date %}{{ item.start_date }} – {{ item.end_date }}{% else %}{{ item.start_date|default:item.end_date }}{% endif %}
                                                 </p>
                                             {% endif %}
 
@@ -564,11 +604,25 @@
 
                     {% if projects %}
 
+                        {% if project_categories %}
+                            <div class="project-filters" role="group" aria-label="Filter projects by type">
+                                <button type="button" class="project-filter is-active" data-filter="all" aria-pressed="true">
+                                    All <span class="filter-count">{{ projects|length }}</span>
+                                </button>
+                                {% for category in project_categories %}
+                                    <button type="button" class="project-filter" data-filter="{{ category.key }}" aria-pressed="false">
+                                        <svg class="filter-icon"><use href="#{{ category.name|category_icon }}"></use></svg>
+                                        {{ category.name }} <span class="filter-count">{{ category.count }}</span>
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
                         <div class="project-grid">
 
                             {% for project in projects %}
 
-                                <article class="glass-card is-hoverable project-card">
+                                <article class="glass-card is-hoverable project-card" data-category="{{ project.category|slug_key }}">
 
                                     <!-- Project interface showcase: a little browser window with
                                          the project's screenshots / screen recordings (script.js §8) -->
@@ -583,7 +637,7 @@
 
                                             <div class="browser-bar" aria-hidden="true">
                                                 <span class="browser-dots"><i></i><i></i><i></i></span>
-                                                <span class="browser-url">{% if project.project_url %}{{ project.project_url|pretty_url }}{% else %}{{ project.title|lower }}{% endif %}</span>
+                                                <span class="browser-url">{% if project.project_url %}{{ project.project_url|pretty_url }}{% elif project.github_url %}{{ project.github_url|pretty_url }}{% else %}{{ project.title|lower }}{% endif %}</span>
                                                 {% if medias|length > 1 %}
                                                     <span class="browser-count" data-showcase-count>1 / {{ medias|length }}</span>
                                                 {% endif %}
@@ -662,7 +716,10 @@
                                     <div class="project-body">
 
                                         {% if project.category %}
-                                            <span class="card-tag">{{ project.category }}</span>
+                                            <span class="card-tag project-type">
+                                                <svg class="tag-icon"><use href="#{{ project.category|category_icon }}"></use></svg>
+                                                {{ project.category }}
+                                            </span>
                                         {% endif %}
 
                                         <h3>{{ project.title }}</h3>
@@ -671,20 +728,40 @@
 
                                         {% if project.technologies %}
                                             <div class="project-technologies">
-                                                <span class="info-label">Technologies</span>
-                                                <p>{{ project.technologies }}</p>
+                                                <span class="info-label">Built with</span>
+                                                <ul class="tech-chips">
+                                                    {% for tech in project.technologies|split_tags %}
+                                                        <li class="tech-chip">{{ tech }}</li>
+                                                    {% endfor %}
+                                                </ul>
                                             </div>
                                         {% endif %}
 
-                                        {% if project.project_url %}
-                                            <a
-                                                href="{{ project.project_url }}"
-                                                class="text-link project-link"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                View Project
-                                                <svg class="external-icon"><use href="#icon-external"></use></svg>
-                                            </a>
+                                        {% if project.project_url or project.github_url %}
+                                            <div class="project-actions">
+                                                {% if project.project_url %}
+                                                    <a
+                                                        href="{{ project.project_url }}"
+                                                        class="text-link project-link"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        aria-label="Live demo of {{ project.title }} (opens in a new tab)">
+                                                        Live Demo
+                                                        <svg class="external-icon"><use href="#icon-external"></use></svg>
+                                                    </a>
+                                                {% endif %}
+                                                {% if project.github_url %}
+                                                    <a
+                                                        href="{{ project.github_url }}"
+                                                        class="text-link project-code-link"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        aria-label="Code of {{ project.title }} on GitHub (opens in a new tab)">
+                                                        <svg class="external-icon"><use href="#icon-github"></use></svg>
+                                                        Code
+                                                    </a>
+                                                {% endif %}
+                                            </div>
                                         {% endif %}
 
                                     </div>
@@ -694,6 +771,8 @@
                             {% endfor %}
 
                         </div>
+
+                        <p class="empty-message" data-filter-empty hidden>No projects of this type yet.</p>
 
                     {% else %}
 
@@ -708,47 +787,90 @@
 
                 <section class="panel-section" id="panel-skills" data-panel="skills" hidden>
 
-                    {% regroup skills by category as skill_groups %}
+                    {% if technical_skills %}
 
-                    {% for group in skill_groups %}
+                        <h3 class="skills-type-heading">
+                            <svg class="card-icon"><use href="#icon-code"></use></svg>
+                            Technical Skills
+                        </h3>
 
-                        <div class="glass-card skill-group">
+                        {% regroup technical_skills by category as skill_groups %}
 
-                            <h3 class="card-heading">{{ group.grouper|default:"Other Skills" }}</h3>
+                        {% for group in skill_groups %}
 
-                            <div class="skill-list">
+                            <div class="glass-card skill-group">
 
-                                {% for skill in group.list %}
+                                <h3 class="card-heading">
+                                    <span class="skill-group-icon" aria-hidden="true">
+                                        <svg><use href="#{{ group.grouper|category_icon }}"></use></svg>
+                                    </span>
+                                    {{ group.grouper|default:"Other Skills" }}
+                                    <span class="skill-group-count">{{ group.list|length }}</span>
+                                </h3>
 
-                                    <div class="skill-card">
+                                <div class="skill-list">
 
-                                        <div class="skill-top">
+                                    {% for skill in group.list %}
 
-                                            <span class="skill-name">{{ skill.skill_name }}</span>
+                                        <div class="skill-card">
 
-                                            {% if skill.proficiency_level %}
-                                                <span class="skill-level">{{ skill.proficiency_level }}</span>
+                                            <div class="skill-top">
+
+                                                <span class="skill-name">{{ skill.skill_name }}</span>
+
+                                                {% if skill.proficiency_level %}
+                                                    <span class="skill-level">{{ skill.proficiency_level }}</span>
+                                                {% endif %}
+
+                                            </div>
+
+                                            {% if skill.description %}
+                                                <div class="skill-description rich-text">{{ skill.description|rich_text }}</div>
                                             {% endif %}
 
                                         </div>
 
-                                        {% if skill.description %}
-                                            <div class="skill-description rich-text">{{ skill.description|rich_text }}</div>
-                                        {% endif %}
+                                    {% endfor %}
 
-                                    </div>
-
-                                {% endfor %}
+                                </div>
 
                             </div>
 
+                        {% endfor %}
+
+                    {% endif %}
+
+                    {% if soft_skills %}
+
+                        <h3 class="skills-type-heading is-soft">
+                            <svg class="card-icon"><use href="#icon-heart"></use></svg>
+                            Soft Skills
+                        </h3>
+
+                        <div class="glass-card soft-skill-group">
+
+                            <ul class="soft-skill-list">
+
+                                {% for skill in soft_skills %}
+
+                                    <li class="soft-skill{% if skill.description %} has-description{% endif %}">
+                                        <span class="soft-skill-name">{{ skill.skill_name }}</span>
+                                        {% if skill.description %}
+                                            <div class="soft-skill-description rich-text">{{ skill.description|rich_text }}</div>
+                                        {% endif %}
+                                    </li>
+
+                                {% endfor %}
+
+                            </ul>
+
                         </div>
 
-                    {% empty %}
+                    {% endif %}
 
+                    {% if not technical_skills and not soft_skills %}
                         <p class="empty-message">No skills added yet.</p>
-
-                    {% endfor %}
+                    {% endif %}
 
                 </section>
 
@@ -887,42 +1009,6 @@
                             <p>Feel free to reach out! I'd love to connect ꪮৎ.</p>
                         </article>
 
-                        {% if contact.email %}
-                            <a class="glass-card is-hoverable contact-card" href="mailto:{{ contact.email }}">
-                                <span class="icon-tile is-aqua">
-                                    <svg class="contact-icon"><use href="#icon-mail"></use></svg>
-                                </span>
-                                <span>
-                                    <span class="info-label">Email</span>
-                                    <span class="contact-value">{{ contact.email }}</span>
-                                </span>
-                            </a>
-                        {% endif %}
-
-                        {% if contact.phone %}
-                            <a class="glass-card is-hoverable contact-card" href="tel:{{ contact.phone|cut:' ' }}">
-                                <span class="icon-tile">
-                                    <svg class="contact-icon"><use href="#icon-phone"></use></svg>
-                                </span>
-                                <span>
-                                    <span class="info-label">Phone</span>
-                                    <span class="contact-value">{{ contact.phone }}</span>
-                                </span>
-                            </a>
-                        {% endif %}
-
-                        {% if contact.location %}
-                            <div class="glass-card contact-card">
-                                <span class="icon-tile is-sand">
-                                    <svg class="contact-icon"><use href="#icon-pin"></use></svg>
-                                </span>
-                                <span>
-                                    <span class="info-label">Location</span>
-                                    <span class="contact-value">{{ contact.location }}</span>
-                                </span>
-                            </div>
-                        {% endif %}
-
                     </div>
 
                     {% if contact.email or contact.social_links %}
@@ -934,7 +1020,7 @@
                             <div class="social-links">
 
                                 {% if contact.email %}
-                                    <a href="mailto:{{ contact.email }}" class="social-link is-email" aria-label="Send an email">
+                                    <a href="mailto:{{ contact.email }}" class="social-link is-email" aria-label="Email {{ contact.email }}">
                                         <span class="social-icon"><svg><use href="#icon-mail"></use></svg></span>
                                         <span class="social-name">Email</span>
                                     </a>
@@ -1002,6 +1088,11 @@
 <!-- JAVASCRIPT -->
 
 <script src="{% static 'portfolio/js/script.js' %}"></script>
+
+{% if cf_analytics_token %}
+<!-- Cloudflare Web Analytics (live site only) -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ cf_analytics_token }}"}'></script>
+{% endif %}
 
 </body>
 </html>

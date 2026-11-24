@@ -1657,14 +1657,7 @@ a:focus-visible,
     color: #64849a;
 }
 
-.project-body .text-link {
-    margin-top: auto;
-}
-
-.project-body .project-technologies + .text-link,
-.project-body .card-description + .text-link {
-    margin-top: 14px;
-}
+/* project buttons: see section 22 */
 
 /* SKILLS */
 .skill-group .card-heading {
@@ -2942,5 +2935,279 @@ a.contact-card:hover .contact-value {
 .about-card.no-photo .card-bullets,
 .about-body .card-bullets {
     text-align: left;
+}
+
+
+/* 21. SKILLS: TECHNICAL + SOFT */
+
+.skills-type-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 2px 2px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: #496a82;
+}
+
+.skills-type-heading .card-icon {
+    width: 30px;
+    height: 30px;
+    padding: 6px;
+    color: #2f8a95;
+    background: rgba(146, 234, 223, 0.45);
+    border-radius: 8px;
+}
+
+.skills-type-heading.is-soft .card-icon {
+    color: #c4628c;
+    background: rgba(240, 141, 180, 0.28);
+}
+
+.skill-group + .skills-type-heading,
+.soft-skill-group + .skills-type-heading {
+    margin-top: 10px;
+}
+
+.soft-skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.soft-skill {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 9px 14px 9px 30px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid #ffffff;
+    border-radius: 12px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.soft-skill::before {
+    content: "";
+    position: absolute;
+    left: 13px;
+    top: 15px;
+    width: 6px;
+    height: 6px;
+    background: #f08db4;
+    box-shadow: 2px 2px 0 rgba(240, 141, 180, 0.35);
+}
+
+.soft-skill:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.soft-skill.has-description {
+    flex: 1 1 220px;
+}
+
+.soft-skill-name {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #496a82;
+}
+
+.soft-skill-description {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: #6e899c;
+}
+
+/* Contact: only the intro card is left above "Find me online" */
+.contact-grid:has(> :only-child) {
+    grid-template-columns: 1fr;
+}
+
+
+/* 22. PIXEL X LOGO + PROJECT TYPES, FILTERS, CHIPS, CODE BUTTON */
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-mark {
+    width: 30px;
+    height: 30px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
+    transition: transform 0.3s steps(3);
+}
+
+.logo:hover .logo-mark {
+    transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+    .logo-mark {
+        width: 24px;
+        height: 24px;
+    }
+
+    .logo {
+        gap: 7px;
+    }
+}
+
+.project-type {
+    align-items: center;
+    gap: 6px;
+}
+
+.tag-icon,
+.filter-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.project-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.project-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 7px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    color: #5d7d93;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #ffffff;
+    border-radius: 10px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.project-filter:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.project-filter.is-active {
+    color: #ffffff;
+    background: #f08db4;
+    border-color: #f08db4;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+}
+
+.project-filter:focus-visible {
+    outline: 3px solid #f08db4;
+    outline-offset: 2px;
+}
+
+.filter-count {
+    min-width: 18px;
+    padding: 0 5px;
+    font-size: 0.7rem;
+    text-align: center;
+    background: rgba(109, 90, 114, 0.1);
+    border-radius: 5px;
+}
+
+.project-filter.is-active .filter-count {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.project-card.is-filtered-out {
+    display: none;
+}
+
+.tech-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tech-chip {
+    padding: 2px 9px 3px;
+    font-size: 0.72rem;
+    color: #5f6f9e;
+    background: rgba(185, 161, 214, 0.22);
+    border-radius: 6px;
+}
+
+.project-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 14px;
+}
+
+.project-actions .text-link {
+    margin-top: 0;
+}
+
+.project-code-link {
+    color: #ffffff;
+    background: #4f4258;
+}
+
+.project-code-link:hover {
+    background: #3d3245;
+}
+
+
+/* 23. SKILL GROUP ICONS (Web Development, Database Management...) */
+
+.skill-group .card-heading::before {
+    display: none;
+}
+
+.skill-group-icon {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    color: #2f8a95;
+    background: rgba(146, 234, 223, 0.45);
+    border-radius: 8px;
+}
+
+.skill-group-icon svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.skill-group-count {
+    margin-left: auto;
+    padding: 1px 8px 2px;
+    font-family: 'Pixelify Sans', 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: #8a6f88;
+    background: rgba(109, 90, 114, 0.08);
+    border-radius: 6px;
 }
 

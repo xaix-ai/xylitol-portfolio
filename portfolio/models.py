@@ -35,7 +35,8 @@ class Project(models.Model):
     description = models.TextField(null=True, blank=True)
     category = models.CharField(max_length=255, null=True, blank=True)
     technologies = models.TextField(null=True, blank=True)
-    project_url = models.TextField(null=True, blank=True)
+    project_url = models.TextField("Live link", null=True, blank=True)
+    github_url = models.TextField("GitHub repo", null=True, blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
@@ -56,8 +57,14 @@ class ProjectMedia(models.Model):
         managed = False
         
 class Skill(models.Model):
+    SKILL_TYPES = (
+        ("technical", "Technical skill"),
+        ("soft", "Soft skill"),
+    )
+
     skill_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_column='user_id')
+    skill_type = models.CharField(max_length=20, choices=SKILL_TYPES, default="technical")
     skill_name = models.CharField(max_length=255)
     category = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -116,8 +123,9 @@ class EducationalBackground(models.Model):
     institution = models.CharField(max_length=255)
     degree = models.CharField(max_length=255, null=True, blank=True)
     field_of_study = models.CharField(max_length=255, null=True, blank=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+    # years only, as text: "2022", "2026", "Present"
+    start_date = models.CharField("Start year", max_length=20, null=True, blank=True)
+    end_date = models.CharField("End year", max_length=20, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
     class Meta:
